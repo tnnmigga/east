@@ -3,7 +3,7 @@ package core
 import (
 	"context"
 	"eden/common/log"
-	"eden/util"
+	"eden/common/util"
 	"reflect"
 
 	"github.com/gogo/protobuf/proto"
@@ -26,8 +26,6 @@ func NewActor(ctx context.Context, ID int64, mqLen int32) *Actor {
 	go actor.run()
 	return actor
 }
-
-
 
 func (actor *Actor) run() {
 	select {

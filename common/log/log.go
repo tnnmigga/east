@@ -17,3 +17,11 @@ func Infof(format string, a ...any) {
 func Errorf(format string, a ...any) {
 	fmt.Printf(format, a...)
 }
+
+func Debug(format string, a ...any) {
+	fmt.Printf(format, a...)
+}
+
+func Debugf(format string, a ...any) {
+	fmt.Printf(format, a...)
+}
