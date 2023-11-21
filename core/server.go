@@ -2,19 +2,23 @@ package core
 
 import (
 	"eden/core/module"
-	"fmt"
+	"eden/core/signal"
+	"eden/pb"
 )
 
 type Server struct {
-	modules map[module.ModuleType]module.IModule
+	modules []module.IModule
+	mq      chan *pb.Package
 }
 
-func (s *Server) Start(modules ...module.IModule) {
+func (s *Server) Run(modules ...module.IModule) {
 	for _, m := range modules {
-		mType := m.Type()
-		if _, exist := s.modules[mType]; exist {
-			panic(fmt.Errorf("module type repead %v", mType))
-		}
-		
+		m.Init()
+		go m.Run()
+	}
+	signal.WaitStopSignal()
+	for i := len(s.modules) - 1; i >= 0; i-- {
+		m := s.modules[i]
+		m.Close()
 	}
 }
