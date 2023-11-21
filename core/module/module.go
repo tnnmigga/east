@@ -4,39 +4,40 @@ import (
 	"eden/core/log"
 	"eden/core/util"
 	"reflect"
+	"sync"
 
 	"github.com/gogo/protobuf/proto"
 )
 
-type ModuleType string
+type ModuleName string
 
 type IModule interface {
-	Type() ModuleType
+	Name() ModuleName
 	MQ() chan<- proto.Message
 	Init()
-	Run()
+	Run(wg *sync.WaitGroup)
 	Close()
 }
 
 type Module struct {
-	typ      ModuleType
+	name     ModuleName
 	mq       chan proto.Message
 	handlers map[reflect.Type]MessageHandler
 }
 
 var modules = map[int64]*Module{}
 
-func NewModule(mType ModuleType, mqLen int32) *Module {
+func NewModule(mType ModuleName, mqLen int32) *Module {
 	m := &Module{
-		typ:      mType,
+		name:     mType,
 		mq:       make(chan proto.Message, mqLen),
 		handlers: map[reflect.Type]MessageHandler{},
 	}
 	return m
 }
 
-func (m *Module) Type() ModuleType {
-	return m.typ
+func (m *Module) Name() ModuleName {
+	return m.name
 }
 
 func (m *Module) MQ() chan<- proto.Message {
@@ -46,7 +47,11 @@ func (m *Module) MQ() chan<- proto.Message {
 func (m *Module) Init() {
 }
 
-func (m *Module) Run() {
+func (m *Module) Run(wg *sync.WaitGroup) {
+	defer func() {
+		log.Infof("%v module exist success", m.name)
+		wg.Done()
+	}()
 	for msg := range m.mq {
 		msgType := reflect.TypeOf(msg)
 		cb, ok := m.handlers[msgType]

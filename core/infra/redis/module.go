@@ -1,4 +1,4 @@
-package mmongo
+package redis
 
 import (
 	"eden/core/module"

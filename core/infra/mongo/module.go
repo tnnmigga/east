@@ -1,4 +1,4 @@
-package mredis
+package mongo
 
 import (
 	"eden/core/module"
