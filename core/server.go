@@ -4,8 +4,8 @@ import (
 	"eden/core/health"
 	"eden/core/log"
 	"eden/core/module"
+	"eden/core/pb"
 	"eden/core/util"
-	"eden/pb"
 	"sync"
 )
 
