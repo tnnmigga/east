@@ -1,0 +1,19 @@
+syntax = "proto3";
+package pb;
+
+import "pb/gogoproto/gogo.proto";
+
+option go_package                           = "pb";
+option (gogoproto.goproto_enum_prefix_all)  = false;
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+
+message Package {
+    int32 ServerID = 1;
+    bytes Body     = 2;
+}
+
+message S {
+    Package s1 = 1;
+}
