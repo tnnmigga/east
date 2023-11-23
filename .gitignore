@@ -20,3 +20,5 @@
 # Go workspace file
 go.work
 vendor
+test.go
+test
