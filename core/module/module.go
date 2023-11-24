@@ -5,23 +5,20 @@ import (
 	"eden/core/util"
 	"reflect"
 	"sync"
-
-	"github.com/gogo/protobuf/proto"
 )
 
 type ModuleName string
 
 type IModule interface {
 	Name() ModuleName
-	MQ() chan<- proto.Message
-	Init()
+	MQ() chan<- any
 	Run(wg *sync.WaitGroup)
 	Close()
 }
 
 type Module struct {
 	name     ModuleName
-	mq       chan proto.Message
+	mq       chan any
 	handlers map[reflect.Type]MessageHandler
 }
 
@@ -30,7 +27,7 @@ var modules = map[int64]*Module{}
 func NewModule(mType ModuleName, mqLen int32) *Module {
 	m := &Module{
 		name:     mType,
-		mq:       make(chan proto.Message, mqLen),
+		mq:       make(chan any, mqLen),
 		handlers: map[reflect.Type]MessageHandler{},
 	}
 	return m
@@ -40,11 +37,8 @@ func (m *Module) Name() ModuleName {
 	return m.name
 }
 
-func (m *Module) MQ() chan<- proto.Message {
+func (m *Module) MQ() chan<- any {
 	return m.mq
-}
-
-func (m *Module) Init() {
 }
 
 func (m *Module) Run(wg *sync.WaitGroup) {
@@ -60,7 +54,7 @@ func (m *Module) Run(wg *sync.WaitGroup) {
 			continue
 		}
 		func() {
-			defer util.PrintPanicStack()
+			defer util.RecoverPanic()
 			cb(msg)
 		}()
 	}

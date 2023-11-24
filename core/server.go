@@ -1,7 +1,6 @@
 package core
 
 import (
-	"eden/core/health"
 	"eden/core/log"
 	"eden/core/module"
 	"eden/core/pb"
@@ -14,26 +13,19 @@ type Server struct {
 	mq      chan *pb.Package
 }
 
-func (s *Server) Run(modules ...module.IModule) {
+func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 	wg := &sync.WaitGroup{}
 	for _, m := range modules {
 		wg.Add(1)
-		m.Init()
 		go m.Run(wg)
 	}
-	sign := health.WaitExitSignal()
-	log.Infof("receive exit signal %v, try close server", sign)
-	s.stop()
-	wg.Wait()
-	log.Info("close server success")
-}
-
-func (s *Server) stop() {
-	for i := len(s.modules) - 1; i >= 0; i-- {
-		m := s.modules[i]
-		defer func() {
-			util.PrintPanicStack()
-			m.Close()
-		}()
+	return func() {
+		log.Infof("try close server, start close modules")
+		for i := len(s.modules) - 1; i >= 0; i-- {
+			m := s.modules[i]
+			util.ExecAndRecover(m.Close)
+		}
+		wg.Wait()
+		log.Infof("close modules success")
 	}
 }

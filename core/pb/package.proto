@@ -11,5 +11,6 @@ option (gogoproto.goproto_sizecache_all)    = false;
 
 message Package {
     int32 ServerID = 1;
-    bytes Body     = 2;
+    string Module  = 2;
+    bytes Body     = 3;
 }
