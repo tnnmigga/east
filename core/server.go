@@ -2,12 +2,12 @@ package core
 
 import (
 	"eden/core/configs"
+	"eden/core/infra"
 	"eden/core/infra/nats"
 	"eden/core/log"
 	"eden/core/message"
 	"eden/core/module"
 	"eden/core/util"
-	"runtime/debug"
 	"sync"
 )
 
@@ -24,8 +24,10 @@ func NewServer() *Server {
 
 func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 	wg := &sync.WaitGroup{}
-	s.modules = append(s.modules, nats.NewModule())
-	message.Attach(s.mq, s.modules[0].MQ())
+	s.modules = make([]module.IModule, 0, len(modules)+1)
+	s.modules = append(s.modules, nats.NewModule(infra.Nats))
+	s.modules = append(s.modules, modules...)
+	message.Attach(s.mq)
 	s.modules = append(s.modules, modules...)
 	for _, m := range s.modules {
 		wg.Add(1)
@@ -44,18 +46,25 @@ func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 
 func (s *Server) dispatch() {
 	for pkg := range s.mq {
-		if pkg.ServerID != configs.ServerID() {
-
+		for _, m := range s.modules {
+			if pkg.Module != m.Name() {
+				continue
+			}
+			select {
+			case m.MQ() <- pkg:
+			default:
+				log.Errorf("server dispatch mq full %v", m.Name())
+				if pkg.TTL < configs.Int32("msg-max-ttl", 1) { // 消息堆积
+					pkg.TTL++
+					s.mq <- pkg
+				}
+			}
 		}
 	}
 }
 
 func (s *Server) run(wg *sync.WaitGroup, fn func()) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Errorf("%v: %s", r, debug.Stack())
-		}
-		wg.Done()
-	}()
+	defer wg.Done()
+	defer util.RecoverPanic()
 	fn()
 }

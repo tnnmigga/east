@@ -2,19 +2,20 @@ package message
 
 import (
 	"eden/core/configs"
+	"eden/core/infra"
 	"sync"
 )
 
 var (
-	once  sync.Once
-	inMQ  chan<- *Package
-	outMQ chan<- *Package
+	once sync.Once
+	mq   chan<- *Package
 )
 
-type Package struct {
-	ServerID uint32
-	Module   string
-	Body     any
+// Attach 放置全局分发入口
+func Attach(c chan<- *Package) {
+	once.Do(func() {
+		mq = c
+	})
 }
 
 func Cast(serverID uint32, module string, msg any) {
@@ -24,20 +25,35 @@ func Cast(serverID uint32, module string, msg any) {
 		Body:     msg,
 	}
 	if serverID != configs.ServerID() {
-		outMQ <- &Package{}
+		Cast(configs.ServerID(), infra.Nats, pkg)
 		return
 	}
-	inMQ <- pkg
+	mq <- pkg
 }
 
-func castToInternal() {
-
+func Broadcast(serverType string, module string, msg any) {
+	pkg := &BroadcastPackage{
+		ServerType: serverType,
+		Module:     module,
+		Body:       msg,
+	}
+	Cast(configs.ServerID(), infra.Nats, pkg)
 }
 
-// Attach 放置全局分发入口
-func Attach(in, out chan<- *Package) {
-	once.Do(func() {
-		inMQ = in
-		outMQ = out
-	})
+func RPC[T any](caller string, serverID uint32, module string, req any, cb func(resp T, err error)) {
+	pkg := &RPCRequest{
+		Caller:   caller,
+		ServerID: serverID,
+		Module:   module,
+		Req:      req,
+		Cb:       rpcCb(cb),
+	}
+	Cast(configs.ServerID(), infra.Nats, pkg)
+}
+
+func rpcCb[T any](cb func(resp T, err error)) func(resp any, err error) {
+	return func(pkg any, err error) {
+		resp := pkg.(T)
+		cb(resp, err)
+	}
 }
