@@ -1,4 +1,4 @@
-package configs
+package iconf
 
 var (
 	serverID   uint32

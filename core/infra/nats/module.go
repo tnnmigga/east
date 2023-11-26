@@ -2,7 +2,7 @@ package nats
 
 import (
 	"eden/core/codec"
-	"eden/core/configs"
+	"eden/core/iconf"
 	"eden/core/log"
 	"eden/core/message"
 	"eden/core/module"
@@ -27,12 +27,12 @@ var (
 )
 
 func NewModule(name string) module.IModule {
-	conn, err := nats.Connect(configs.String("nats-url"))
+	conn, err := nats.Connect(iconf.String("nats-url"))
 	if err != nil {
 		panic(err)
 	}
 	m := &Module{
-		Module: module.NewModule(name, configs.Int32("mq-len")),
+		Module: module.NewModule(name, iconf.Int32("mq-len")),
 		conn:   conn,
 	}
 	m.initHandler()
@@ -40,7 +40,7 @@ func NewModule(name string) module.IModule {
 }
 
 func castTopic(serverID uint32) string {
-	return fmt.Sprintf("cast.%s.%d", configs.ServerType(), serverID)
+	return fmt.Sprintf("cast.%s.%d", iconf.ServerType(), serverID)
 }
 
 func broadcastTopic(serverType string) string {
@@ -48,13 +48,13 @@ func broadcastTopic(serverType string) string {
 }
 
 func rpcTopic(serverID uint32) string {
-	return fmt.Sprintf("rpc.%s.%d", configs.ServerType(), serverID)
+	return fmt.Sprintf("rpc.%s.%d", iconf.ServerType(), serverID)
 }
 
 func (m *Module) Run() {
-	m.conn.Subscribe(castTopic(configs.ServerID()), m.recv)
-	m.conn.Subscribe(broadcastTopic(configs.ServerType()), m.recv)
-	m.conn.Subscribe(rpcTopic(configs.ServerID()), m.rpc)
+	m.conn.Subscribe(castTopic(iconf.ServerID()), m.recv)
+	m.conn.Subscribe(broadcastTopic(iconf.ServerType()), m.recv)
+	m.conn.Subscribe(rpcTopic(iconf.ServerID()), m.rpc)
 	m.Module.Run()
 }
 
@@ -81,7 +81,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 	}
 	message.Cast(pkg.ServerID, pkg.Module, rpcMsg)
 	go util.ExecAndRecover(func() {
-		timer := time.After(time.Duration(configs.Int64("rpc-wait-time", 10)) * time.Second)
+		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
 		case <-timer:
 			log.Errorf("nats rpc call timeout %v", util.ReflectName(rpcMsg.Req))
@@ -103,7 +103,7 @@ func unpack(b []byte) (*message.Package, error) {
 		return nil, fmt.Errorf("nats recv decode pkg error: %v", err)
 	}
 	return &message.Package{
-		ServerID: configs.ServerID(),
+		ServerID: iconf.ServerID(),
 		Module:   pkg.Module,
 		Body:     body,
 	}, nil

@@ -1,7 +1,7 @@
 package message
 
 import (
-	"eden/core/configs"
+	"eden/core/iconf"
 	"eden/core/infra"
 	"sync"
 )
@@ -24,8 +24,8 @@ func Cast(serverID uint32, module string, msg any) {
 		Module:   module,
 		Body:     msg,
 	}
-	if serverID != configs.ServerID() {
-		Cast(configs.ServerID(), infra.Nats, pkg)
+	if serverID != iconf.ServerID() {
+		Cast(iconf.ServerID(), infra.Nats, pkg)
 		return
 	}
 	mq <- pkg
@@ -37,7 +37,7 @@ func Broadcast(serverType string, module string, msg any) {
 		Module:     module,
 		Body:       msg,
 	}
-	Cast(configs.ServerID(), infra.Nats, pkg)
+	Cast(iconf.ServerID(), infra.Nats, pkg)
 }
 
 func RPC[T any](caller string, serverID uint32, module string, req any, cb func(resp T, err error)) {
@@ -48,7 +48,7 @@ func RPC[T any](caller string, serverID uint32, module string, req any, cb func(
 		Req:      req,
 		Cb:       rpcCb(cb),
 	}
-	Cast(configs.ServerID(), infra.Nats, pkg)
+	Cast(iconf.ServerID(), infra.Nats, pkg)
 }
 
 func rpcCb[T any](cb func(resp T, err error)) func(resp any, err error) {

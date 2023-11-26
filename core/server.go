@@ -1,7 +1,7 @@
 package core
 
 import (
-	"eden/core/configs"
+	"eden/core/iconf"
 	"eden/core/infra"
 	"eden/core/infra/nats"
 	"eden/core/log"
@@ -18,7 +18,7 @@ type Server struct {
 
 func NewServer() *Server {
 	return &Server{
-		mq: make(chan *message.Package, configs.Int32("mq-len")),
+		mq: make(chan *message.Package, iconf.Int32("mq-len")),
 	}
 }
 
@@ -54,7 +54,7 @@ func (s *Server) dispatch() {
 			case m.MQ() <- pkg:
 			default:
 				log.Errorf("server dispatch mq full %v", m.Name())
-				if pkg.TTL < configs.Int32("msg-max-ttl", 1) { // 消息堆积
+				if pkg.TTL < iconf.Int32("msg-max-ttl", 1) { // 消息堆积
 					pkg.TTL++
 					s.mq <- pkg
 				}

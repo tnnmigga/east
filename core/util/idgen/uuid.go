@@ -1,7 +1,7 @@
 package idgen
 
 import (
-	"eden/core/configs"
+	"eden/core/iconf"
 	"eden/core/log"
 	"eden/core/util"
 	"sync"
@@ -29,7 +29,7 @@ func (idgen *UUIDGenerater) NewID() uint64 {
 		log.Errorf("idgen uuid index over limit, caller %v", util.Caller())
 		return 0
 	}
-	serverID := uint64(configs.ServerID())
+	serverID := uint64(iconf.ServerID())
 	if serverID >= 0xFFF {
 		log.Errorf("server-id must be smaller than 4096")
 		return 0

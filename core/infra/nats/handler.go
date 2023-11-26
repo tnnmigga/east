@@ -2,7 +2,7 @@ package nats
 
 import (
 	"eden/core/codec"
-	"eden/core/configs"
+	"eden/core/iconf"
 	"eden/core/log"
 	"eden/core/message"
 	"eden/core/module"
@@ -47,12 +47,12 @@ func (m *Module) onRPCPequest(req *message.RPCRequest) {
 		Body:   b,
 	}
 	go util.ExecAndRecover(func() {
-		msg, err := m.conn.Request(rpcTopic(req.ServerID), codec.Encode(netPkg), time.Duration(configs.Int64("rpc-wait-time", 10))*time.Second)
+		msg, err := m.conn.Request(rpcTopic(req.ServerID), codec.Encode(netPkg), time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
 		if err != nil {
 			req.Resp, err = codec.Decode(msg.Data)
 		} else {
 			req.Err = err
 		}
-		message.Cast(configs.ServerID(), req.Caller, req)
+		message.Cast(iconf.ServerID(), req.Caller, req)
 	})
 }
