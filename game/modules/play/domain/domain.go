@@ -17,7 +17,7 @@ func NewDomain() *Domain {
 }
 
 const (
-	MsgCaseIndex domain.CaseIndex = iota
+	MsgCaseIndex = iota
 	MaxCaseIndex
 )
 

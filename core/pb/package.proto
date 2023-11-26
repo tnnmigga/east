@@ -10,7 +10,6 @@ option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;
 
 message Package {
-    int32 ServerID = 1;
-    string Module  = 2;
-    bytes Body     = 3;
+    string Module = 1;
+    bytes Body    = 2;
 }

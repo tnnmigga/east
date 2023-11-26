@@ -1,7 +1,5 @@
 package domain
 
-type CaseIndex uint16
-
 type IUseCaseInit interface {
 	Init()
 }
@@ -14,17 +12,17 @@ type Pool struct {
 	useCases []any
 }
 
-func NewPool(maxCaseIndex CaseIndex) *Pool {
+func NewPool(maxCaseIndex int) *Pool {
 	return &Pool{
 		useCases: make([]any, maxCaseIndex),
 	}
 }
 
-func (p *Pool) PutCase(caseIndex CaseIndex, useCase any) {
+func (p *Pool) PutCase(caseIndex int, useCase any) {
 	p.useCases[caseIndex] = useCase
 }
 
-func (p *Pool) GetCase(caseIndex CaseIndex) any {
+func (p *Pool) GetCase(caseIndex int) any {
 	return p.useCases[caseIndex]
 }
 
@@ -38,8 +36,8 @@ func (p *Pool) Init() {
 
 func (p *Pool) Destroy() {
 	for i := len(p.useCases) - 1; i >= 0; i-- {
-		if uc, ok := p.useCases[i].(IUseCaseInit); ok {
-			uc.Init()
+		if uc, ok := p.useCases[i].(IUseCaseDestroy); ok {
+			uc.Destroy()
 		}
 	}
 }
