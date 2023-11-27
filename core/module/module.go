@@ -6,6 +6,7 @@ import (
 	"eden/core/util"
 	"fmt"
 	"reflect"
+	"runtime/debug"
 )
 
 type IModule interface {
@@ -56,9 +57,9 @@ func (m *Module) Run() {
 	for msg := range m.MQ() {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
-		case rpcPackage:
+		case rpcPackage: // 被发起rpc
 			m.rpc(msg.(*message.RPCPackage))
-		case rpcRequest:
+		case rpcRequest: // rpc请求完成
 			m.rpcResp(msg.(*message.RPCRequest))
 		default:
 			m.cb(msg)
@@ -83,7 +84,11 @@ func (m *Module) cb(msg any) {
 }
 
 func (m *Module) rpc(msg *message.RPCPackage) {
-	defer util.RecoverPanic()
+	defer func() {
+		if r := recover(); r != nil {
+			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
+		}
+	}()
 	msgType := reflect.TypeOf(msg.Req)
 	fns, ok := m.handlers[msgType]
 	if !ok {
