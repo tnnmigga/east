@@ -13,7 +13,7 @@ type HandlerFn struct {
 
 var (
 	rpcPackage = reflect.TypeOf((*message.RPCPackage)(nil))
-	rpcResp    = reflect.TypeOf((*message.RPCRequest)(nil))
+	rpcRequest = reflect.TypeOf((*message.RPCRequest)(nil))
 )
 
 func RegisterHandler[T any](m *Module, fn func(msg T)) {
@@ -30,7 +30,7 @@ func RegisterHandler[T any](m *Module, fn func(msg T)) {
 	}
 }
 
-func RegisterRPC[T any](m *Module, fn func(msg T, respFn func(resp any))) {
+func RegisterRPC[T any](m *Module, fn func(msg T, resp func(msg any))) {
 	msgType := reflect.TypeOf(new(T))
 	_, ok := m.handlers[msgType]
 	if ok {

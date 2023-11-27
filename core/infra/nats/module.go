@@ -51,11 +51,22 @@ func rpcTopic(serverID uint32) string {
 	return fmt.Sprintf("rpc.%s.%d", iconf.ServerType(), serverID)
 }
 
-func (m *Module) Run() {
-	m.conn.Subscribe(castTopic(iconf.ServerID()), m.recv)
-	m.conn.Subscribe(broadcastTopic(iconf.ServerType()), m.recv)
-	m.conn.Subscribe(rpcTopic(iconf.ServerID()), m.rpc)
-	m.Module.Run()
+func (m *Module) Init() error {
+	if _, err := m.conn.Subscribe(castTopic(iconf.ServerID()), m.recv); err != nil {
+		return err
+	}
+	if _, err := m.conn.Subscribe(broadcastTopic(iconf.ServerType()), m.recv); err != nil {
+		return err
+	}
+	if _, err := m.conn.Subscribe(rpcTopic(iconf.ServerID()), m.rpc); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Module) Close() {
+	m.conn.Close()
+	m.Module.Close()
 }
 
 func (m *Module) recv(msg *nats.Msg) {
@@ -78,6 +89,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 	rpcMsg := &message.RPCPackage{
 		Req:  pkg.Body,
 		Resp: make(chan any, 1),
+		Err:  make(chan error, 1),
 	}
 	message.Cast(pkg.ServerID, pkg.Module, rpcMsg)
 	go util.ExecAndRecover(func() {
@@ -88,6 +100,8 @@ func (m *Module) rpc(msg *nats.Msg) {
 		case resp := <-rpcMsg.Resp:
 			b := codec.Encode(resp)
 			m.conn.Publish(msg.Reply, b)
+		case err := <-rpcMsg.Err:
+			log.Errorf("nats rpc call %v error %v", util.ReflectName(rpcMsg.Req), err)
 		}
 	})
 }

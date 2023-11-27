@@ -26,4 +26,5 @@ type RPCRequest struct {
 type RPCPackage struct {
 	Req  any
 	Resp chan any
+	Err  chan error
 }

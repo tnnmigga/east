@@ -4,12 +4,14 @@ import (
 	"eden/core/log"
 	"eden/core/message"
 	"eden/core/util"
+	"fmt"
 	"reflect"
 )
 
 type IModule interface {
 	Name() string
 	MQ() chan any
+	Init() error
 	Run()
 	Close()
 }
@@ -41,6 +43,10 @@ func (m *Module) MQ() chan any {
 	return m.mq
 }
 
+func (m *Module) Init() error {
+	return nil
+}
+
 func (m *Module) Run() {
 	defer util.RecoverPanic()
 	defer func() {
@@ -52,8 +58,8 @@ func (m *Module) Run() {
 		switch msgType {
 		case rpcPackage:
 			m.rpc(msg.(*message.RPCPackage))
-		case rpcResp:
-
+		case rpcRequest:
+			m.rpcResp(msg.(*message.RPCRequest))
 		default:
 			m.cb(msg)
 		}
@@ -81,7 +87,7 @@ func (m *Module) rpc(msg *message.RPCPackage) {
 	msgType := reflect.TypeOf(msg.Req)
 	fns, ok := m.handlers[msgType]
 	if !ok {
-		log.Errorf("rpc handler not found %v", msgType)
+		msg.Err <- fmt.Errorf("rpc handler not found %v", msgType)
 		return
 	}
 	fns.RPC(msg.Req, func(v any) {

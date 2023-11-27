@@ -29,9 +29,9 @@ func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 	s.modules = append(s.modules, modules...)
 	message.Attach(s.mq)
 	s.modules = append(s.modules, modules...)
+	s.NewGoroutine(wg, s.dispatch)
 	for _, m := range s.modules {
-		wg.Add(1)
-		go s.run(wg, m.Run)
+		s.NewGoroutine(wg, m.Run)
 	}
 	return func() {
 		log.Infof("try close server, start close modules")
@@ -63,8 +63,11 @@ func (s *Server) dispatch() {
 	}
 }
 
-func (s *Server) run(wg *sync.WaitGroup, fn func()) {
-	defer wg.Done()
-	defer util.RecoverPanic()
-	fn()
+func (s *Server) NewGoroutine(wg *sync.WaitGroup, fn func()) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer util.RecoverPanic()
+		fn()
+	}()
 }
