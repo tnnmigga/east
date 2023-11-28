@@ -19,7 +19,8 @@ const ModuleName = "nats"
 
 type Module struct {
 	*module.Module
-	conn *nats.Conn
+	conn   *nats.Conn
+	stream nats.JetStream
 }
 
 var (
@@ -27,7 +28,15 @@ var (
 )
 
 func NewModule(name string) module.IModule {
-	conn, err := nats.Connect(iconf.String("nats-url"))
+	conn, err := nats.Connect(
+		iconf.String("nats-url"),
+		nats.RetryOnFailedConnect(true),
+		nats.MaxReconnects(10),
+		nats.ReconnectWait(time.Second),
+		nats.ReconnectHandler(func(_ *nats.Conn) {
+			log.Errorf("nats retry connect")
+		}),
+	)
 	if err != nil {
 		panic(err)
 	}
