@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"context"
 	"eden/core/codec"
 	"eden/core/iconf"
 	"eden/core/log"
@@ -9,25 +10,25 @@ import (
 	"eden/core/pb"
 	"eden/core/util"
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/jetstream"
 )
 
-const ModuleName = "nats"
+const (
+	ModuleName     = "nats"
+	castStreamName = "stream-cast"
+)
 
 type Module struct {
 	*module.Module
 	conn   *nats.Conn
-	stream nats.JetStream
+	stream jetstream.Stream
+	cons   jetstream.Consumer
 }
 
-var (
-	netPackageType = reflect.TypeOf((*pb.Package)(nil))
-)
-
-func NewModule(name string) module.IModule {
+func New(name string) module.IModule {
 	conn, err := nats.Connect(
 		iconf.String("nats-url"),
 		nats.RetryOnFailedConnect(true),
@@ -41,41 +42,92 @@ func NewModule(name string) module.IModule {
 		panic(err)
 	}
 	m := &Module{
-		Module: module.NewModule(name, iconf.Int32("mq-len")),
+		Module: module.New(name, iconf.Int32("nats-mq-len", 100000)),
 		conn:   conn,
 	}
 	m.initHandler()
 	return m
 }
 
-func castTopic(serverID uint32) string {
-	return fmt.Sprintf("cast.%s.%d", iconf.ServerType(), serverID)
+func (m *Module) Run() {
+	stop, err := m.initSubcribe()
+	if err != nil {
+		panic(err)
+	}
+	m.Module.Run()
+	stop()
 }
 
-func broadcastTopic(serverType string) string {
+func castSubject(serverID uint32) string {
+	return fmt.Sprintf("cast.%d", serverID)
+}
+
+func streamCastSubject(serverID uint32) string {
+	return fmt.Sprintf("stream.cast.%d", serverID)
+}
+
+func broadcastSubject(serverType string) string {
 	return fmt.Sprintf("broadcast.%s", serverType)
 }
 
-func rpcTopic(serverID uint32) string {
-	return fmt.Sprintf("rpc.%s.%d", iconf.ServerType(), serverID)
+func rpcSubject(serverID uint32) string {
+	return fmt.Sprintf("rpc.%d", serverID)
 }
 
-func (m *Module) Init() error {
-	if _, err := m.conn.Subscribe(castTopic(iconf.ServerID()), m.recv); err != nil {
-		return err
+func (m *Module) initSubcribe() (stop func(), err error) {
+	js, err := jetstream.New(m.conn)
+	if err != nil {
+		return nil, err
 	}
-	if _, err := m.conn.Subscribe(broadcastTopic(iconf.ServerType()), m.recv); err != nil {
-		return err
+	m.stream, err = js.Stream(context.Background(), castStreamName)
+	if err != nil {
+		return nil, err
 	}
-	if _, err := m.conn.Subscribe(rpcTopic(iconf.ServerID()), m.rpc); err != nil {
-		return err
+	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
+		Durable:       fmt.Sprintf("%s-%d", iconf.ServerType(), iconf.ServerID()),
+		FilterSubject: streamCastSubject(iconf.ServerID()),
+	})
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	consCtx, err := m.cons.Consume(m.streamRecv)
+	if err != nil {
+		return nil, err
+	}
+	castSub, err := m.conn.Subscribe(castSubject(iconf.ServerID()), m.recv)
+	if err != nil {
+		return nil, err
+	}
+	broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
+	if err != nil {
+		return nil, err
+	}
+	rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
+	if err != nil {
+		return nil, err
+	}
+	return func() {
+		consCtx.Stop()
+		castSub.Drain()
+		broadcastSub.Drain()
+		rpcSub.Drain()
+	}, nil
 }
 
 func (m *Module) Close() {
 	m.conn.Close()
 	m.Module.Close()
+}
+
+func (m *Module) streamRecv(msg jetstream.Msg) {
+	defer util.RecoverPanic()
+	msg.Ack()
+	pkg, err := unpack(msg.Data())
+	if err != nil {
+		log.Errorf("nats streamRecv decode msg error: %v", err)
+		return
+	}
+	message.Cast(pkg.ServerID, pkg.Module, pkg.Body)
 }
 
 func (m *Module) recv(msg *nats.Msg) {

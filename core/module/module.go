@@ -12,7 +12,6 @@ import (
 type IModule interface {
 	Name() string
 	MQ() chan any
-	Init() error
 	Run()
 	Close()
 }
@@ -24,11 +23,9 @@ type Module struct {
 	closeSig chan struct{}
 }
 
-var modules = map[int64]*Module{}
-
-func NewModule(mType string, mqLen int32) *Module {
+func New(name string, mqLen int32) *Module {
 	m := &Module{
-		name:     mType,
+		name:     name,
 		mq:       make(chan any, mqLen),
 		handlers: map[reflect.Type]*HandlerFn{},
 		closeSig: make(chan struct{}, 1),
@@ -42,10 +39,6 @@ func (m *Module) Name() string {
 
 func (m *Module) MQ() chan any {
 	return m.mq
-}
-
-func (m *Module) Init() error {
-	return nil
 }
 
 func (m *Module) Run() {

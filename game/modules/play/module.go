@@ -13,7 +13,7 @@ type Module struct {
 
 func NewModule() module.IModule {
 	m := &Module{
-		Module: module.NewModule("play", 100000),
+		Module: module.New("play", 100000),
 		Domain: domain.NewDomain(),
 	}
 	usecase.Init(m.Domain)

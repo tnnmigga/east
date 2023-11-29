@@ -14,6 +14,7 @@ import (
 func (m *Module) initHandler() {
 	module.RegisterHandler(m.Module, m.onPackage)
 	module.RegisterHandler(m.Module, m.onBroadcastPackage)
+	module.RegisterHandler(m.Module, m.onRPCPequest)
 }
 
 func (m *Module) onPackage(pkg *message.Package) {
@@ -22,7 +23,7 @@ func (m *Module) onPackage(pkg *message.Package) {
 		Module: pkg.Module,
 		Body:   b,
 	}
-	err := m.conn.Publish(castTopic(pkg.ServerID), codec.Encode(netPkg))
+	err := m.conn.Publish(castSubject(pkg.ServerID), codec.Encode(netPkg))
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
@@ -34,7 +35,7 @@ func (m *Module) onBroadcastPackage(pkg *message.BroadcastPackage) {
 		Module: pkg.Module,
 		Body:   b,
 	}
-	err := m.conn.Publish(broadcastTopic(pkg.ServerType), codec.Encode(netPkg))
+	err := m.conn.Publish(broadcastSubject(pkg.ServerType), codec.Encode(netPkg))
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
@@ -47,9 +48,9 @@ func (m *Module) onRPCPequest(req *message.RPCRequest) {
 		Body:   b,
 	}
 	go util.ExecAndRecover(func() {
-		msg, err := m.conn.Request(rpcTopic(req.ServerID), codec.Encode(netPkg), time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
-		if err != nil {
-			req.Resp, err = codec.Decode(msg.Data)
+		msg, err := m.conn.Request(rpcSubject(req.ServerID), codec.Encode(netPkg), time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
+		if err == nil {
+			req.Resp, req.Err = codec.Decode(msg.Data)
 		} else {
 			req.Err = err
 		}

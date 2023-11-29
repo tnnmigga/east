@@ -24,9 +24,8 @@ func NewServer() *Server {
 
 func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 	wg := &sync.WaitGroup{}
-	s.modules = make([]module.IModule, 0, len(modules)+1)
-	s.modules = append(s.modules, nats.NewModule(infra.Nats))
-	s.modules = append(s.modules, modules...)
+	modules = append(modules, nats.New(infra.Nats)) // nats module最后启动最先停止
+	s.modules = modules
 	message.Attach(s.mq)
 	s.modules = append(s.modules, modules...)
 	s.NewGoroutine(wg, s.dispatch)
@@ -39,6 +38,7 @@ func (s *Server) Run(modules ...module.IModule) (stopFn func()) {
 			m := s.modules[i]
 			util.ExecAndRecover(m.Close)
 		}
+		close(s.mq)
 		wg.Wait()
 		log.Infof("close modules success")
 	}
@@ -53,7 +53,7 @@ func (s *Server) dispatch() {
 			select {
 			case m.MQ() <- pkg:
 			default:
-				log.Errorf("server dispatch mq full %v", m.Name())
+				log.Errorf("server dispatch module mq full %v", m.Name())
 				if pkg.TTL < iconf.Int32("msg-max-ttl", 1) { // 消息堆积
 					pkg.TTL++
 					s.mq <- pkg
