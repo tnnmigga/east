@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	"eden/core/module"
+	"east/core/module"
 
 	"github.com/go-redis/redis"
 )

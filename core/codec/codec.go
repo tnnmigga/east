@@ -1,8 +1,8 @@
 package codec
 
 import (
-	"eden/core/util"
-	"eden/core/util/idgen"
+	"east/core/util"
+	"east/core/util/idgen"
 	"encoding/binary"
 	"errors"
 	"fmt"

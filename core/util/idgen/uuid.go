@@ -1,9 +1,9 @@
 package idgen
 
 import (
-	"eden/core/iconf"
-	"eden/core/log"
-	"eden/core/util"
+	"east/core/iconf"
+	"east/core/log"
+	"east/core/util"
 	"sync"
 	"time"
 )

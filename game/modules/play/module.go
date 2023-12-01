@@ -1,9 +1,11 @@
 package play
 
 import (
-	"eden/core/module"
-	"eden/game/modules/play/domain"
-	"eden/game/modules/play/domain/usecase"
+	"east/core/define"
+	"east/core/module"
+	define1 "east/define"
+	"east/game/modules/play/domain"
+	"east/game/modules/play/domain/usecase"
 )
 
 type Module struct {
@@ -11,9 +13,9 @@ type Module struct {
 	*domain.Domain
 }
 
-func NewModule() module.IModule {
+func NewModule() define.IModule {
 	m := &Module{
-		Module: module.New("play", 100000),
+		Module: module.New(define1.ModTypPlay, 100000),
 		Domain: domain.NewDomain(),
 	}
 	usecase.Init(m.Domain)

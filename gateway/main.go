@@ -1,7 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"east/core"
+	"east/core/health"
+	"east/core/iconf"
+	"east/core/util"
+	"east/game/modules/play"
+)
 
 func main() {
-	fmt.Println("ok")
+	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
+	server := core.NewServer(
+		play.NewModule(),
+	)
+	stop := server.Run()
+	health.WaitExitSignal()
+	stop()
 }

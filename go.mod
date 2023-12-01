@@ -1,4 +1,4 @@
-module eden
+module east
 
 go 1.21
 

@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"eden/core/domain"
-	"eden/game/modules/play/domain/api"
+	"east/core/domain"
+	"east/game/modules/play/domain/api"
 )
 
 type Domain struct {

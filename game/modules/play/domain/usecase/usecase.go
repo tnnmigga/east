@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"eden/game/modules/play/domain"
-	"eden/game/modules/play/domain/usecase/msgcase"
+	"east/game/modules/play/domain"
+	"east/game/modules/play/domain/usecase/msgcase"
 )
 
 func Init(d *domain.Domain) {

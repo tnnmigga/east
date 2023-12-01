@@ -1,7 +1,7 @@
 package health
 
 import (
-	"eden/core/log"
+	"east/core/log"
 	"runtime"
 	"sync"
 )

@@ -2,13 +2,14 @@ package nats
 
 import (
 	"context"
-	"eden/core/codec"
-	"eden/core/iconf"
-	"eden/core/log"
-	"eden/core/message"
-	"eden/core/module"
-	"eden/core/pb"
-	"eden/core/util"
+	"east/core/codec"
+	"east/core/define"
+	"east/core/iconf"
+	"east/core/log"
+	"east/core/message"
+	"east/core/module"
+	"east/core/pb"
+	"east/core/util"
 	"fmt"
 	"time"
 
@@ -24,11 +25,12 @@ const (
 type Module struct {
 	*module.Module
 	conn   *nats.Conn
+	js     jetstream.JetStream
 	stream jetstream.Stream
 	cons   jetstream.Consumer
 }
 
-func New(name string) module.IModule {
+func New(name string) define.IModule {
 	conn, err := nats.Connect(
 		iconf.String("nats-url"),
 		nats.RetryOnFailedConnect(true),
@@ -70,16 +72,20 @@ func broadcastSubject(serverType string) string {
 	return fmt.Sprintf("broadcast.%s", serverType)
 }
 
+func randomCastSubject(serverType string) string {
+	return fmt.Sprintf("randomcast.%s", serverType)
+}
+
 func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
 func (m *Module) initSubcribe() (stop func(), err error) {
-	js, err := jetstream.New(m.conn)
+	m.js, err = jetstream.New(m.conn)
 	if err != nil {
 		return nil, err
 	}
-	m.stream, err = js.Stream(context.Background(), castStreamName)
+	m.stream, err = m.js.Stream(context.Background(), castStreamName)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +108,10 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 	if err != nil {
 		return nil, err
 	}
+	queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
+	if err != nil {
+		return nil, err
+	}
 	rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
 	if err != nil {
 		return nil, err
@@ -110,6 +120,7 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 		consCtx.Stop()
 		castSub.Drain()
 		broadcastSub.Drain()
+		queueSub.Drain()
 		rpcSub.Drain()
 	}, nil
 }
@@ -127,7 +138,7 @@ func (m *Module) streamRecv(msg jetstream.Msg) {
 		log.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	message.Cast(pkg.ServerID, pkg.Module, pkg.Body)
+	message.Cast(pkg.ServerID, pkg.Body)
 }
 
 func (m *Module) recv(msg *nats.Msg) {
@@ -137,7 +148,7 @@ func (m *Module) recv(msg *nats.Msg) {
 		log.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	message.Cast(pkg.ServerID, pkg.Module, pkg.Body)
+	message.Cast(pkg.ServerID, pkg.Body)
 }
 
 func (m *Module) rpc(msg *nats.Msg) {
@@ -147,12 +158,12 @@ func (m *Module) rpc(msg *nats.Msg) {
 		log.Errorf("nats rpc decode msg error: %v", err)
 		return
 	}
-	rpcMsg := &message.RPCPackage{
+	rpcMsg := &define.RPCPackage{
 		Req:  pkg.Body,
 		Resp: make(chan any, 1),
 		Err:  make(chan error, 1),
 	}
-	message.Cast(pkg.ServerID, pkg.Module, rpcMsg)
+	message.Cast(pkg.ServerID, rpcMsg)
 	go util.ExecAndRecover(func() {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
@@ -167,7 +178,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 	})
 }
 
-func unpack(b []byte) (*message.Package, error) {
+func unpack(b []byte) (*define.Package, error) {
 	pkg0, err := codec.Decode(b)
 	if err != nil {
 		return nil, fmt.Errorf("nats decode msg error: %v", err)
@@ -177,9 +188,8 @@ func unpack(b []byte) (*message.Package, error) {
 	if err != nil {
 		return nil, fmt.Errorf("nats recv decode pkg error: %v", err)
 	}
-	return &message.Package{
+	return &define.Package{
 		ServerID: iconf.ServerID(),
-		Module:   pkg.Module,
 		Body:     body,
 	}, nil
 }

@@ -1,13 +1,19 @@
 package main
 
 import (
-	"eden/core"
-	"eden/game/modules/play"
+	"east/core"
+	"east/core/health"
+	"east/core/iconf"
+	"east/core/util"
+	"east/game/modules/play"
 )
 
 func main() {
-	server := core.Server{}
-	server.Run(
+	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
+	server := core.NewServer(
 		play.NewModule(),
 	)
+	stop := server.Run()
+	health.WaitExitSignal()
+	stop()
 }

@@ -1,7 +1,7 @@
 package util
 
 import (
-	"eden/core/log"
+	"east/core/log"
 	"runtime"
 	"runtime/debug"
 )

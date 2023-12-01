@@ -1,39 +1,38 @@
 package nats
 
 import (
-	"eden/core/codec"
-	"eden/core/iconf"
-	"eden/core/log"
-	"eden/core/message"
-	"eden/core/module"
-	"eden/core/pb"
-	"eden/core/util"
+	"east/core/codec"
+	"east/core/define"
+	"east/core/iconf"
+	"east/core/log"
+	"east/core/message"
+	"east/core/pb"
+	"east/core/util"
 	"time"
 )
 
 func (m *Module) initHandler() {
-	module.RegisterHandler(m.Module, m.onPackage)
-	module.RegisterHandler(m.Module, m.onBroadcastPackage)
-	module.RegisterHandler(m.Module, m.onRPCPequest)
+	message.RegisterHandler(m, m.onPackage)
+	message.RegisterHandler(m, m.onBroadcastPackage)
+	message.RegisterHandler(m, m.onRandomCastPackage)
+	message.RegisterHandler(m, m.onRPCPequest)
 }
 
-func (m *Module) onPackage(pkg *message.Package) {
+func (m *Module) onPackage(pkg *define.Package) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
-		Module: pkg.Module,
-		Body:   b,
+		Body: b,
 	}
-	err := m.conn.Publish(castSubject(pkg.ServerID), codec.Encode(netPkg))
+	_, err := m.js.PublishAsync(castSubject(pkg.ServerID), codec.Encode(netPkg))
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
 }
 
-func (m *Module) onBroadcastPackage(pkg *message.BroadcastPackage) {
+func (m *Module) onBroadcastPackage(pkg *define.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
-		Module: pkg.Module,
-		Body:   b,
+		Body: b,
 	}
 	err := m.conn.Publish(broadcastSubject(pkg.ServerType), codec.Encode(netPkg))
 	if err != nil {
@@ -41,11 +40,21 @@ func (m *Module) onBroadcastPackage(pkg *message.BroadcastPackage) {
 	}
 }
 
-func (m *Module) onRPCPequest(req *message.RPCRequest) {
+func (m *Module) onRandomCastPackage(pkg *define.RandomCastPackage) {
+	b := codec.Encode(pkg.Body)
+	netPkg := &pb.Package{
+		Body: b,
+	}
+	err := m.conn.Publish(randomCastSubject(pkg.ServerType), codec.Encode(netPkg))
+	if err != nil {
+		log.Errorf("nats publish error %v", err)
+	}
+}
+
+func (m *Module) onRPCPequest(req *define.RPCRequest) {
 	b := codec.Encode(req.Req)
 	netPkg := &pb.Package{
-		Module: req.Module,
-		Body:   b,
+		Body: b,
 	}
 	go util.ExecAndRecover(func() {
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), codec.Encode(netPkg), time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
@@ -54,6 +63,6 @@ func (m *Module) onRPCPequest(req *message.RPCRequest) {
 		} else {
 			req.Err = err
 		}
-		message.Cast(iconf.ServerID(), req.Caller, req)
+		req.Module.MQ() <- req
 	})
 }

@@ -1,25 +1,18 @@
 package module
 
 import (
-	"eden/core/log"
-	"eden/core/message"
-	"eden/core/util"
+	"east/core/define"
+	"east/core/log"
+	"east/core/util"
 	"fmt"
 	"reflect"
 	"runtime/debug"
 )
 
-type IModule interface {
-	Name() string
-	MQ() chan any
-	Run()
-	Close()
-}
-
 type Module struct {
 	name     string
 	mq       chan any
-	handlers map[reflect.Type]*HandlerFn
+	handlers map[reflect.Type]*define.HandlerFn
 	closeSig chan struct{}
 }
 
@@ -27,7 +20,7 @@ func New(name string, mqLen int32) *Module {
 	m := &Module{
 		name:     name,
 		mq:       make(chan any, mqLen),
-		handlers: map[reflect.Type]*HandlerFn{},
+		handlers: map[reflect.Type]*define.HandlerFn{},
 		closeSig: make(chan struct{}, 1),
 	}
 	return m
@@ -41,6 +34,10 @@ func (m *Module) MQ() chan any {
 	return m.mq
 }
 
+func (m *Module) Handlers() map[reflect.Type]*define.HandlerFn {
+	return m.handlers
+}
+
 func (m *Module) Run() {
 	defer util.RecoverPanic()
 	defer func() {
@@ -51,9 +48,9 @@ func (m *Module) Run() {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
 		case rpcPackage: // 被发起rpc
-			m.rpc(msg.(*message.RPCPackage))
+			m.rpc(msg.(*define.RPCPackage))
 		case rpcRequest: // rpc请求完成
-			m.rpcResp(msg.(*message.RPCRequest))
+			m.rpcResp(msg.(*define.RPCRequest))
 		default:
 			m.cb(msg)
 		}
@@ -76,7 +73,7 @@ func (m *Module) cb(msg any) {
 	fns.Cb(msg)
 }
 
-func (m *Module) rpc(msg *message.RPCPackage) {
+func (m *Module) rpc(msg *define.RPCPackage) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -93,7 +90,7 @@ func (m *Module) rpc(msg *message.RPCPackage) {
 	})
 }
 
-func (m *Module) rpcResp(req *message.RPCRequest) {
+func (m *Module) rpcResp(req *define.RPCRequest) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }
