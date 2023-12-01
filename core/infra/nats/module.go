@@ -56,8 +56,8 @@ func (m *Module) Run() {
 	if err != nil {
 		panic(err)
 	}
+	defer stop()
 	m.Module.Run()
-	stop()
 }
 
 func castSubject(serverID uint32) string {
@@ -122,12 +122,8 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 		broadcastSub.Drain()
 		queueSub.Drain()
 		rpcSub.Drain()
+		m.conn.Close()
 	}, nil
-}
-
-func (m *Module) Close() {
-	m.conn.Close()
-	m.Module.Close()
 }
 
 func (m *Module) streamRecv(msg jetstream.Msg) {
