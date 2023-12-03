@@ -26,7 +26,7 @@ func (s *Server) Run() (stop func()) {
 		s.NewGoroutine(wg, m.Run)
 	}
 	return func() {
-		log.Infof("try close server, start close modules")
+		log.Infof("try close server, stop modules...")
 		for i := len(s.modules) - 1; i >= 0; i-- {
 			m := s.modules[i]
 			util.ExecAndRecover(m.Close)

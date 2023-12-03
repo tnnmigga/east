@@ -7,9 +7,9 @@ import { Socket } from 'net';
 const msg_builders = {}
 const msgid_to_name = {}
 const socket = new Socket()
-// socket.connect('9527', '127.0.0.1', function () {
-//     log("connect success")
-// })
+socket.connect('9527', '127.0.0.1', function () {
+    log("connect success")
+})
 
 function init_msg_builder(path) {
     let files = readdirSync(path)
@@ -30,7 +30,7 @@ function init_msg_builder(path) {
 
 init_msg_builder("/go/east/pb")
 
-function live({context = {}, name = 'REPL'} = {}) {
+function live(context = {}, name = 'REPL') {
     const r = repl.start({
         prompt: `${name} > `,
         preview: true,

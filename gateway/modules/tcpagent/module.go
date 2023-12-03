@@ -25,6 +25,7 @@ func New() define.IModule {
 	m := &Module{
 		Module: module.New(define1.ModTypTCPAgent, 100000),
 		lister: lister,
+		conns:  map[uint64]*userAgent{},
 	}
 	m.initHandler()
 	return m
@@ -32,6 +33,7 @@ func New() define.IModule {
 
 func (m *Module) Run() {
 	go m.accept()
+	m.Module.Run()
 }
 
 func (m *Module) accept() {
