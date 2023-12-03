@@ -57,7 +57,7 @@ func (m *Module) Run() {
 	}
 }
 
-func (m *Module) Close() {
+func (m *Module) Stop() {
 	log.Infof("try stop %s", m.name)
 	close(m.mq)
 	<-m.closeSig

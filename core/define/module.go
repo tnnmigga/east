@@ -7,5 +7,5 @@ type IModule interface {
 	MQ() chan any
 	Handlers() map[reflect.Type]*HandlerFn
 	Run()
-	Close()
+	Stop()
 }
