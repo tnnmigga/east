@@ -41,7 +41,7 @@ func (m *Module) Handlers() map[reflect.Type]*define.HandlerFn {
 func (m *Module) Run() {
 	defer util.RecoverPanic()
 	defer func() {
-		log.Infof("module %v has stoped", m.Name())
+		log.Infof("%v has stoped", m.Name())
 		m.closeSig <- struct{}{}
 	}()
 	for msg := range m.MQ() {
@@ -61,7 +61,7 @@ func (m *Module) Close() {
 	log.Infof("try stop %s", m.name)
 	close(m.mq)
 	<-m.closeSig
-	log.Infof("stop %s success", m.name)
+	// log.Infof("stop %s success", m.name)
 }
 
 func (m *Module) cb(msg any) {
