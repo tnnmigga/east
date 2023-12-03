@@ -1,8 +1,10 @@
 package iconf
 
 import (
+	"east/core/util"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
@@ -14,13 +16,13 @@ var (
 
 var errConfigNotFound error = errors.New("configs not found")
 
-func LoadFromJSON(b []byte) error {
+func LoadFromJSON(b []byte) {
+	b = util.Uncomment(b)
 	err := json.Unmarshal(b, &confs)
-	if err != nil {
-		return err
+		if err != nil {
+		panic(err)
 	}
 	afterLoad()
-	return nil
 }
 
 func LoadFromYAML(b []byte) error {
@@ -38,7 +40,7 @@ func RegInitFn(fn func()) {
 
 func afterLoad() {
 	initServerConf()
-	for _, fn := range fns {
+		for _, fn := range fns {
 		fn()
 	}
 }

@@ -5,13 +5,13 @@ import (
 	"east/core/health"
 	"east/core/iconf"
 	"east/core/util"
-	"east/game/modules/play"
+	"east/gateway/modules/tcpagent"
 )
 
 func main() {
 	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	server := core.NewServer(
-		play.NewModule(),
+		tcpagent.New(),
 	)
 	stop := server.Run()
 	health.WaitExitSignal()

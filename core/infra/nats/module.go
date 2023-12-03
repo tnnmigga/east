@@ -32,7 +32,7 @@ type Module struct {
 
 func New(name string) define.IModule {
 	conn, err := nats.Connect(
-		iconf.String("nats-url"),
+		iconf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
 		nats.MaxReconnects(10),
 		nats.ReconnectWait(time.Second),
@@ -104,19 +104,19 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 	if err != nil {
 		return nil, err
 	}
-	broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
+		broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
+	if err != nil {
+				return nil, err
+	}
+		queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
 	if err != nil {
 		return nil, err
 	}
-	queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
+		rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
 	if err != nil {
 		return nil, err
 	}
-	rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
-	if err != nil {
-		return nil, err
-	}
-	return func() {
+		return func() {
 		consCtx.Stop()
 		castSub.Drain()
 		broadcastSub.Drain()
