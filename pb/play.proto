@@ -8,12 +8,10 @@ option (gogoproto.goproto_unrecognized_all) = false;
 option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;
 
-message C2SPackage {
-    uint64 userID = 1;
-    bytes body = 2;
+message SayHelloReq {
+    string text = 1;
 }
 
-message S2CPackage {
-    uint64 userID = 1;
-    bytes body = 2;
+message SayHelloResp {
+    string text = 1;
 }

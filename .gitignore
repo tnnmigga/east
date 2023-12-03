@@ -22,3 +22,4 @@ go.work
 vendor
 test.go
 test
+node_modules
