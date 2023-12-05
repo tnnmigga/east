@@ -1,8 +1,8 @@
 package tcpagent
 
 import (
-	"east/core/define"
 	"east/core/iconf"
+	"east/core/idef"
 	"east/core/module"
 	"east/core/util/idgen"
 	define1 "east/define"
@@ -17,7 +17,7 @@ type Module struct {
 	conns  map[uint64]*userAgent
 }
 
-func New() define.IModule {
+func New() idef.IModule {
 	lister, err := net.Listen("tcp", iconf.String("tcp-addr", "127.0.0.1:9527"))
 	if err != nil {
 		panic(err)

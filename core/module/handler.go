@@ -1,11 +1,11 @@
 package module
 
 import (
-	"east/core/define"
+	"east/core/idef"
 	"reflect"
 )
 
 var (
-	rpcPackage = reflect.TypeOf((*define.RPCPackage)(nil))
-	rpcRequest = reflect.TypeOf((*define.RPCRequest)(nil))
+	rpcPackage = reflect.TypeOf((*idef.RPCPackage)(nil))
+	rpcRequest = reflect.TypeOf((*idef.RPCRequest)(nil))
 )

@@ -17,3 +17,7 @@ message S2CPackage {
     uint64 userID = 1;
     bytes body = 2;
 }
+
+message UserLoginReq {
+    uint64 userID = 1; 
+}

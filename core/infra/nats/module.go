@@ -3,8 +3,8 @@ package nats
 import (
 	"context"
 	"east/core/codec"
-	"east/core/define"
 	"east/core/iconf"
+	"east/core/idef"
 	"east/core/log"
 	"east/core/message"
 	"east/core/module"
@@ -31,7 +31,7 @@ type Module struct {
 	cons   jetstream.Consumer
 }
 
-func New(name string) define.IModule {
+func New(name string) idef.IModule {
 	conn, err := nats.Connect(
 		iconf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
@@ -155,7 +155,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 		log.Errorf("nats rpc decode msg error: %v", err)
 		return
 	}
-	rpcMsg := &define.RPCPackage{
+	rpcMsg := &idef.RPCPackage{
 		Req:  pkg.Body,
 		Resp: make(chan any, 1),
 		Err:  make(chan error, 1),
@@ -175,7 +175,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 	})
 }
 
-func unpack(b []byte) (*define.Package, error) {
+func unpack(b []byte) (*idef.Package, error) {
 	pkg0, err := codec.Decode(b)
 	if err != nil {
 		return nil, fmt.Errorf("nats decode msg error: %v", err)
@@ -185,7 +185,7 @@ func unpack(b []byte) (*define.Package, error) {
 	if err != nil {
 		return nil, fmt.Errorf("nats recv decode pkg error: %v", err)
 	}
-	return &define.Package{
+	return &idef.Package{
 		ServerID: iconf.ServerID(),
 		Body:     body,
 	}, nil

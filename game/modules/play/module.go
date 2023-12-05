@@ -1,11 +1,11 @@
 package play
 
 import (
-	"east/core/define"
+	"east/core/idef"
 	"east/core/module"
-	define1 "east/define"
+	"east/define"
 	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/usecase"
+	"east/game/modules/play/domain/services"
 )
 
 type Module struct {
@@ -13,11 +13,11 @@ type Module struct {
 	*domain.Domain
 }
 
-func NewModule() define.IModule {
+func NewModule() idef.IModule {
 	m := &Module{
-		Module: module.New(define1.ModTypPlay, 100000),
+		Module: module.New(define.ModTypPlay, 100000),
 		Domain: domain.NewDomain(),
 	}
-	usecase.Init(m.Domain)
+	services.Init(m.Domain)
 	return m
 }

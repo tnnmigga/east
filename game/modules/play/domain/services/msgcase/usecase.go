@@ -11,7 +11,7 @@ import (
 type useCase struct {
 }
 
-func NewCase(d *domain.Domain) api.IMsgCase {
+func NewCase(d *domain.Domain) api.IMsg {
 	return &useCase{}
 }
 

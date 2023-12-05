@@ -1,7 +1,7 @@
 package core
 
 import (
-	"east/core/define"
+	"east/core/idef"
 	"east/core/infra"
 	"east/core/infra/nats"
 	"east/core/log"
@@ -12,11 +12,11 @@ import (
 )
 
 type Server struct {
-	modules []define.IModule
+	modules []idef.IModule
 	// mq      chan any // 对内分发
 }
 
-func NewServer(modules ...define.IModule) *Server {
+func NewServer(modules ...idef.IModule) *Server {
 	return &Server{
 		modules: append(modules, nats.New(infra.ModTypNats)), // nats module最后启动最先停止
 	}

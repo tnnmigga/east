@@ -1,4 +1,4 @@
-package define
+package idef
 
 import "reflect"
 

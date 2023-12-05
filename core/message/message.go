@@ -1,8 +1,8 @@
 package message
 
 import (
-	"east/core/define"
 	"east/core/iconf"
+	"east/core/idef"
 	"east/core/log"
 	"east/core/util"
 
@@ -38,7 +38,7 @@ func Init() {
 
 func Cast(serverID uint32, msg any) {
 	if serverID != iconf.ServerID() {
-		Cast(iconf.ServerID(), &define.Package{
+		Cast(iconf.ServerID(), &idef.Package{
 			ServerID: serverID,
 			Body:     msg,
 		})
@@ -59,15 +59,15 @@ func Cast(serverID uint32, msg any) {
 }
 
 func Broadcast(serverType string, msg any) {
-	pkg := &define.BroadcastPackage{
+	pkg := &idef.BroadcastPackage{
 		ServerType: serverType,
 		Body:       msg,
 	}
 	Cast(iconf.ServerID(), pkg)
 }
 
-func RPC[T any](module define.IModule, serverID uint32, req any, cb func(resp T, err error)) {
-	pkg := &define.RPCRequest{
+func RPC[T any](module idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+	pkg := &idef.RPCRequest{
 		Module:   module,
 		ServerID: serverID,
 		Req:      req,

@@ -1,7 +1,7 @@
 package module
 
 import (
-	"east/core/define"
+	"east/core/idef"
 	"east/core/log"
 	"east/core/util"
 	"fmt"
@@ -12,7 +12,7 @@ import (
 type Module struct {
 	name     string
 	mq       chan any
-	handlers map[reflect.Type]*define.HandlerFn
+	handlers map[reflect.Type]*idef.HandlerFn
 	closeSig chan struct{}
 }
 
@@ -20,7 +20,7 @@ func New(name string, mqLen int32) *Module {
 	m := &Module{
 		name:     name,
 		mq:       make(chan any, mqLen),
-		handlers: map[reflect.Type]*define.HandlerFn{},
+		handlers: map[reflect.Type]*idef.HandlerFn{},
 		closeSig: make(chan struct{}, 1),
 	}
 	return m
@@ -34,7 +34,7 @@ func (m *Module) MQ() chan any {
 	return m.mq
 }
 
-func (m *Module) Handlers() map[reflect.Type]*define.HandlerFn {
+func (m *Module) Handlers() map[reflect.Type]*idef.HandlerFn {
 	return m.handlers
 }
 
@@ -48,9 +48,9 @@ func (m *Module) Run() {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
 		case rpcPackage: // 被发起rpc
-			m.rpc(msg.(*define.RPCPackage))
+			m.rpc(msg.(*idef.RPCPackage))
 		case rpcRequest: // rpc请求完成
-			m.rpcResp(msg.(*define.RPCRequest))
+			m.rpcResp(msg.(*idef.RPCRequest))
 		default:
 			m.cb(msg)
 		}
@@ -75,7 +75,7 @@ func (m *Module) cb(msg any) {
 	fns.Cb(msg)
 }
 
-func (m *Module) rpc(msg *define.RPCPackage) {
+func (m *Module) rpc(msg *idef.RPCPackage) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -92,7 +92,7 @@ func (m *Module) rpc(msg *define.RPCPackage) {
 	})
 }
 
-func (m *Module) rpcResp(req *define.RPCRequest) {
+func (m *Module) rpcResp(req *idef.RPCRequest) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

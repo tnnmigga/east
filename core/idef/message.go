@@ -1,4 +1,4 @@
-package define
+package idef
 
 type HandlerFn struct {
 	Cb  func(msg any)

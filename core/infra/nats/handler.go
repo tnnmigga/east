@@ -2,8 +2,8 @@ package nats
 
 import (
 	"east/core/codec"
-	"east/core/define"
 	"east/core/iconf"
+	"east/core/idef"
 	"east/core/log"
 	"east/core/message"
 	"east/core/pb"
@@ -18,7 +18,7 @@ func (m *Module) initHandler() {
 	message.RegisterHandler(m, m.onRPCPequest)
 }
 
-func (m *Module) onPackage(pkg *define.Package) {
+func (m *Module) onPackage(pkg *idef.Package) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
 		Body: b,
@@ -29,7 +29,7 @@ func (m *Module) onPackage(pkg *define.Package) {
 	}
 }
 
-func (m *Module) onBroadcastPackage(pkg *define.BroadcastPackage) {
+func (m *Module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
 		Body: b,
@@ -40,7 +40,7 @@ func (m *Module) onBroadcastPackage(pkg *define.BroadcastPackage) {
 	}
 }
 
-func (m *Module) onRandomCastPackage(pkg *define.RandomCastPackage) {
+func (m *Module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
 		Body: b,
@@ -51,7 +51,7 @@ func (m *Module) onRandomCastPackage(pkg *define.RandomCastPackage) {
 	}
 }
 
-func (m *Module) onRPCPequest(req *define.RPCRequest) {
+func (m *Module) onRPCPequest(req *idef.RPCRequest) {
 	b := codec.Encode(req.Req)
 	netPkg := &pb.Package{
 		Body: b,
