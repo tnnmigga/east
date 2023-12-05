@@ -9,6 +9,7 @@ import (
 	"east/core/message"
 	"east/core/module"
 	"east/core/pb"
+	"east/core/sys"
 	"east/core/util"
 	"fmt"
 	"time"
@@ -104,19 +105,19 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 	if err != nil {
 		return nil, err
 	}
-		broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
-	if err != nil {
-				return nil, err
-	}
-		queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
+	broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
 	if err != nil {
 		return nil, err
 	}
-		rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
+	queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
 	if err != nil {
 		return nil, err
 	}
-		return func() {
+	rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
+	if err != nil {
+		return nil, err
+	}
+	return func() {
 		consCtx.Stop()
 		castSub.Drain()
 		broadcastSub.Drain()
@@ -160,7 +161,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 		Err:  make(chan error, 1),
 	}
 	message.Cast(pkg.ServerID, rpcMsg)
-	go util.ExecAndRecover(func() {
+	sys.Go[sys.Call](func() {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
 		case <-timer:

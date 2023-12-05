@@ -5,8 +5,10 @@ import (
 	"east/core/infra"
 	"east/core/infra/nats"
 	"east/core/log"
+	"east/core/sys"
 	"east/core/util"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -27,6 +29,7 @@ func (s *Server) Run() (stop func()) {
 	}
 	return func() {
 		log.Infof("try stop modules...")
+		sys.WaitGoDone(time.Minute)
 		for i := len(s.modules) - 1; i >= 0; i-- {
 			m := s.modules[i]
 			util.ExecAndRecover(m.Stop)
@@ -39,8 +42,8 @@ func (s *Server) Run() (stop func()) {
 func (s *Server) NewGoroutine(wg *sync.WaitGroup, fn func()) {
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		defer util.RecoverPanic()
+		defer wg.Done()
 		fn()
 	}()
 }

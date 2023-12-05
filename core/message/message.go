@@ -28,8 +28,8 @@ type IRecver interface {
 	MQ() chan any
 }
 
-// Attach 放置全局分发入口
-func EnableBuffer() {
+// Init
+func Init() {
 	once.Do(func() {
 		buffer = make(chan any, iconf.Int32("mq-len", 100000))
 		go util.ExecAndRecover(dispatch)
@@ -83,8 +83,7 @@ func warpRPCCb[T any](cb func(resp T, err error)) func(resp any, err error) {
 	}
 }
 
-func RegisterRecver[msg any](recver IRecver) {
-	mType := reflect.TypeOf(new(msg))
+func registerRecver(mType reflect.Type, recver IRecver) {
 	if _, has := recvers[mType]; has {
 		panic(fmt.Errorf("message has registered %v", mType.Elem().Name()))
 	}

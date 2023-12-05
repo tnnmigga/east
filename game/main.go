@@ -2,8 +2,8 @@ package main
 
 import (
 	"east/core"
-	"east/core/health"
 	"east/core/iconf"
+	"east/core/sys"
 	"east/core/util"
 	"east/game/modules/play"
 )
@@ -14,6 +14,6 @@ func main() {
 		play.NewModule(),
 	)
 	stop := server.Run()
-	health.WaitExitSignal()
+	sys.WaitExitSignal()
 	stop()
 }

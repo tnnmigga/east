@@ -7,7 +7,7 @@ import (
 	"east/core/log"
 	"east/core/message"
 	"east/core/pb"
-	"east/core/util"
+	"east/core/sys"
 	"time"
 )
 
@@ -56,7 +56,7 @@ func (m *Module) onRPCPequest(req *define.RPCRequest) {
 	netPkg := &pb.Package{
 		Body: b,
 	}
-	go util.ExecAndRecover(func() {
+	sys.Go[sys.Call](func() {
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), codec.Encode(netPkg), time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
 		if err == nil {
 			req.Resp, req.Err = codec.Decode(msg.Data)

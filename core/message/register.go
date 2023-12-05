@@ -7,13 +7,13 @@ import (
 )
 
 func RegisterHandler[T any](m define.IModule, fn func(msg T)) {
-	RegisterRecver[T](m)
-	msgType := reflect.TypeOf(new(T))
-	_, ok := m.Handlers()[msgType]
+	mType := reflect.TypeOf(new(T))
+	registerRecver(mType, m)
+	_, ok := m.Handlers()[mType]
 	if ok {
-		panic(fmt.Errorf("RegisterHandler multiple registration %v", msgType))
+		panic(fmt.Errorf("RegisterHandler multiple registration %v", mType))
 	}
-	m.Handlers()[msgType] = &define.HandlerFn{
+	m.Handlers()[mType] = &define.HandlerFn{
 		Cb: func(msg0 any) {
 			msg := msg0.(T)
 			fn(msg)

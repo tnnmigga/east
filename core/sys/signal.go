@@ -1,4 +1,4 @@
-package health
+package sys
 
 import (
 	"os"
@@ -13,3 +13,5 @@ func WaitExitSignal() os.Signal {
 	signal.Notify(c, exitSignals...)
 	return <-c
 }
+
+
