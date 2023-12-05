@@ -5,10 +5,14 @@ type HandlerFn struct {
 	RPC func(msg any, resp func(any))
 }
 
-type Package struct {
+type CastPackage struct {
 	ServerID uint32
 	Body     any
-	TTL      int32
+}
+
+type StreamCastPackage struct {
+	ServerID uint32
+	Body     any
 }
 
 type BroadcastPackage struct {

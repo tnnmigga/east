@@ -1,20 +1,19 @@
 package msgimpl
 
 import (
-	"east/core/codec"
-	"east/core/iconf"
 	"east/core/log"
 	"east/core/message"
+	"east/define"
 	"east/pb"
 )
 
 func (s *service) regMsgHandler() {
-	message.RegisterHandler(s, s.onC2SPackage)
+	message.RegisterHandler(s, s.onSayHelloReq)
 }
-func (m *service) onC2SPackage(msg *pb.C2SPackage) {
-	req, err := codec.Decode(msg.Body)
-	if err != nil {
-		log.Errorf("onC2SPackage decode error %v", err)
-	}
-	message.Cast(iconf.ServerID(), req) // 临时
+
+func (m *service) onSayHelloReq(msg *pb.SayHelloReq) {
+	log.Infof("onSayHelloReq %v", msg.Text)
+	message.Broadcast(define.ServTypGateway, &pb.SayHelloResp{
+		Text: "hello, client",
+	})
 }

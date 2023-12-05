@@ -18,7 +18,7 @@ func (m *Module) initHandler() {
 	message.RegisterHandler(m, m.onRPCPequest)
 }
 
-func (m *Module) onPackage(pkg *idef.Package) {
+func (m *Module) onPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
 	netPkg := &pb.Package{
 		Body: b,

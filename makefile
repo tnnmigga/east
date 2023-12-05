@@ -10,3 +10,9 @@ ba:
 
 rungateway:
 	cd gateway && ../bin/gateway
+
+rungame:
+	cd game && ../bin/game
+
+runclient:
+	node tools/fakecli/main.js

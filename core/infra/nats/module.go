@@ -175,7 +175,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 	})
 }
 
-func unpack(b []byte) (*idef.Package, error) {
+func unpack(b []byte) (*idef.CastPackage, error) {
 	pkg0, err := codec.Decode(b)
 	if err != nil {
 		return nil, fmt.Errorf("nats decode msg error: %v", err)
@@ -185,7 +185,7 @@ func unpack(b []byte) (*idef.Package, error) {
 	if err != nil {
 		return nil, fmt.Errorf("nats recv decode pkg error: %v", err)
 	}
-	return &idef.Package{
+	return &idef.CastPackage{
 		ServerID: iconf.ServerID(),
 		Body:     body,
 	}, nil

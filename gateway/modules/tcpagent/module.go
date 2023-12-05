@@ -3,9 +3,10 @@ package tcpagent
 import (
 	"east/core/iconf"
 	"east/core/idef"
+	"east/core/log"
 	"east/core/module"
 	"east/core/util/idgen"
-	define1 "east/define"
+	"east/define"
 	"net"
 	"sync"
 )
@@ -23,7 +24,7 @@ func New() idef.IModule {
 		panic(err)
 	}
 	m := &Module{
-		Module: module.New(define1.ModTypTCPAgent, 100000),
+		Module: module.New(define.ModTypTCPAgent, 100000),
 		lister: lister,
 		conns:  map[uint64]*userAgent{},
 	}
@@ -40,6 +41,7 @@ func (m *Module) accept() {
 	for {
 		conn, err := m.lister.Accept()
 		if err != nil {
+			log.Errorf("tcpagent accept error %v", err)
 			continue
 		}
 		uid := idgen.NewUUID()

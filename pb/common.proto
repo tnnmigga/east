@@ -3,7 +3,7 @@ package pb;
 
 import "vendor/github.com/gogo/protobuf/gogoproto/gogo.proto";
 
-option go_package                           = "pb";
+option go_package                           = "./pb";
 option (gogoproto.goproto_unrecognized_all) = false;
 option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;

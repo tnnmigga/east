@@ -36,26 +36,34 @@ func Init() {
 	})
 }
 
-func Cast(serverID uint32, msg any) {
-	if serverID != iconf.ServerID() {
-		Cast(iconf.ServerID(), &idef.Package{
+func Cast(serverID uint32, msg any, byStream ...bool) {
+	useStream := util.FirstOrDefault(byStream, true) // 默认使用流
+	if serverID == iconf.ServerID() {
+		recv, ok := recvers[reflect.TypeOf(msg)]
+		if !ok {
+			log.Errorf("message cast recv not fuound %v", util.ReflectName(msg))
+			return
+		}
+		select {
+		case recv.MQ() <- msg:
+		case buffer <- msg: // 一次重试机会
+			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.ReflectName(msg))
+		default:
+			log.Errorf("message cast faild, buffer full %s %s", util.ReflectName(msg), util.String(msg))
+		}
+		return
+	}
+	if useStream {
+		Cast(iconf.ServerID(), &idef.StreamCastPackage{
 			ServerID: serverID,
 			Body:     msg,
 		})
 		return
 	}
-	recv, ok := recvers[reflect.TypeOf(msg)]
-	if !ok {
-		log.Errorf("message cast recv not fuound %v", util.ReflectName(msg))
-		return
-	}
-	select {
-	case recv.MQ() <- msg:
-	case buffer <- msg: // 一次重试机会
-		log.Errorf("metssage cast mq full %s %s", recv.Name(), util.ReflectName(msg))
-	default:
-		log.Errorf("message cast faild, buffer full %s %s", util.ReflectName(msg), util.String(msg))
-	}
+	Cast(iconf.ServerID(), &idef.CastPackage{
+		ServerID: serverID,
+		Body:     msg,
+	})
 }
 
 func Broadcast(serverType string, msg any) {

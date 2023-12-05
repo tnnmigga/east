@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(msg T)) {
-	mType := reflect.TypeOf(new(T))
+	mType := reflect.TypeOf(*new(T))
 	registerRecver(mType, m)
 	_, ok := m.Handlers()[mType]
 	if ok {

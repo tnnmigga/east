@@ -9,6 +9,7 @@ const msgid_to_name = {}
 const socket = new Socket()
 socket.connect('9527', '127.0.0.1', function () {
     log("connect success")
+    send("SayHelloReq", {text:"hello"})
 })
 
 function init_msg_builder(path) {
@@ -44,7 +45,9 @@ function live(context = {}, name = 'REPL') {
 live({send})
 
 function send(msg_name, msg_body) {
-    socket.write(encode(msg_name, msg_body))
+    let b = encode(msg_name, msg_body)
+    log(b.length, b.readUint32LE(), b.readUint32LE(4))
+    socket.write(b)
 }
 
 async function recv() {
@@ -58,8 +61,9 @@ async function recv() {
 function encode(msg_name, msg) {
     let proto_msg = msg_builders[msg_name].create(msg)
     proto_msg = msg_builders[msg_name].encode(proto_msg).finish()
-    let buf = Buffer.alloc(4)
-    buf.writeUint32LE(nametoid(msg_name))
+    let buf = Buffer.alloc(8)
+    buf.writeUint32LE(proto_msg.length+4)
+    buf.writeUint32LE(nametoid(msg_name), 4)
     return Buffer.concat([buf, Buffer.from(proto_msg)])
 }
 

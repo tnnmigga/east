@@ -1,12 +1,14 @@
 package codec
 
 import (
+	"east/core/pb"
 	"east/core/util"
 	"east/core/util/idgen"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"reflect"
+	"sync"
 
 	"github.com/gogo/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,7 +16,15 @@ import (
 
 var (
 	msgIDToDesc map[uint32]*MessageDescriptor
+	once        sync.Once
 )
+
+func init() {
+	once.Do(func() {
+		msgIDToDesc = map[uint32]*MessageDescriptor{}
+		Register(&pb.Package{})
+	})
+}
 
 const (
 	marshalTypeGogoproto = 1
@@ -37,11 +47,16 @@ func Register(v any) {
 	if _, has := msgIDToDesc[id]; has {
 		panic(fmt.Errorf("msgid duplicat %v %d", name, id))
 	}
+	mType := reflect.TypeOf(v)
+	kind := mType.Kind()
+	if kind == reflect.Ptr {
+		mType = mType.Elem()
+	}
 	if _, ok := v.(proto.Message); ok {
 		msgIDToDesc[id] = &MessageDescriptor{
 			MessageName: name,
 			MarshalType: marshalType(v),
-			ReflectType: reflect.TypeOf(v),
+			ReflectType: mType,
 		}
 	}
 }
