@@ -1,7 +1,6 @@
 package codec
 
 import (
-	"east/core/pb"
 	"east/core/util"
 	"east/core/util/idgen"
 	"encoding/binary"
@@ -22,7 +21,6 @@ var (
 func init() {
 	once.Do(func() {
 		msgIDToDesc = map[uint32]*MessageDescriptor{}
-		Register(&pb.Package{})
 	})
 }
 
@@ -48,23 +46,20 @@ func Register(v any) {
 		panic(fmt.Errorf("msgid duplicat %v %d", name, id))
 	}
 	mType := reflect.TypeOf(v)
-	kind := mType.Kind()
-	if kind == reflect.Ptr {
+	if mType.Kind() == reflect.Ptr {
 		mType = mType.Elem()
 	}
-	if _, ok := v.(proto.Message); ok {
-		msgIDToDesc[id] = &MessageDescriptor{
-			MessageName: name,
-			MarshalType: marshalType(v),
-			ReflectType: mType,
-		}
+	msgIDToDesc[id] = &MessageDescriptor{
+		MessageName: name,
+		MarshalType: marshalType(v),
+		ReflectType: mType,
 	}
 }
 
 func Encode(v any) []byte {
 	msgID := msgID(v)
 	bytes := toBytes(v)
-	body := make([]byte, len(bytes)+4)
+	body := make([]byte, 4, len(bytes)+4)
 	binary.LittleEndian.PutUint32(body, msgID)
 	body = append(body, bytes...)
 	return body
@@ -82,9 +77,9 @@ func Decode(b []byte) (msg any, err error) {
 	msg = desc.New()
 	switch desc.MarshalType {
 	case marshalTypeGogoproto:
-		err = proto.Unmarshal(b, msg.(proto.Message))
+		err = proto.Unmarshal(b[4:], msg.(proto.Message))
 	case marshalTypeBSON:
-		err = bson.Unmarshal(b, msg)
+		err = bson.Unmarshal(b[4:], msg)
 	default:
 		err = errors.New("invalid marshal type")
 	}

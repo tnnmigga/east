@@ -17,13 +17,12 @@ type Module struct {
 }
 
 func New(name string, mqLen int32) *Module {
-	m := &Module{
+	return &Module{
 		name:     name,
 		mq:       make(chan any, mqLen),
 		handlers: map[reflect.Type]*idef.HandlerFn{},
 		closeSig: make(chan struct{}, 1),
 	}
-	return m
 }
 
 func (m *Module) Name() string {

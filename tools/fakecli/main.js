@@ -1,15 +1,20 @@
 import protobuf from 'protobufjs';
 import repl from 'repl'
 import { readdirSync } from 'fs'
-import { log } from 'console';
+import { info, log } from 'console';
 import { Socket } from 'net';
 
 const msg_builders = {}
 const msgid_to_name = {}
 const socket = new Socket()
 socket.connect('9527', '127.0.0.1', function () {
-    log("connect success")
-    send("SayHelloReq", {text:"hello"})
+    print("connect success")
+    send("SayHelloReq", {text:"hello, server!"})
+})
+
+socket.on("data", function(data) {
+    let [msg_name, msg] = decode(data)
+    print("recv server msg:", msg_name, msg)
 })
 
 function init_msg_builder(path) {
@@ -29,24 +34,22 @@ function init_msg_builder(path) {
     // log(msgid_to_name)
 }
 
-init_msg_builder("/go/east/pb")
+init_msg_builder("pb")
 
-function live(context = {}, name = 'REPL') {
+function runCli(context = {}, name = 'REPL') {
     const r = repl.start({
-        prompt: `${name} > `,
+        // prompt: `${name} > `,
         preview: true,
         terminal: true,
-        useGlobal: false
     });
     Object.setPrototypeOf(r.context, context);
     global.console = r.context.console;
 }
 
-live({send})
+runCli({send})
 
-function send(msg_name, msg_body) {
+function send(msg_name = 'SayHelloReq', msg_body = {text:"hello, server!"}) {
     let b = encode(msg_name, msg_body)
-    log(b.length, b.readUint32LE(), b.readUint32LE(4))
     socket.write(b)
 }
 
@@ -76,7 +79,7 @@ function decode(buf) {
     let msgid = buf.readUInt32LE()
     let msg_name = msgid_to_name[msgid]
     const proto_msg = msg_builders[msg_name].decode(buf.slice(4))
-    return msg_builders[msg_name].toObject(proto_msg)
+    return [msg_name, msg_builders[msg_name].toObject(proto_msg)]
 }
 
 function nametoid(msg_name) {
@@ -105,4 +108,9 @@ function mod(a, b) {
 }
 function uint32(x) {
     return mod(int(x), Math.pow(2, 32));
+}
+
+function print(...any) {
+    global.console.log(...any)
+    process.stdout.write('> ') // 模拟prompt
 }

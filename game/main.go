@@ -11,7 +11,7 @@ import (
 func main() {
 	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	server := core.NewServer(
-		play.NewModule(),
+		play.New(),
 	)
 	stop := server.Run()
 	sys.WaitExitSignal()

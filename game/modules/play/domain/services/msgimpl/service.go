@@ -13,7 +13,9 @@ type service struct {
 }
 
 func New(d *domain.Domain) api.IMsg {
-	return &service{}
+	return &service{
+		Domain: d,
+	}
 }
 
 func (s *service) Init() {

@@ -9,25 +9,25 @@ type IUseCaseDestroy interface {
 }
 
 type Pool struct {
-	useCases []any
+	services []any
 }
 
 func NewPool(maxCaseIndex int) *Pool {
 	return &Pool{
-		useCases: make([]any, maxCaseIndex),
+		services: make([]any, maxCaseIndex),
 	}
 }
 
 func (p *Pool) PutCase(caseIndex int, useCase any) {
-	p.useCases[caseIndex] = useCase
+	p.services[caseIndex] = useCase
 }
 
 func (p *Pool) GetCase(caseIndex int) any {
-	return p.useCases[caseIndex]
+	return p.services[caseIndex]
 }
 
 func (p *Pool) Init() {
-	for _, v := range p.useCases {
+	for _, v := range p.services {
 		if uc, ok := v.(IUseCaseInit); ok {
 			uc.Init()
 		}
@@ -35,8 +35,8 @@ func (p *Pool) Init() {
 }
 
 func (p *Pool) Destroy() {
-	for i := len(p.useCases) - 1; i >= 0; i-- {
-		if uc, ok := p.useCases[i].(IUseCaseDestroy); ok {
+	for i := len(p.services) - 1; i >= 0; i-- {
+		if uc, ok := p.services[i].(IUseCaseDestroy); ok {
 			uc.Destroy()
 		}
 	}

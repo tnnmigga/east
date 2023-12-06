@@ -1,13 +1,16 @@
 package message
 
 import (
+	"east/core/codec"
 	"east/core/idef"
 	"fmt"
 	"reflect"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(msg T)) {
-	mType := reflect.TypeOf(*new(T))
+	mValue := *new(T)
+	mType := reflect.TypeOf(mValue)
+	codec.Register(mValue)
 	registerRecver(mType, m)
 	_, ok := m.Handlers()[mType]
 	if ok {

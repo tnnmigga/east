@@ -5,7 +5,6 @@ import (
 	"east/core/idef"
 	"east/core/log"
 	"east/core/module"
-	"east/core/util/idgen"
 	"east/define"
 	"net"
 	"sync"
@@ -40,11 +39,12 @@ func (m *Module) Run() {
 func (m *Module) accept() {
 	for {
 		conn, err := m.lister.Accept()
+		log.Infof("new conn!")
 		if err != nil {
 			log.Errorf("tcpagent accept error %v", err)
 			continue
 		}
-		uid := idgen.NewUUID()
+		uid := uint64(1) //idgen.NewUUID()
 		agent := &userAgent{
 			userInfo: userInfo{userID: uid, serverID: 1},
 			conn:     conn,

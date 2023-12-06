@@ -12,6 +12,7 @@ func (m *Module) initHandler() {
 
 func (m *Module) onS2CPackage(pkg *pb.S2CPackage) {
 	m.RLock()
+	defer m.RUnlock()
 	agent, ok := m.conns[pkg.UserID]
 	if !ok {
 		return
@@ -19,7 +20,7 @@ func (m *Module) onS2CPackage(pkg *pb.S2CPackage) {
 	select {
 	case agent.mq <- pkg.Body:
 	default:
-		log.Errorf("")
+		log.Errorf("userAgent mq full!")
 		agent.close()
 	}
 }

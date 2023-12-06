@@ -11,15 +11,17 @@ type Domain struct {
 	*domain.Pool
 }
 
-func NewDomain() *Domain {
+func NewDomain(m idef.IModule) *Domain {
 	d := &Domain{
-		Pool: domain.NewPool(MaxCaseIndex),
+		IModule: m,
+		Pool:    domain.NewPool(MaxCaseIndex),
 	}
 	return d
 }
 
 const (
 	MsgCaseIndex = iota
+	UserCaseIndex
 	MaxCaseIndex
 )
 

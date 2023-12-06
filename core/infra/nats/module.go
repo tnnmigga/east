@@ -8,7 +8,6 @@ import (
 	"east/core/log"
 	"east/core/message"
 	"east/core/module"
-	"east/core/pb"
 	"east/core/sys"
 	"east/core/util"
 	"fmt"
@@ -176,17 +175,12 @@ func (m *Module) rpc(msg *nats.Msg) {
 }
 
 func unpack(b []byte) (*idef.CastPackage, error) {
-	pkg0, err := codec.Decode(b)
+	pkg, err := codec.Decode(b)
 	if err != nil {
 		return nil, fmt.Errorf("nats decode msg error: %v", err)
 	}
-	pkg := pkg0.(*pb.Package)
-	body, err := codec.Decode(pkg.Body)
-	if err != nil {
-		return nil, fmt.Errorf("nats recv decode pkg error: %v", err)
-	}
 	return &idef.CastPackage{
 		ServerID: iconf.ServerID(),
-		Body:     body,
+		Body:     pkg,
 	}, nil
 }

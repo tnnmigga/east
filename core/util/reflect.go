@@ -8,7 +8,7 @@ import (
 
 func ReflectName(v any) string {
 	mType := reflect.TypeOf(v)
-	if mType.Kind() == reflect.Ptr {
+	for mType.Kind() == reflect.Ptr {
 		mType = mType.Elem()
 	}
 	return mType.Name()

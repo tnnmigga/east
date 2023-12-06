@@ -22,33 +22,32 @@ type userAgent struct {
 }
 
 func (agent *userAgent) run() {
-	log.Infof("new agent")
+	log.Infof("new agent") // 临时
 	go agent.recv()
 	go agent.send()
 }
 
 func (agent *userAgent) recv() {
-	sizeBuf := make([]byte, 4)
+	var sizeBuf [4]byte
 	var bufLen uint32 = 1024
 	msgBuf := make([]byte, bufLen)
-	agent.conn.Read(sizeBuf)
-	// _, err := io.ReadFull(agent.conn, sizeBuf)
-	// if err != nil {
-	// 	return
-	// }
-	size := binary.LittleEndian.Uint32(sizeBuf)
-	if size > bufLen {
-		bufLen = size
-		msgBuf = make([]byte, bufLen)
+	for {
+		if _, err := io.ReadFull(agent.conn, sizeBuf[:]); err != nil {
+			return
+		}
+		size := binary.LittleEndian.Uint32(sizeBuf[:])
+		if size > bufLen {
+			bufLen = size
+			msgBuf = make([]byte, bufLen)
+		}
+		if _, err := io.ReadFull(agent.conn, msgBuf[:size]); err != nil {
+			return
+		}
+		message.Broadcast(define.ServTypGame, &pb.C2SPackage{
+			UserID: agent.userInfo.userID,
+			Body:   msgBuf[:size],
+		})
 	}
-	_, err := io.ReadFull(agent.conn, msgBuf[:size])
-	if err != nil {
-		return
-	}
-	message.Broadcast(define.ServTypGame, &pb.C2SPackage{
-		UserID: agent.userInfo.userID,
-		Body:   msgBuf[:size],
-	})
 }
 
 func (agent *userAgent) send() {

@@ -9,14 +9,13 @@ import (
 )
 
 type Module struct {
-	*module.Module
 	*domain.Domain
 }
 
-func NewModule() idef.IModule {
+func New() idef.IModule {
+	basicModule := module.New(define.ModTypPlay, 100000)
 	m := &Module{
-		Module: module.New(define.ModTypPlay, 100000),
-		Domain: domain.NewDomain(),
+		Domain: domain.NewDomain(basicModule),
 	}
 	services.Init(m.Domain)
 	return m
