@@ -4,15 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"unsafe"
 )
-
-func ReflectName(v any) string {
-	mType := reflect.TypeOf(v)
-	for mType.Kind() == reflect.Ptr {
-		mType = mType.Elem()
-	}
-	return mType.Name()
-}
 
 func String(v any) string {
 	type IString interface{ String() string }
@@ -23,4 +16,11 @@ func String(v any) string {
 		return string(b)
 	}
 	return fmt.Sprint(v)
+}
+
+func Address(fn any) uint64 {
+	value := reflect.ValueOf(fn)
+	ptr := unsafe.Pointer(value.Pointer())
+	addr := uintptr(ptr)
+	return uint64(addr)
 }

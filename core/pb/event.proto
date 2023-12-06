@@ -1,0 +1,18 @@
+syntax = "proto3";
+package pb;
+
+import "vendor/github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package                           = "pb";
+option (gogoproto.goproto_enum_prefix_all)  = false;
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+
+message Event {
+    int64 OwnerID = 2;
+    string Type = 1;
+    int64 ID = 3;
+    int64 Value = 4;
+    map<string, string> Params = 5;
+}

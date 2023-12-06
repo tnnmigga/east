@@ -41,15 +41,15 @@ func Cast(serverID uint32, msg any, byStream ...bool) {
 	if serverID == iconf.ServerID() {
 		recv, ok := recvers[reflect.TypeOf(msg)]
 		if !ok {
-			log.Errorf("message cast recv not fuound %v", util.ReflectName(msg))
+			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
 			return
 		}
 		select {
 		case recv.MQ() <- msg:
 		case buffer <- msg: // 一次重试机会
-			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.ReflectName(msg))
+			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.StructName(msg))
 		default:
-			log.Errorf("message cast faild, buffer full %s %s", util.ReflectName(msg), util.String(msg))
+			log.Errorf("message cast faild, buffer full %s %s", util.StructName(msg), util.String(msg))
 		}
 		return
 	}
@@ -102,13 +102,13 @@ func dispatch() {
 	for msg := range buffer {
 		recver, ok := recvers[reflect.TypeOf(msg)]
 		if !ok {
-			log.Errorf("message dispatch recver not found %v", util.ReflectName(msg))
+			log.Errorf("message dispatch recver not found %v", util.StructName(msg))
 			return
 		}
 		select {
 		case recver.MQ() <- msg:
 		default:
-			log.Errorf("message dispatch faild, mq full %s %s %s", recver.Name(), util.ReflectName(msg), util.String(msg))
+			log.Errorf("message dispatch faild, mq full %s %s %s", recver.Name(), util.StructName(msg), util.String(msg))
 		}
 	}
 }

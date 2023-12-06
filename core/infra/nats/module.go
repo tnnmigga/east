@@ -164,12 +164,12 @@ func (m *Module) rpc(msg *nats.Msg) {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
 		case <-timer:
-			log.Errorf("nats rpc call timeout %v", util.ReflectName(rpcMsg.Req))
+			log.Errorf("nats rpc call timeout %v", util.StructName(rpcMsg.Req))
 		case resp := <-rpcMsg.Resp:
 			b := codec.Encode(resp)
 			m.conn.Publish(msg.Reply, b)
 		case err := <-rpcMsg.Err:
-			log.Errorf("nats rpc call %v error %v", util.ReflectName(rpcMsg.Req), err)
+			log.Errorf("nats rpc call %v error %v", util.StructName(rpcMsg.Req), err)
 		}
 	})
 }

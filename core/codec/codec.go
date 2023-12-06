@@ -40,7 +40,7 @@ func (d *MessageDescriptor) New() any {
 }
 
 func Register(v any) {
-	name := util.ReflectName(v)
+	name := util.StructName(v)
 	id := msgID(v)
 	if _, has := msgIDToDesc[id]; has {
 		panic(fmt.Errorf("msgid duplicat %v %d", name, id))
@@ -102,7 +102,7 @@ func toBytes(v any) []byte {
 }
 
 func msgID(v any) uint32 {
-	name := util.ReflectName(v)
+	name := util.StructName(v)
 	return idgen.HashToID(name)
 }
 
