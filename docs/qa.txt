@@ -9,7 +9,9 @@
   需要挂后台加 > xxx.log 2>&1
 
 3.假客户端fakecli怎么使用
-  make runclient
+  需要安装nodejs
+  运行cd tools/fakecli && npm install安装依赖
+  make runclient启动
   send() // send(协议名, 协议体)
 
 4.快速理解代码结构
