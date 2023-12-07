@@ -13,3 +13,12 @@ func FirstOrDefault[T any](s []T, defaultVal T) T {
 	}
 	return defaultVal
 }
+
+func Filter[T any](items []T, fn func(T) bool) (res []T) {
+	for _, item := range items {
+		if fn(item) {
+			res = append(res, item)
+		}
+	}
+	return res
+}

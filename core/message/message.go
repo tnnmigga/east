@@ -13,13 +13,12 @@ import (
 
 var (
 	once    sync.Once
-	buffer  chan any
-	recvers map[reflect.Type]IRecver
+	recvers map[reflect.Type][]IRecver
 )
 
 func init() {
 	once.Do(func() {
-		recvers = map[reflect.Type]IRecver{}
+		recvers = map[reflect.Type][]IRecver{}
 	})
 }
 
@@ -28,32 +27,12 @@ type IRecver interface {
 	MQ() chan any
 }
 
-// Init
-func Init() {
-	once.Do(func() {
-		buffer = make(chan any, iconf.Int32("mq-len", 100000))
-		go util.ExecAndRecover(dispatch)
-	})
-}
-
 func Cast(serverID uint32, msg any, byStream ...bool) {
-	useStream := util.FirstOrDefault(byStream, true) // 默认使用流
 	if serverID == iconf.ServerID() {
-		recv, ok := recvers[reflect.TypeOf(msg)]
-		if !ok {
-			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
-			return
-		}
-		select {
-		case recv.MQ() <- msg:
-		case buffer <- msg: // 一次重试机会
-			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.StructName(msg))
-		default:
-			log.Errorf("message cast faild, buffer full %s %s", util.StructName(msg), util.String(msg))
-		}
+		messageDispatch(msg)
 		return
 	}
-	if useStream {
+	if util.FirstOrDefault(byStream, true) { // 默认使用流
 		Cast(iconf.ServerID(), &idef.StreamCastPackage{
 			ServerID: serverID,
 			Body:     msg,
@@ -95,20 +74,26 @@ func registerRecver(mType reflect.Type, recver IRecver) {
 	if _, has := recvers[mType]; has {
 		panic(fmt.Errorf("message has registered %v", mType.Elem().Name()))
 	}
-	recvers[mType] = recver
+	recvers[mType] = append(recvers[mType], recver)
 }
 
-func dispatch() {
-	for msg := range buffer {
-		recver, ok := recvers[reflect.TypeOf(msg)]
+func messageDispatch(msg any) {
+	recvs, ok := recvers[reflect.TypeOf(msg)]
+	for _, recv := range recvs {
 		if !ok {
-			log.Errorf("message dispatch recver not found %v", util.StructName(msg))
+			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
 			return
 		}
 		select {
-		case recver.MQ() <- msg:
+		case recv.MQ() <- msg:
 		default:
-			log.Errorf("message dispatch faild, mq full %s %s %s", recver.Name(), util.StructName(msg), util.String(msg))
+			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.StructName(msg))
+			onCastFail(recv, msg)
 		}
 	}
+}
+
+// onCastFail 消息投递失败处理
+func onCastFail(recver IRecver, msg any) {
+	log.Errorf("message cast faild, buffer full %s %s", util.StructName(msg), util.String(msg))
 }

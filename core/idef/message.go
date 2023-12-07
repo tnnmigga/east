@@ -1,8 +1,9 @@
 package idef
 
-type HandlerFn struct {
-	Cb  func(msg any)
-	RPC func(msg any, resp func(any))
+type Handler struct {
+	Name string
+	Cb   func(msg any)
+	RPC  func(msg any, resp func(any))
 }
 
 type CastPackage struct {
@@ -11,7 +12,7 @@ type CastPackage struct {
 }
 
 type StreamCastPackage struct {
-	ServerID uint32
+	ServerID uint32 
 	Body     any
 }
 

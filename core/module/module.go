@@ -12,7 +12,7 @@ import (
 type Module struct {
 	name     string
 	mq       chan any
-	handlers map[reflect.Type]*idef.HandlerFn
+	handlers map[reflect.Type]*idef.Handler
 	closeSig chan struct{}
 }
 
@@ -20,7 +20,7 @@ func New(name string, mqLen int32) *Module {
 	return &Module{
 		name:     name,
 		mq:       make(chan any, mqLen),
-		handlers: map[reflect.Type]*idef.HandlerFn{},
+		handlers: map[reflect.Type]*idef.Handler{},
 		closeSig: make(chan struct{}, 1),
 	}
 }
@@ -33,7 +33,7 @@ func (m *Module) MQ() chan any {
 	return m.mq
 }
 
-func (m *Module) Handlers() map[reflect.Type]*idef.HandlerFn {
+func (m *Module) Handlers() map[reflect.Type]*idef.Handler {
 	return m.handlers
 }
 
