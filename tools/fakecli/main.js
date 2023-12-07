@@ -1,7 +1,7 @@
 import protobuf from 'protobufjs';
 import repl from 'repl'
 import { readdirSync } from 'fs'
-import { info, log } from 'console';
+import { log } from 'console';
 import { Socket } from 'net';
 
 const msg_builders = {}
@@ -9,10 +9,10 @@ const msgid_to_name = {}
 const socket = new Socket()
 socket.connect('9527', '127.0.0.1', function () {
     print("connect success")
-    send("SayHelloReq", {text:"hello, server!"})
+    send("SayHelloReq", { text: "hello, server!" })
 })
 
-socket.on("data", function(data) {
+socket.on("data", function (data) {
     let [msg_name, msg] = decode(data)
     print("recv server msg:", msg_name, msg)
 })
@@ -46,9 +46,9 @@ function runCli(context = {}, name = 'REPL') {
     global.console = r.context.console;
 }
 
-runCli({send})
+runCli({ send })
 
-function send(msg_name = 'SayHelloReq', msg_body = {text:"hello, server!"}) {
+function send(msg_name = 'SayHelloReq', msg_body = { text: "hello, server!" }) {
     let b = encode(msg_name, msg_body)
     socket.write(b)
 }
@@ -65,7 +65,7 @@ function encode(msg_name, msg) {
     let proto_msg = msg_builders[msg_name].create(msg)
     proto_msg = msg_builders[msg_name].encode(proto_msg).finish()
     let buf = Buffer.alloc(8)
-    buf.writeUint32LE(proto_msg.length+4)
+    buf.writeUint32LE(proto_msg.length + 4)
     buf.writeUint32LE(nametoid(msg_name), 4)
     return Buffer.concat([buf, Buffer.from(proto_msg)])
 }
@@ -111,6 +111,6 @@ function uint32(x) {
 }
 
 function print(...any) {
-    global.console.log(...any)
+    log(...any)
     process.stdout.write('> ') // 模拟prompt
 }
