@@ -4,21 +4,21 @@ import (
 	"east/core/idef"
 	"east/core/log"
 	"east/core/message"
-	"east/core/pb"
 	"east/core/util"
+	"strconv"
 )
 
-type Subscriber interface {
+type ISubscriber interface {
 	Name() string
 	Topics() []string
-	Handler(event *pb.Event)
+	Handler(event *Event)
 }
 
 type EventBus struct {
-	subs map[string][]Subscriber
+	subs map[string][]ISubscriber
 }
 
-func (bus *EventBus) RegisterSubscriber(sub Subscriber) {
+func (bus *EventBus) RegisterSubscriber(sub ISubscriber) {
 	if bus.find(sub) {
 		log.Errorf("%s has registered", sub.Name())
 		return
@@ -28,7 +28,7 @@ func (bus *EventBus) RegisterSubscriber(sub Subscriber) {
 	}
 }
 
-func (bus *EventBus) RegisterHandler(topic string, handler func(event *pb.Event)) {
+func (bus *EventBus) RegisterHandler(topic string, handler func(event *Event)) {
 	h := &eventHandler{
 		name:    util.FuncName(handler),
 		topic:   topic,
@@ -37,23 +37,23 @@ func (bus *EventBus) RegisterHandler(topic string, handler func(event *pb.Event)
 	bus.RegisterSubscriber(h)
 }
 
-func (bus *EventBus) UnregisterSubscriber(sub Subscriber) {
+func (bus *EventBus) UnregisterSubscriber(sub ISubscriber) {
 	bus.removeSubscriber(sub.Name())
 }
 
-func (bus *EventBus) UnregisterHandler(topic string, handler func(event *pb.Event)) {
+func (bus *EventBus) UnregisterHandler(topic string, handler func(event *Event)) {
 	bus.removeSubscriber(util.FuncName(handler))
 }
 
 func (bus *EventBus) removeSubscriber(name string) {
 	for topic, subs := range bus.subs {
-		bus.subs[topic] = util.Filter(subs, func(sub Subscriber) bool {
+		bus.subs[topic] = util.Filter(subs, func(sub ISubscriber) bool {
 			return sub.Name() != name
 		})
 	}
 }
 
-func (bus *EventBus) find(sub Subscriber) bool {
+func (bus *EventBus) find(sub ISubscriber) bool {
 	subName := sub.Name()
 	for _, m := range bus.subs {
 		for _, v := range m {
@@ -65,7 +65,7 @@ func (bus *EventBus) find(sub Subscriber) bool {
 	return false
 }
 
-func (bus *EventBus) dispatch(event *pb.Event) {
+func (bus *EventBus) dispatch(event *Event) {
 	subs := bus.subs[event.Topic]
 	for _, sub := range subs {
 		util.ExecAndRecover(func() {
@@ -76,7 +76,7 @@ func (bus *EventBus) dispatch(event *pb.Event) {
 
 func New(m idef.IModule) *EventBus {
 	bus := &EventBus{
-		subs: map[string][]Subscriber{},
+		subs: map[string][]ISubscriber{},
 	}
 	message.RegisterHandler(m, bus.dispatch)
 	return bus
@@ -85,7 +85,7 @@ func New(m idef.IModule) *EventBus {
 type eventHandler struct {
 	name    string
 	topic   string
-	handler func(*pb.Event)
+	handler func(*Event)
 }
 
 func (h *eventHandler) Name() string {
@@ -96,6 +96,32 @@ func (h *eventHandler) Topics() []string {
 	return []string{h.topic}
 }
 
-func (h *eventHandler) Handler(event *pb.Event) {
+func (h *eventHandler) Handler(event *Event) {
 	h.handler(event)
+}
+
+func (e Event) Int64Arg(name string) (arg int64) {
+	if e.Params != nil {
+		if v, ok := e.Params[name]; ok {
+			if n, err := strconv.Atoi(v); err != nil {
+				return int64(n)
+			}
+		}
+	}
+	log.Errorf("event get param %s from %s faild", name, e.String())
+	return arg
+}
+
+func (e Event) Int32Arg(name string) (arg int32) {
+	return int32(e.Int64Arg(name))
+}
+
+func (e Event) StringArg(name string) (arg string) {
+	if e.Params != nil {
+		if v, ok := e.Params[name]; ok {
+			return v
+		}
+	}
+	log.Errorf("event get param %s from %s faild", name, e.String())
+	return arg
 }

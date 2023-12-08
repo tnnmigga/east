@@ -3,6 +3,7 @@ pbc:
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/pb/*.proto
+	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
 
 ba:
 	cd game && go build -o ../bin/game main.go 

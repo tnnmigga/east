@@ -18,11 +18,11 @@ func NewPool(maxCaseIndex int) *Pool {
 	}
 }
 
-func (p *Pool) PutCase(caseIndex int, useCase any) {
+func (p *Pool) PutImpl(caseIndex int, useCase any) {
 	p.services[caseIndex] = useCase
 }
 
-func (p *Pool) GetCase(caseIndex int) any {
+func (p *Pool) GetImpl(caseIndex int) any {
 	return p.services[caseIndex]
 }
 

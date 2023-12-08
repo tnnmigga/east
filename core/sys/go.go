@@ -51,6 +51,7 @@ func GoWithTimeout(fn WithCtx, duration time.Duration) {
 }
 
 func WaitGoDone(maxWaitTime time.Duration) {
+	cancel(nil)
 	c := make(chan struct{}, 1)
 	timer := time.After(maxWaitTime)
 	go util.ExecAndRecover(func() {
