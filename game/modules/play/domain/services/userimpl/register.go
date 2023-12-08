@@ -1,7 +1,7 @@
 package userimpl
 
 import (
-	"east/core/message"
+	"east/core/msgbus"
 	"east/define"
 )
 
@@ -11,7 +11,7 @@ func (s *service) register() {
 }
 
 func (s *service) registerHandler() {
-	message.RegisterHandler(s, s.onSayHelloReq)
+	msgbus.RegisterHandler(s, s.onSayHelloReq)
 }
 
 func (s *service) registerEvent() {

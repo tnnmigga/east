@@ -5,16 +5,16 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/core/sys"
 	"time"
 )
 
 func (m *Module) initHandler() {
-	message.RegisterHandler(m, m.onPackage)
-	message.RegisterHandler(m, m.onBroadcastPackage)
-	message.RegisterHandler(m, m.onRandomCastPackage)
-	message.RegisterHandler(m, m.onRPCPequest)
+	msgbus.RegisterHandler(m, m.onPackage)
+	msgbus.RegisterHandler(m, m.onBroadcastPackage)
+	msgbus.RegisterHandler(m, m.onRandomCastPackage)
+	msgbus.RegisterHandler(m, m.onRPCPequest)
 }
 
 func (m *Module) onPackage(pkg *idef.CastPackage) {

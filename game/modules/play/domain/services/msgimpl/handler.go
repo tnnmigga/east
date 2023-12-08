@@ -4,12 +4,12 @@ import (
 	"east/core/codec"
 	"east/core/iconf"
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/pb"
 )
 
 func (s *service) regMsgHandler() {
-	message.RegisterHandler(s, s.onC2SPackage)
+	msgbus.RegisterHandler(s, s.onC2SPackage)
 }
 
 func (m *service) onC2SPackage(msg *pb.C2SPackage) {
@@ -19,5 +19,5 @@ func (m *service) onC2SPackage(msg *pb.C2SPackage) {
 		log.Errorf("onC2SPackage decode error %v", err)
 		return
 	}
-	message.Cast(iconf.ServerID(), pkg)
+	msgbus.Cast(iconf.ServerID(), pkg)
 }

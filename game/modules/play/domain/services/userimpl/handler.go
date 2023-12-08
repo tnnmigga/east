@@ -5,20 +5,20 @@ import (
 	"east/core/eventbus"
 	"east/core/iconf"
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/define"
 	"east/pb"
 )
 
 func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 	log.Infof("onSayHelloReq %v", msg.Text)
-	message.Broadcast(define.ServTypGateway, &pb.S2CPackage{
+	msgbus.Broadcast(define.ServTypGateway, &pb.S2CPackage{
 		UserID: 1,
 		Body: codec.Encode(&pb.SayHelloResp{
 			Text: "hello, client!",
 		}),
 	})
-	message.Cast(iconf.ServerID(), &eventbus.Event{
+	msgbus.Cast(iconf.ServerID(), &eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,
 		Value:   1,

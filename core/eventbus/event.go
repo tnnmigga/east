@@ -3,7 +3,7 @@ package eventbus
 import (
 	"east/core/idef"
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/core/util"
 	"strconv"
 )
@@ -78,7 +78,7 @@ func New(m idef.IModule) *EventBus {
 	bus := &EventBus{
 		subs: map[string][]ISubscriber{},
 	}
-	message.RegisterHandler(m, bus.dispatch)
+	msgbus.RegisterHandler(m, bus.dispatch)
 	return bus
 }
 

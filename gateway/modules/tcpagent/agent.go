@@ -2,7 +2,7 @@ package tcpagent
 
 import (
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/define"
 	"east/pb"
 	"encoding/binary"
@@ -43,7 +43,7 @@ func (agent *userAgent) recv() {
 		if _, err := io.ReadFull(agent.conn, msgBuf[:size]); err != nil {
 			return
 		}
-		message.Broadcast(define.ServTypGame, &pb.C2SPackage{
+		msgbus.Broadcast(define.ServTypGame, &pb.C2SPackage{
 			UserID: agent.userInfo.userID,
 			Body:   msgBuf[:size],
 		})

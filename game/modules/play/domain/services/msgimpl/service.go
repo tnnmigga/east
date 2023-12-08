@@ -2,7 +2,7 @@ package msgimpl
 
 import (
 	"east/core/codec"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
 	"east/pb"
@@ -26,7 +26,7 @@ func (s *service) Destroy() {
 }
 
 func (s *service) Notify(userID uint64, msg any) {
-	message.Cast(1, &pb.S2CPackage{
+	msgbus.Cast(1, &pb.S2CPackage{
 		UserID: userID,
 		Body:   codec.Encode(msg),
 	})

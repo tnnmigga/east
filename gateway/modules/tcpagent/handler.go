@@ -2,12 +2,12 @@ package tcpagent
 
 import (
 	"east/core/log"
-	"east/core/message"
+	"east/core/msgbus"
 	"east/pb"
 )
 
 func (m *Module) initHandler() {
-	message.RegisterHandler(m, m.onS2CPackage)
+	msgbus.RegisterHandler(m, m.onS2CPackage)
 }
 
 func (m *Module) onS2CPackage(pkg *pb.S2CPackage) {

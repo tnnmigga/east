@@ -1,4 +1,4 @@
-package message
+package msgbus
 
 import (
 	"east/core/codec"

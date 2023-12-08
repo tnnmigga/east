@@ -6,8 +6,8 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
-	"east/core/message"
 	"east/core/module"
+	"east/core/msgbus"
 	"east/core/sys"
 	"east/core/util"
 	"fmt"
@@ -134,7 +134,7 @@ func (m *Module) streamRecv(msg jetstream.Msg) {
 		log.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	message.Cast(pkg.ServerID, pkg.Body)
+	msgbus.Cast(pkg.ServerID, pkg.Body)
 }
 
 func (m *Module) recv(msg *nats.Msg) {
@@ -144,7 +144,7 @@ func (m *Module) recv(msg *nats.Msg) {
 		log.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	message.Cast(pkg.ServerID, pkg.Body)
+	msgbus.Cast(pkg.ServerID, pkg.Body)
 }
 
 func (m *Module) rpc(msg *nats.Msg) {
@@ -159,7 +159,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 		Resp: make(chan any, 1),
 		Err:  make(chan error, 1),
 	}
-	message.Cast(pkg.ServerID, rpcMsg)
+	msgbus.Cast(pkg.ServerID, rpcMsg)
 	sys.Go[sys.Call](func() {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
