@@ -14,6 +14,7 @@ func RegisterHandler[T any](m idef.IModule, fn func(msg T)) {
 	registerRecver(mType, m)
 	_, ok := m.Handlers()[mType]
 	if ok {
+		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
 		panic(fmt.Errorf("RegisterHandler multiple registration %v", mType))
 	}
 	m.Handlers()[mType] = &idef.Handler{

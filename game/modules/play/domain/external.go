@@ -11,7 +11,7 @@ type Domain struct {
 	*domain.Pool
 }
 
-func NewDomain(m idef.IModule) *Domain {
+func New(m idef.IModule) *Domain {
 	d := &Domain{
 		IModule: m,
 		Pool:    domain.NewPool(MaxCaseIndex),

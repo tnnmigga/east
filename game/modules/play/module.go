@@ -15,7 +15,7 @@ type Module struct {
 func New() idef.IModule {
 	basicModule := module.New(define.ModTypPlay, 100000)
 	m := &Module{
-		Domain: domain.NewDomain(basicModule),
+		Domain: domain.New(basicModule),
 	}
 	services.Init(m.Domain)
 	return m

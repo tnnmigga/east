@@ -95,5 +95,5 @@ func messageDispatch(msg any) {
 
 // onCastFail 消息投递失败处理
 func onCastFail(recver IRecver, msg any) {
-	log.Errorf("message cast faild, buffer full %s %s", util.StructName(msg), util.String(msg))
+	log.Errorf("message cast faild, %s %s", util.StructName(msg), util.String(msg))
 }

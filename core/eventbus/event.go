@@ -74,8 +74,12 @@ func (bus *EventBus) dispatch(event *pb.Event) {
 	}
 }
 
-func (bus *EventBus) Bind(m idef.IModule) {
+func New(m idef.IModule) *EventBus {
+	bus := &EventBus{
+		subs: map[string][]Subscriber{},
+	}
 	message.RegisterHandler(m, bus.dispatch)
+	return bus
 }
 
 type eventHandler struct {
