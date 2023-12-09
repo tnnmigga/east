@@ -22,3 +22,16 @@ func Filter[T any](items []T, fn func(T) bool) (res []T) {
 	}
 	return res
 }
+
+func Index[T comparable](slice []T, n T) int {
+	for i, v := range slice {
+		if v == n {
+			return i
+		}
+	}
+	return -1
+}
+
+func Contain[T comparable](slice []T, n T) bool {
+	return Index(slice, n) != -1
+}

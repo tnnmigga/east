@@ -27,19 +27,19 @@ type IRecver interface {
 	MQ() chan any
 }
 
-func Cast(serverID uint32, msg any, byStream ...bool) {
+func Cast(serverID uint32, msg any, opts ...castOpt) {
 	if serverID == iconf.ServerID() {
 		messageDispatch(msg)
 		return
 	}
-	if util.FirstOrDefault(byStream, true) { // 默认使用流
-		Cast(iconf.ServerID(), &idef.StreamCastPackage{
+	if util.Contain(opts, NonuseStream) { // 不使用流
+		Cast(iconf.ServerID(), &idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
 		})
 		return
 	}
-	Cast(iconf.ServerID(), &idef.CastPackage{
+	Cast(iconf.ServerID(), &idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
 	})
