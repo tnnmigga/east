@@ -4,12 +4,12 @@ import (
 	"east/core"
 	"east/core/iconf"
 	"east/core/sys"
-	"east/core/util"
+	"east/core/utils"
 	"east/game/modules/play"
 )
 
 func main() {
-	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
+	iconf.LoadFromJSON(utils.ReadFile("configs.jsonc"))
 	server := core.NewServer(
 		play.New(),
 	)

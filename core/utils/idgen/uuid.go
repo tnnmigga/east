@@ -3,7 +3,7 @@ package idgen
 import (
 	"east/core/iconf"
 	"east/core/log"
-	"east/core/util"
+	"east/core/utils"
 	"sync"
 	"time"
 )
@@ -26,7 +26,7 @@ func (idgen *UUIDGenerater) NewID() uint64 {
 	}
 	idgen.index++
 	if idgen.index > 0x3FF {
-		log.Errorf("idgen uuid index over limit, caller %v", util.Caller())
+		log.Errorf("idgen uuid index over limit, caller %v", utils.Caller())
 		return 0
 	}
 	serverID := uint64(iconf.ServerID())

@@ -1,4 +1,4 @@
-package util
+package utils
 
 func IfElse[T any](ok bool, a, b T) T {
 	if ok {

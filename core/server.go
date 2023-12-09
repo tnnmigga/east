@@ -6,7 +6,7 @@ import (
 	"east/core/infra/nats"
 	"east/core/log"
 	"east/core/sys"
-	"east/core/util"
+	"east/core/utils"
 	"sync"
 	"time"
 )
@@ -32,7 +32,7 @@ func (s *Server) Run() (stop func()) {
 		sys.WaitGoDone(time.Minute)
 		for i := len(s.modules) - 1; i >= 0; i-- {
 			m := s.modules[i]
-			util.ExecAndRecover(m.Stop)
+			utils.ExecAndRecover(m.Stop)
 		}
 		wg.Wait()
 		log.Infof("stop modules success")
@@ -42,7 +42,7 @@ func (s *Server) Run() (stop func()) {
 func (s *Server) NewGoroutine(wg *sync.WaitGroup, fn func()) {
 	wg.Add(1)
 	go func() {
-		defer util.RecoverPanic()
+		defer utils.RecoverPanic()
 		defer wg.Done()
 		fn()
 	}()

@@ -4,7 +4,7 @@ import (
 	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
-	"east/core/util"
+	"east/core/utils"
 	"strconv"
 )
 
@@ -30,7 +30,7 @@ func (bus *EventBus) RegisterSubscriber(sub ISubscriber) {
 
 func (bus *EventBus) RegisterHandler(topic string, handler func(event *Event)) {
 	h := &eventHandler{
-		name:    util.FuncName(handler),
+		name:    utils.FuncName(handler),
 		topic:   topic,
 		handler: handler,
 	}
@@ -42,12 +42,12 @@ func (bus *EventBus) UnregisterSubscriber(sub ISubscriber) {
 }
 
 func (bus *EventBus) UnregisterHandler(topic string, handler func(event *Event)) {
-	bus.removeSubscriber(util.FuncName(handler))
+	bus.removeSubscriber(utils.FuncName(handler))
 }
 
 func (bus *EventBus) removeSubscriber(name string) {
 	for topic, subs := range bus.subs {
-		bus.subs[topic] = util.Filter(subs, func(sub ISubscriber) bool {
+		bus.subs[topic] = utils.Filter(subs, func(sub ISubscriber) bool {
 			return sub.Name() != name
 		})
 	}
@@ -68,7 +68,7 @@ func (bus *EventBus) find(sub ISubscriber) bool {
 func (bus *EventBus) dispatch(event *Event) {
 	subs := bus.subs[event.Topic]
 	for _, sub := range subs {
-		util.ExecAndRecover(func() {
+		utils.ExecAndRecover(func() {
 			sub.Handler(event)
 		})
 	}

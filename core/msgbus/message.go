@@ -4,7 +4,7 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
-	"east/core/util"
+	"east/core/utils"
 
 	"fmt"
 	"reflect"
@@ -32,7 +32,7 @@ func Cast(serverID uint32, msg any, opts ...castOpt) {
 		messageDispatch(msg)
 		return
 	}
-	if util.Contain(opts, NonuseStream) { // 不使用流
+	if utils.Contain(opts, NonuseStream) { // 不使用流
 		Cast(iconf.ServerID(), &idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
@@ -81,13 +81,13 @@ func messageDispatch(msg any) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	for _, recv := range recvs {
 		if !ok {
-			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
+			log.Errorf("message cast recv not fuound %v", utils.StructName(msg))
 			return
 		}
 		select {
 		case recv.MQ() <- msg:
 		default:
-			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.StructName(msg))
+			log.Errorf("metssage cast mq full %s %s", recv.Name(), utils.StructName(msg))
 			onCastFail(recv, msg)
 		}
 	}
@@ -95,5 +95,5 @@ func messageDispatch(msg any) {
 
 // onCastFail 消息投递失败处理
 func onCastFail(recver IRecver, msg any) {
-	log.Errorf("message cast faild, %s %s", util.StructName(msg), util.String(msg))
+	log.Errorf("message cast faild, %s %s", utils.StructName(msg), utils.String(msg))
 }
