@@ -2,12 +2,8 @@ package algorithms
 
 type Set[T comparable] map[T]struct{}
 
-func (s Set[T]) Insert(key T) bool {
-	if s.Find(key) {
-		return false
-	}
+func (s Set[T]) Insert(key T) {
 	s[key] = struct{}{}
-	return true
 }
 
 func (s Set[T]) Find(key T) bool {
@@ -27,4 +23,29 @@ func (s Set[T]) ToSlice() []T {
 		slice = append(slice, k)
 	}
 	return slice
+}
+
+func (s Set[T]) Intersect(v Set[T]) Set[T] {
+	a, b := s, v
+	if len(b) < len(a) {
+		a, b = b, a
+	}
+	res := Set[T]{}
+	for k := range a {
+		if b.Find(k) {
+			res.Insert(k)
+		}
+	}
+	return res
+}
+
+func (s Set[T]) Union(v Set[T]) Set[T] {
+	res := make(Set[T], Max(len(s), len(v)))
+	for k := range s {
+		res.Insert(k)
+	}
+	for k := range v {
+		res.Insert(k)
+	}
+	return res
 }
