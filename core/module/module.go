@@ -3,7 +3,7 @@ package module
 import (
 	"east/core/idef"
 	"east/core/log"
-	"east/core/utils"
+	"east/core/util"
 	"fmt"
 	"reflect"
 	"runtime/debug"
@@ -38,7 +38,7 @@ func (m *Module) Handlers() map[reflect.Type]*idef.Handler {
 }
 
 func (m *Module) Run() {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	defer func() {
 		log.Infof("%v has stoped", m.Name())
 		m.closeSig <- struct{}{}
@@ -64,7 +64,7 @@ func (m *Module) Stop() {
 }
 
 func (m *Module) cb(msg any) {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
 	fns, ok := m.handlers[msgType]
 	if !ok {
@@ -92,6 +92,6 @@ func (m *Module) rpc(msg *idef.RPCPackage) {
 }
 
 func (m *Module) rpcResp(req *idef.RPCRequest) {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

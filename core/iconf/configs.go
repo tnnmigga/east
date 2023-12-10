@@ -1,7 +1,7 @@
 package iconf
 
 import (
-	"east/core/utils"
+	"east/core/util"
 	"encoding/json"
 	"errors"
 
@@ -16,7 +16,7 @@ var (
 var errConfigNotFound error = errors.New("configs not found")
 
 func LoadFromJSON(b []byte) {
-	b = utils.Uncomment(b)
+	b = util.Uncomment(b)
 	err := json.Unmarshal(b, &confs)
 	if err != nil {
 		panic(err)

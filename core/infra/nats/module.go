@@ -9,7 +9,7 @@ import (
 	"east/core/module"
 	"east/core/msgbus"
 	"east/core/sys"
-	"east/core/utils"
+	"east/core/util"
 	"fmt"
 	"time"
 
@@ -127,7 +127,7 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 }
 
 func (m *Module) streamRecv(msg jetstream.Msg) {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	msg.Ack()
 	pkg, err := unpack(msg.Data())
 	if err != nil {
@@ -138,7 +138,7 @@ func (m *Module) streamRecv(msg jetstream.Msg) {
 }
 
 func (m *Module) recv(msg *nats.Msg) {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	pkg, err := unpack(msg.Data)
 	if err != nil {
 		log.Errorf("nats recv decode msg error: %v", err)
@@ -148,7 +148,7 @@ func (m *Module) recv(msg *nats.Msg) {
 }
 
 func (m *Module) rpc(msg *nats.Msg) {
-	defer utils.RecoverPanic()
+	defer util.RecoverPanic()
 	pkg, err := unpack(msg.Data)
 	if err != nil {
 		log.Errorf("nats rpc decode msg error: %v", err)
@@ -164,12 +164,12 @@ func (m *Module) rpc(msg *nats.Msg) {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
 		case <-timer:
-			log.Errorf("nats rpc call timeout %v", utils.StructName(rpcMsg.Req))
+			log.Errorf("nats rpc call timeout %v", util.StructName(rpcMsg.Req))
 		case resp := <-rpcMsg.Resp:
 			b := codec.Encode(resp)
 			m.conn.Publish(msg.Reply, b)
 		case err := <-rpcMsg.Err:
-			log.Errorf("nats rpc call %v error %v", utils.StructName(rpcMsg.Req), err)
+			log.Errorf("nats rpc call %v error %v", util.StructName(rpcMsg.Req), err)
 		}
 	})
 }

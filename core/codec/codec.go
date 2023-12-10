@@ -1,8 +1,8 @@
 package codec
 
 import (
-	"east/core/utils"
-	"east/core/utils/idgen"
+	"east/core/util"
+	"east/core/util/idgen"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -40,7 +40,7 @@ func (d *MessageDescriptor) New() any {
 }
 
 func Register(v any) {
-	name := utils.StructName(v)
+	name := util.StructName(v)
 	id := msgID(v)
 	if _, has := msgIDToDesc[id]; has {
 		panic(fmt.Errorf("msgid duplicat %v %d", name, id))
@@ -102,7 +102,7 @@ func toBytes(v any) []byte {
 }
 
 func msgID(v any) uint32 {
-	name := utils.StructName(v)
+	name := util.StructName(v)
 	return idgen.HashToID(name)
 }
 

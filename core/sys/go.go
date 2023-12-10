@@ -3,7 +3,7 @@ package sys
 import (
 	"context"
 	"east/core/log"
-	"east/core/utils"
+	"east/core/util"
 	"sync"
 	"time"
 )
@@ -26,14 +26,14 @@ func Go[T gocall](fn T) {
 	case WithCtx:
 		wg.Add(1)
 		go func() {
-			defer utils.RecoverPanic()
+			defer util.RecoverPanic()
 			defer wg.Done()
 			f(rootCtx)
 		}()
 	case Call:
 		wg.Add(1)
 		go func() {
-			defer utils.RecoverPanic()
+			defer util.RecoverPanic()
 			defer wg.Done()
 			f()
 		}()
@@ -43,7 +43,7 @@ func Go[T gocall](fn T) {
 func GoWithTimeout(fn WithCtx, duration time.Duration) {
 	wg.Add(1)
 	go func() {
-		defer utils.RecoverPanic()
+		defer util.RecoverPanic()
 		defer wg.Done()
 		ctx, _ := context.WithTimeout(rootCtx, duration)
 		fn(ctx)
@@ -54,7 +54,7 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	cancel(nil)
 	c := make(chan struct{}, 1)
 	timer := time.After(maxWaitTime)
-	go utils.ExecAndRecover(func() {
+	go util.ExecAndRecover(func() {
 		wg.Wait()
 		c <- struct{}{}
 	})
