@@ -1,4 +1,4 @@
-package algorithms
+package algorithm
 
 type Set[T comparable] map[T]struct{}
 
@@ -40,7 +40,11 @@ func (s Set[T]) Intersect(v Set[T]) Set[T] {
 }
 
 func (s Set[T]) Union(v Set[T]) Set[T] {
-	res := make(Set[T], Max(len(s), len(v)))
+	size := len(s)
+	if n := len(v); n > size {
+		size = n
+	}
+	res := make(Set[T], size)
 	for k := range s {
 		res.Insert(k)
 	}

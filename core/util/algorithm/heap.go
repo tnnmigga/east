@@ -1,4 +1,4 @@
-package algorithms
+package algorithm
 
 type Heap[T any] struct {
 	data []T
