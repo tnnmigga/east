@@ -6,16 +6,19 @@ import { Socket } from 'net';
 
 const msg_builders = {}
 const msgid_to_name = {}
-const socket = new Socket()
-socket.connect('9527', '127.0.0.1', function () {
-    print("connect success")
-    send("SayHelloReq", { text: "hello, server!" })
-})
+var socket = new Socket()
 
-socket.on("data", function (data) {
-    let [msg_name, msg] = decode(data)
-    print("recv server msg:", msg_name, msg)
-})
+function connect() {
+    socket = new Socket()
+    socket.connect('9527', '127.0.0.1', function () {
+        print("connect success")
+        send("SayHelloReq", { text: "hello, server!" })
+    })
+    socket.on("data", function (data) {
+        let [msg_name, msg] = decode(data)
+        print("recv server msg:", msg_name, msg)
+    })
+}
 
 function init_msg_builder(path) {
     let files = readdirSync(path)
@@ -46,7 +49,8 @@ function runCli(context = {}, name = 'REPL') {
     global.console = r.context.console;
 }
 
-runCli({ send })
+connect()
+runCli({ send, connect })
 
 function send(msg_name = 'SayHelloReq', msg_body = { text: "hello, server!" }) {
     let b = encode(msg_name, msg_body)
