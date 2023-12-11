@@ -12,7 +12,7 @@ type CastPackage struct {
 }
 
 type StreamCastPackage struct {
-	ServerID uint32 
+	ServerID uint32
 	Body     any
 }
 

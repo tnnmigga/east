@@ -29,20 +29,20 @@ type IRecver interface {
 
 func Cast(serverID uint32, msg any, opts ...castOpt) {
 	if serverID == iconf.ServerID() {
-		messageDispatch(msg)
+		messageDispatch(msg, opts...)
 		return
 	}
-	if util.Contain(opts, NonuseStream) { // 不使用流
+	if nonuse, find := findCastOpt[bool](opts, keyNonuseStream); nonuse && find { // 不使用流
 		Cast(iconf.ServerID(), &idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
-		})
+		}, opts...)
 		return
 	}
 	Cast(iconf.ServerID(), &idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
-	})
+	}, opts...)
 }
 
 func Broadcast(serverType string, msg any) {
@@ -77,20 +77,29 @@ func registerRecver(mType reflect.Type, recver IRecver) {
 	recvers[mType] = append(recvers[mType], recver)
 }
 
-func messageDispatch(msg any) {
+func messageDispatch(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
+	modName, oneOfMod := findCastOpt[string](opts, keyOneOfModules)
+	var castSucc bool
 	for _, recv := range recvs {
 		if !ok {
 			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
 			return
 		}
+		if oneOfMod && modName != recv.Name() {
+			continue
+		}
 		select {
 		case recv.MQ() <- msg:
+			castSucc = true
 		default:
-			log.Errorf("metssage cast mq full %s %s", recv.Name(), util.StructName(msg))
 			onCastFail(recv, msg)
 		}
 	}
+	if castSucc {
+		return
+	}
+	log.Errorf("metssage cast mq full %s %s", util.StructName(msg), util.String(msg))
 }
 
 // onCastFail 消息投递失败处理

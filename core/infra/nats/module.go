@@ -160,7 +160,7 @@ func (m *Module) rpc(msg *nats.Msg) {
 		Err:  make(chan error, 1),
 	}
 	msgbus.Cast(pkg.ServerID, rpcMsg)
-	sys.Go[sys.Call](func() {
+	sys.Go(func() {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
 		case <-timer:

@@ -1,5 +1,7 @@
 package util
 
+import "time"
+
 func IfElse[T any](ok bool, a, b T) T {
 	if ok {
 		return a
@@ -34,4 +36,12 @@ func Index[T comparable](slice []T, n T) int {
 
 func Contain[T comparable](slice []T, n T) bool {
 	return Index(slice, n) != -1
+}
+
+func NowNs() time.Duration {
+	return time.Duration(time.Now().UnixNano())
+}
+
+func NowMs() float64 {
+	return float64(time.Now().UnixNano()) / float64(time.Millisecond)
 }

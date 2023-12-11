@@ -9,6 +9,15 @@ import (
 	"runtime/debug"
 )
 
+const (
+	DefaultMQLen = 100000
+)
+
+var (
+	rpcPackage = reflect.TypeOf((*idef.RPCPackage)(nil))
+	rpcRequest = reflect.TypeOf((*idef.RPCRequest)(nil))
+)
+
 type Module struct {
 	name     string
 	mq       chan any

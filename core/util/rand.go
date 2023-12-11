@@ -1,8 +1,8 @@
 package util
 
 import (
+	"east/core/algorithm"
 	"east/core/log"
-	"east/core/util/algorithm"
 	"math/rand"
 
 	"golang.org/x/exp/constraints"

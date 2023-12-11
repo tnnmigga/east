@@ -43,7 +43,7 @@ func (m *Module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 
 func (m *Module) onRPCPequest(req *idef.RPCRequest) {
 	b := codec.Encode(req.Req)
-	sys.Go[sys.Call](func() {
+	sys.Go(func() {
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
 		if err == nil {
 			req.Resp, req.Err = codec.Decode(msg.Data)

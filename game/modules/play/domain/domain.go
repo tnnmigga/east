@@ -22,6 +22,7 @@ func New(m idef.IModule) *Domain {
 const (
 	MsgImplIndex = iota
 	EventImplIndex
+	TimerImplIndex
 	UserImplIndex
 	MaxImplIndex
 )
@@ -32,6 +33,10 @@ func (d *Domain) MsgCase() api.IMsg {
 
 func (d *Domain) EventImpl() api.IEvent {
 	return d.GetImpl(EventImplIndex).(api.IEvent)
+}
+
+func (d *Domain) TimerImpl() api.ITimer {
+	return d.GetImpl(TimerImplIndex).(api.ITimer)
 }
 
 func (d *Domain) UserImpl() api.IUser {

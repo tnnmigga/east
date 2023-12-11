@@ -14,23 +14,21 @@ var (
 )
 
 type (
-	Call    func()
-	WithCtx func(context.Context)
-	gocall  interface {
-		WithCtx | Call
+	gocall interface {
+		func(context.Context) | func()
 	}
 )
 
 func Go[T gocall](fn T) {
 	switch f := any(fn).(type) {
-	case WithCtx:
+	case func(context.Context):
 		wg.Add(1)
 		go func() {
 			defer util.RecoverPanic()
 			defer wg.Done()
 			f(rootCtx)
 		}()
-	case Call:
+	case func():
 		wg.Add(1)
 		go func() {
 			defer util.RecoverPanic()
@@ -40,7 +38,7 @@ func Go[T gocall](fn T) {
 	}
 }
 
-func GoWithTimeout(fn WithCtx, duration time.Duration) {
+func GoWithTimeout(fn func(context.Context), duration time.Duration) {
 	wg.Add(1)
 	go func() {
 		defer util.RecoverPanic()
