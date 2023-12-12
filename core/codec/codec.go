@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/gogo/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,13 +14,10 @@ import (
 
 var (
 	msgIDToDesc map[uint32]*MessageDescriptor
-	once        sync.Once
 )
 
 func init() {
-	once.Do(func() {
-		msgIDToDesc = map[uint32]*MessageDescriptor{}
-	})
+	msgIDToDesc = map[uint32]*MessageDescriptor{}
 }
 
 const (

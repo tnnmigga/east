@@ -8,18 +8,14 @@ import (
 
 	"fmt"
 	"reflect"
-	"sync"
 )
 
 var (
-	once    sync.Once
 	recvers map[reflect.Type][]IRecver
 )
 
 func init() {
-	once.Do(func() {
-		recvers = map[reflect.Type][]IRecver{}
-	})
+	recvers = map[reflect.Type][]IRecver{}
 }
 
 type IRecver interface {
