@@ -1,6 +1,7 @@
 package eventbus
 
 import (
+	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
@@ -80,6 +81,14 @@ func New(m idef.IModule) *EventBus {
 	}
 	msgbus.RegisterHandler(m, bus.dispatch)
 	return bus
+}
+
+func (bus *EventBus) Cast(event *Event) {
+	msgbus.Cast(iconf.ServerID(), event)
+}
+
+func (bus *EventBus) SyncCast(event *Event) {
+	bus.dispatch(event)
 }
 
 type eventHandler struct {
