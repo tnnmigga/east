@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	rootCtx, cancel = context.WithCancelCause(context.Background())
-	wg              = &sync.WaitGroup{}
+	rootCtx, cancelGo = context.WithCancel(context.Background())
+	wg                = &sync.WaitGroup{}
 )
 
 type (
@@ -38,7 +38,7 @@ func Go[T gocall](fn T) {
 	}
 }
 
-func GoWithTimeout(fn func(context.Context), duration time.Duration) {
+func GoWithTimeout(duration time.Duration, fn func(context.Context)) {
 	wg.Add(1)
 	go func() {
 		defer util.RecoverPanic()
@@ -49,7 +49,7 @@ func GoWithTimeout(fn func(context.Context), duration time.Duration) {
 }
 
 func WaitGoDone(maxWaitTime time.Duration) {
-	cancel(nil)
+	cancelGo()
 	c := make(chan struct{}, 1)
 	timer := time.After(maxWaitTime)
 	go util.ExecAndRecover(func() {
