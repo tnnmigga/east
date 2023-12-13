@@ -25,7 +25,7 @@ func NewServer(modules ...idef.IModule) *Server {
 func (s *Server) Run() (stop func()) {
 	wg := &sync.WaitGroup{}
 	for _, m := range s.modules {
-		s.NewGoroutine(wg, m.Run)
+		s.runModule(wg, m)
 	}
 	return func() {
 		log.Infof("try stop modules...")
@@ -39,11 +39,11 @@ func (s *Server) Run() (stop func()) {
 	}
 }
 
-func (s *Server) NewGoroutine(wg *sync.WaitGroup, fn func()) {
+func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
 	wg.Add(1)
 	go func() {
 		defer util.RecoverPanic()
 		defer wg.Done()
-		fn()
+		m.Run()
 	}()
 }

@@ -44,7 +44,7 @@ func New(name string) idef.IModule {
 		panic(err)
 	}
 	m := &Module{
-		Module: module.New(name, iconf.Int32("nats-mq-len", 100000)),
+		Module: module.New(name, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
 		conn:   conn,
 	}
 	m.initHandler()
