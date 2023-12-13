@@ -122,6 +122,7 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 		broadcastSub.Drain()
 		queueSub.Drain()
 		rpcSub.Drain()
+		<-m.js.PublishAsyncComplete()
 		m.conn.Close()
 	}, nil
 }
