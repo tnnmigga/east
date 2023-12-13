@@ -6,7 +6,6 @@ import (
 	"east/core/log"
 	"east/core/util"
 
-	"fmt"
 	"reflect"
 )
 
@@ -64,13 +63,6 @@ func warpRPCCb[T any](cb func(resp T, err error)) func(resp any, err error) {
 		resp := pkg.(T)
 		cb(resp, err)
 	}
-}
-
-func registerRecver(mType reflect.Type, recver IRecver) {
-	if _, has := recvers[mType]; has {
-		panic(fmt.Errorf("message has registered %v", mType.Elem().Name()))
-	}
-	recvers[mType] = append(recvers[mType], recver)
 }
 
 func messageDispatch(msg any, opts ...castOpt) {
