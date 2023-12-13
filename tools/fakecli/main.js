@@ -15,8 +15,12 @@ function connect() {
         send("SayHelloReq", { text: "hello, server!" })
     })
     socket.on("data", function (data) {
-        let [msg_name, msg] = decode(data)
-        print("recv server msg:", msg_name, msg)
+        try {
+            let [msg_name, msg] = decode(data)
+            print("recv server msg:", msg_name, msg)
+        } catch {
+            print("decode error", data, data.length)
+        }
     })
 }
 

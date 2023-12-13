@@ -11,15 +11,24 @@ import (
 )
 
 func (m *Module) initHandler() {
-	msgbus.RegisterHandler(m, m.onPackage)
+	msgbus.RegisterHandler(m, m.onCastPackage)
+	msgbus.RegisterHandler(m, m.onStreamCastPackage)
 	msgbus.RegisterHandler(m, m.onBroadcastPackage)
 	msgbus.RegisterHandler(m, m.onRandomCastPackage)
 	msgbus.RegisterHandler(m, m.onRPCPequest)
 }
 
-func (m *Module) onPackage(pkg *idef.CastPackage) {
+func (m *Module) onCastPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
-	_, err := m.js.PublishAsync(castSubject(pkg.ServerID), b)
+	err := m.conn.Publish(castSubject(pkg.ServerID), b)
+	if err != nil {
+		log.Errorf("nats publish error %v", err)
+	}
+}
+
+func (m *Module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
+	b := codec.Encode(pkg.Body)
+	_, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}

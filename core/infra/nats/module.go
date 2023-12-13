@@ -108,7 +108,7 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 	if err != nil {
 		return nil, err
 	}
-	queueSub, err := m.conn.QueueSubscribe(castSubject(iconf.ServerID()), iconf.ServerType(), m.recv)
+	queueSub, err := m.conn.QueueSubscribe(randomCastSubject(iconf.ServerType()), iconf.ServerType(), m.recv)
 	if err != nil {
 		return nil, err
 	}
@@ -129,37 +129,37 @@ func (m *Module) initSubcribe() (stop func(), err error) {
 func (m *Module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
-	pkg, err := unpack(msg.Data())
+	pkg, err := codec.Decode(msg.Data())
 	if err != nil {
 		log.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(pkg.ServerID, pkg.Body)
+	msgbus.Cast(iconf.ServerID(), pkg)
 }
 
 func (m *Module) recv(msg *nats.Msg) {
 	defer util.RecoverPanic()
-	pkg, err := unpack(msg.Data)
+	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
 		log.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(pkg.ServerID, pkg.Body)
+	msgbus.Cast(iconf.ServerID(), pkg)
 }
 
 func (m *Module) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
-	pkg, err := unpack(msg.Data)
+	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
 		log.Errorf("nats rpc decode msg error: %v", err)
 		return
 	}
 	rpcMsg := &idef.RPCPackage{
-		Req:  pkg.Body,
+		Req:  pkg,
 		Resp: make(chan any, 1),
 		Err:  make(chan error, 1),
 	}
-	msgbus.Cast(pkg.ServerID, rpcMsg)
+	msgbus.Cast(iconf.ServerID(), rpcMsg)
 	sys.Go(func() {
 		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
 		select {
@@ -172,15 +172,4 @@ func (m *Module) rpc(msg *nats.Msg) {
 			log.Errorf("nats rpc call %v error %v", util.StructName(rpcMsg.Req), err)
 		}
 	})
-}
-
-func unpack(b []byte) (*idef.CastPackage, error) {
-	pkg, err := codec.Decode(b)
-	if err != nil {
-		return nil, fmt.Errorf("nats decode msg error: %v", err)
-	}
-	return &idef.CastPackage{
-		ServerID: iconf.ServerID(),
-		Body:     pkg,
-	}, nil
 }

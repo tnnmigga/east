@@ -87,7 +87,7 @@ func messageDispatch(msg any, opts ...castOpt) {
 	if castSucc {
 		return
 	}
-	log.Errorf("metssage cast mq full %s %s", util.StructName(msg), util.String(msg))
+	log.Errorf("message cast mq full %s %s", util.StructName(msg), util.String(msg))
 }
 
 // onCastFail 消息投递失败处理
