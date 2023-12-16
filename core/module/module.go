@@ -46,6 +46,15 @@ func (m *Module) Handlers() map[reflect.Type]*idef.Handler {
 	return m.handlers
 }
 
+func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
+	_, ok := m.handlers[mType]
+	if ok {
+		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
+		panic(fmt.Errorf("RegisterHandler multiple registration %v", mType))
+	}
+	m.handlers[mType] = handler
+}
+
 func (m *Module) Run() {
 	defer util.RecoverPanic()
 	defer func() {
