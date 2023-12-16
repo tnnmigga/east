@@ -21,8 +21,8 @@ func init() {
 }
 
 const (
-	marshalTypeGogoproto = 1
-	marshalTypeBSON      = 2
+	marshalTypeGogoproto = iota
+	marshalTypeBSON
 )
 
 type MessageDescriptor struct {
