@@ -4,13 +4,13 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type heapItem[K, V constraints.Ordered] interface {
+type heapItem[K comparable, V constraints.Ordered] interface {
 	Key() K
 	Value() V
 }
 
 // Heap 小顶堆
-type Heap[K constraints.Ordered, V constraints.Ordered, T heapItem[K, V]] struct {
+type Heap[K comparable, V constraints.Ordered, T heapItem[K, V]] struct {
 	Items []T
 }
 
