@@ -6,7 +6,7 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/define"
-	"east/game/modules/play/domain/services/userimpl/usermeta"
+	"east/game/modules/play/domain/impl/userimpl/usermeta"
 	"east/pb"
 	"time"
 )

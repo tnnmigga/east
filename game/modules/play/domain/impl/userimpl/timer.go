@@ -3,7 +3,7 @@ package userimpl
 import (
 	"east/core/codec"
 	"east/core/msgbus"
-	"east/game/modules/play/domain/services/userimpl/usermeta"
+	"east/game/modules/play/domain/impl/userimpl/usermeta"
 	"east/pb"
 )
 

@@ -5,7 +5,7 @@ import (
 	"east/core/module"
 	"east/define"
 	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/services"
+	"east/game/modules/play/domain/impl"
 )
 
 type Module struct {
@@ -17,6 +17,6 @@ func New() idef.IModule {
 	m := &Module{
 		Domain: domain.New(basicModule),
 	}
-	services.Init(m.Domain)
+	impl.Init(m.Domain)
 	return m
 }
