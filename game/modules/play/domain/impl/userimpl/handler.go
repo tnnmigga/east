@@ -6,7 +6,6 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/define"
-	"east/game/modules/play/domain/impl/userimpl/usermeta"
 	"east/pb"
 	"time"
 )
@@ -18,7 +17,7 @@ func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 		Topic:   define.EventUserSayHello,
 		Value:   1,
 	})
-	s.TimerImpl().After(time.Second*2, &usermeta.TimerSayHello{
+	s.TimerImpl().After(time.Second*2, &timerSayHello{
 		Text: "hello client!",
 	})
 }
