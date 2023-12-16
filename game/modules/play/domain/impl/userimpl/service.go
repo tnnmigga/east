@@ -16,7 +16,9 @@ func New(d *domain.Domain) api.IMsg {
 }
 
 func (s *service) Init() {
-	s.register()
+	s.registerMsgHandler()
+	s.registerEventHandler()
+	s.registerTimerHandler()
 }
 
 func (s *service) Destroy() {
