@@ -110,8 +110,8 @@ func (h *eventHandler) Handler(event *Event) {
 }
 
 func (e Event) Int64Arg(name string) (arg int64) {
-	if e.Params != nil {
-		if v, ok := e.Params[name]; ok {
+	if e.Args != nil {
+		if v, ok := e.Args[name]; ok {
 			if n, err := strconv.Atoi(v); err != nil {
 				return int64(n)
 			}
@@ -126,8 +126,8 @@ func (e Event) Int32Arg(name string) (arg int32) {
 }
 
 func (e Event) StringArg(name string) (arg string) {
-	if e.Params != nil {
-		if v, ok := e.Params[name]; ok {
+	if e.Args != nil {
+		if v, ok := e.Args[name]; ok {
 			return v
 		}
 	}

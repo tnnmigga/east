@@ -10,9 +10,9 @@ option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;
 
 message Event {
-    int64 OwnerID              = 2;
-    string Topic               = 1;
-    int64 ID                   = 3;
-    int64 Value                = 4;
-    map<string, string> Params = 5;
+    int64 OwnerID            = 2;
+    string Topic             = 1;
+    int64 ID                 = 3;
+    int64 Value              = 4;
+    map<string, string> Args = 5;
 }
