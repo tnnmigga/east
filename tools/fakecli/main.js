@@ -4,8 +4,8 @@ import { readdirSync } from 'fs'
 import { log } from 'console';
 import { Socket } from 'net';
 
-const msg_builders = {}
-const msgid_to_name = {}
+const msgBuilders = {}
+const msgidToName = {}
 var socket = new Socket()
 
 function connect() {
@@ -16,32 +16,31 @@ function connect() {
     })
     socket.on("data", function (data) {
         try {
-            let [msg_name, msg] = decode(data)
-            print("recv server msg:", msg_name, msg)
+            let [msgName, msg] = decode(data)
+            print("recv server msg:", msgName, msg)
         } catch {
             print("decode error", data, data.length)
         }
     })
 }
 
-function init_msg_builder(path) {
+function initMsgBuilder(path) {
     let files = readdirSync(path)
     for (let name of files) {
         if (!name.endsWith(".proto")) {
             continue
         }
-        const msg_builder = new protobuf.Root()
+        const msgBuilder = new protobuf.Root()
         // console.log(path + '/' + name)
-        msg_builder.loadSync(path + '/' + name, { keepCase: true })
-        for (let msg_name in msg_builder.nested.pb.nested) {
-            msg_builders[msg_name] = msg_builder.lookup(msg_name)
-            msgid_to_name[nametoid(msg_name)] = msg_name
+        msgBuilder.loadSync(path + '/' + name, { keepCase: true })
+        for (let msgName in msgBuilder.nested.pb.nested) {
+            msgBuilders[msgName] = msgBuilder.lookup(msgName)
+            msgidToName[nametoid(msgName)] = msgName
         }
     }
-    // log(msgid_to_name)
 }
 
-init_msg_builder("pb")
+initMsgBuilder("pb")
 
 function runCli(context = {}, name = 'REPL') {
     const r = repl.start({
@@ -56,8 +55,8 @@ function runCli(context = {}, name = 'REPL') {
 connect()
 runCli({ send, connect })
 
-function send(msg_name = 'SayHelloReq', msg_body = { text: "hello, server!" }) {
-    let b = encode(msg_name, msg_body)
+function send(msgName = 'SayHelloReq', msgBody = { text: "hello, server!" }) {
+    let b = encode(msgName, msgBody)
     socket.write(b)
 }
 
@@ -65,17 +64,17 @@ async function recv() {
 }
 /**
  * encode
- * @param {string} msg_name 
+ * @param {string} msgName 
  * @param {object} msg 
  * @returns 
  */
-function encode(msg_name, msg) {
-    let proto_msg = msg_builders[msg_name].create(msg)
-    proto_msg = msg_builders[msg_name].encode(proto_msg).finish()
+function encode(msgName, msg) {
+    let protoMsg = msgBuilders[msgName].create(msg)
+    protoMsg = msgBuilders[msgName].encode(protoMsg).finish()
     let buf = Buffer.alloc(8)
-    buf.writeUint32LE(proto_msg.length + 4)
-    buf.writeUint32LE(nametoid(msg_name), 4)
-    return Buffer.concat([buf, Buffer.from(proto_msg)])
+    buf.writeUint32LE(protoMsg.length + 4)
+    buf.writeUint32LE(nametoid(msgName), 4)
+    return Buffer.concat([buf, Buffer.from(protoMsg)])
 }
 
 /**
@@ -85,21 +84,20 @@ function encode(msg_name, msg) {
  */
 function decode(buf) {
     let msgid = buf.readUInt32LE()
-    let msg_name = msgid_to_name[msgid]
-    const proto_msg = msg_builders[msg_name].decode(buf.slice(4))
-    return [msg_name, msg_builders[msg_name].toObject(proto_msg)]
+    let msgName = msgidToName[msgid]
+    const protoMsg = msgBuilders[msgName].decode(buf.slice(4))
+    return [msgName, msgBuilders[msgName].toObject(protoMsg)]
 }
 
-function nametoid(msg_name) {
+function nametoid(msgName) {
     let s = 31
     let v = 0
-    for (let c of msg_name) {
+    for (let c of msgName) {
         v = uint32(v * s) + c.charCodeAt()
     }
     return uint32(v)
 }
 
-// var msg_id = nametoid("SayHelloReq")
 
 // var m = encode("SayHelloReq", { text: "hello" })
 // var n = decode(m)
