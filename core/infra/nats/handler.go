@@ -15,7 +15,7 @@ func (m *Module) initHandler() {
 	msgbus.RegisterHandler(m, m.onStreamCastPackage)
 	msgbus.RegisterHandler(m, m.onBroadcastPackage)
 	msgbus.RegisterHandler(m, m.onRandomCastPackage)
-	msgbus.RegisterHandler(m, m.onRPCPequest)
+	msgbus.RegisterHandler(m, m.onRPCRequest)
 }
 
 func (m *Module) onCastPackage(pkg *idef.CastPackage) {
@@ -50,7 +50,7 @@ func (m *Module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	}
 }
 
-func (m *Module) onRPCPequest(req *idef.RPCRequest) {
+func (m *Module) onRPCRequest(req *idef.RPCRequest) {
 	b := codec.Encode(req.Req)
 	sys.Go(func() {
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
