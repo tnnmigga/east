@@ -15,7 +15,7 @@ func (s *service) registerMsgHandler() {
 }
 
 func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
-	log.Infof("onSayHelloReq %v", msg.Text)
+	log.Infof("client say hello %v", msg.Text)
 	msgbus.Cast(iconf.ServerID(), &eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,

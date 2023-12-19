@@ -1,9 +1,9 @@
 package iconf
 
 import (
-	"east/core/util"
 	"encoding/json"
 	"errors"
+	"regexp"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,7 +16,7 @@ var (
 var errConfigNotFound error = errors.New("configs not found")
 
 func LoadFromJSON(b []byte) {
-	b = util.Uncomment(b)
+	b = uncomment(b)
 	err := json.Unmarshal(b, &confs)
 	if err != nil {
 		panic(err)
@@ -31,6 +31,13 @@ func LoadFromYAML(b []byte) error {
 	}
 	afterLoad()
 	return nil
+}
+
+func uncomment(b []byte) []byte {
+	reg := regexp.MustCompile(`/\*{1,2}[\s\S]*?\*/`)
+	b = reg.ReplaceAll(b, []byte("\n"))
+	reg = regexp.MustCompile(`\s//[\s\S]*?\n`)
+	return reg.ReplaceAll(b, []byte("\n"))
 }
 
 func RegInitFn(fn func()) {
