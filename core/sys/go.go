@@ -60,6 +60,6 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	case <-c:
 		return
 	case <-timer:
-		log.Errorf("WaitGoDone timeout")
+		log.Errorf("wait goroutine exit timeout")
 	}
 }

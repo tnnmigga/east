@@ -27,6 +27,7 @@ func (s *Server) Run() (stop func()) {
 	for _, m := range s.modules {
 		s.runModule(wg, m)
 	}
+	log.Infof("server start running...")
 	return func() {
 		log.Infof("try stop modules...")
 		sys.WaitGoDone(time.Minute)
@@ -36,6 +37,7 @@ func (s *Server) Run() (stop func()) {
 		}
 		wg.Wait()
 		log.Infof("stop modules success")
+		log.Infof("server stop running...")
 	}
 }
 

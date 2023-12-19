@@ -16,7 +16,7 @@ func RandomInterval[T constraints.Signed](low, high T) T {
 func RandomIntervalN[T constraints.Signed](low, high T, num T) algorithm.Set[T] {
 	maxNum := high - low + 1
 	if maxNum < num {
-		log.Errorf("RandomIntervalN max random num not enough")
+		log.Errorf("max random num not enough")
 		return nil
 	}
 	var set algorithm.Set[T]
