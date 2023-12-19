@@ -9,6 +9,7 @@
 *.dylib
 .idea
 .vscode
+log.txt
 
 # Test binary, built with `go test -c`
 *.test

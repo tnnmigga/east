@@ -2,6 +2,9 @@
     "server-id": 1888,
     "server-type": "gateway",
     // nats
-    "nats-url": "nats://127.0.0.1:4222"
+    "nats-url": "nats://127.0.0.1:4222",
     // mongo
+    // log
+    "log-stdout": "log.txt",
+    "log-stderr": "log.txt"
 }

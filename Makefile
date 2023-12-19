@@ -8,11 +8,13 @@ ba:
 	cd game && go build -o ../bin/game main.go 
 	cd gateway && go build -o ../bin/gateway main.go 
 
-rungateway:
-	cd gateway && ../bin/gateway
+run:
+	tools/shell/run.sh
+	
+stop:
+	tools/shell/stop.sh
 
-rungame:
-	cd game && ../bin/game
-
-runclient:
+client:
 	node tools/fakecli/main.js
+
+br: ba run
