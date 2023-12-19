@@ -17,6 +17,7 @@ type Server struct {
 }
 
 func NewServer(modules ...idef.IModule) *Server {
+	log.Init()
 	return &Server{
 		modules: append(modules, nats.New(infra.ModTypNats)), // nats module最后启动最先停止
 	}
