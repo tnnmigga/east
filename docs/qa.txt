@@ -2,17 +2,14 @@
   go1.21
   nats, 并通过nats stream add "stream-cast"命令创建流
 
-2.快速编译运行
-  make ba
-  make rungateway
-  make rungame
-  需要挂后台加 > xxx.log 2>&1
+2.快速编译运行服务器
+  make br
 
 3.假客户端fakecli怎么使用
   需要安装nodejs
   运行cd tools/fakecli && npm install安装依赖
-  make runclient启动
-  send() // send(协议名, 协议体)
+  make client启动
+  send() // send(协议名, 协议体) 发包
 
 4.快速理解代码结构
   每个进程有一个唯一server-id
