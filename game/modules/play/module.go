@@ -13,9 +13,8 @@ type Module struct {
 }
 
 func New() idef.IModule {
-	basicModule := module.New(define.ModTypPlay, 100000)
 	m := &Module{
-		Domain: domain.New(basicModule),
+		Domain: domain.New(module.New(define.ModTypPlay, 100000)),
 	}
 	impl.Init(m.Domain)
 	return m
