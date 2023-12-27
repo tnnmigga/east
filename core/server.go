@@ -32,30 +32,36 @@ func (s *Server) Init() {
 	s.before(idef.ServerStateInit, s.abort)
 	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	log.Init()
+	log.Info("server initialization")
 	s.after(idef.ServerStateInit, s.abort)
 }
 
 func (s *Server) Run() {
 	s.before(idef.ServerStateRun, s.abort)
+	log.Info("server try to run")
 	for _, m := range s.modules {
 		s.runModule(s.wg, m)
 	}
+	log.Info("server running successfully")
 	s.after(idef.ServerStateRun, s.abort)
 }
 
 func (s *Server) Stop() {
 	s.before(idef.ServerStateStop, s.noabort)
+	log.Info("server try to stop")
 	sys.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		util.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
+	log.Info("server stoped successfully")
 	s.after(idef.ServerStateStop, s.noabort)
 }
 
 func (s *Server) Close() {
 	s.before(idef.ServerStateClose, s.noabort)
+	log.Info("server close")
 	os.Exit(0)
 }
 
