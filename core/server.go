@@ -8,7 +8,9 @@ import (
 	"east/core/log"
 	"east/core/sys"
 	"east/core/util"
+	"fmt"
 	"os"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -65,6 +67,15 @@ func (s *Server) Close() {
 	os.Exit(0)
 }
 
+func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
+	wg.Add(1)
+	go func() {
+		defer util.RecoverPanic()
+		defer wg.Done()
+		m.Run()
+	}()
+}
+
 func (s *Server) abort(m idef.IModule, err error) {
 	log.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
@@ -77,7 +88,7 @@ func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, er
 	for _, m := range s.modules {
 		hook := m.Hook(state, 0)
 		for _, h := range hook {
-			if err := h(); err != nil {
+			if err := wrapHook(h)(); err != nil {
 				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
 					f(m, err)
@@ -91,7 +102,7 @@ func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, err
 	for _, m := range s.modules {
 		hook := m.Hook(state, 1)
 		for _, h := range hook {
-			if err := h(); err != nil {
+			if err := wrapHook(h)(); err != nil {
 				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
 					f(m, err)
@@ -101,11 +112,14 @@ func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, err
 	}
 }
 
-func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
-	wg.Add(1)
-	go func() {
-		defer util.RecoverPanic()
-		defer wg.Done()
-		m.Run()
-	}()
+// wrapHook 添加panic处理
+func wrapHook(h func() error) func() error {
+	return func() (err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("%v: %s", r, debug.Stack())
+			}
+		}()
+		return h()
+	}
 }
