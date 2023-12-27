@@ -29,66 +29,66 @@ func NewServer(modules ...idef.IModule) *Server {
 }
 
 func (s *Server) Init() {
-	s.before(idef.ServerStateInit, s.panicErr)
+	s.before(idef.ServerStateInit, s.abort)
 	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	log.Init()
-	s.after(idef.ServerStateInit)
+	s.after(idef.ServerStateInit, s.abort)
 }
 
 func (s *Server) Run() {
-	s.before(idef.ServerStateRun, s.panicErr)
+	s.before(idef.ServerStateRun, s.abort)
 	for _, m := range s.modules {
 		s.runModule(s.wg, m)
 	}
-	s.after(idef.ServerStateRun, s.panicErr)
+	s.after(idef.ServerStateRun, s.abort)
 }
 
 func (s *Server) Stop() {
-	s.before(idef.ServerStateStop, s.logErr)
+	s.before(idef.ServerStateStop, s.noabort)
 	sys.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		util.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
-	s.after(idef.ServerStateStop, s.logErr)
+	s.after(idef.ServerStateStop, s.noabort)
 }
 
 func (s *Server) Close() {
-	s.before(idef.ServerStateClose, s.logErr)
+	s.before(idef.ServerStateClose, s.noabort)
 	os.Exit(0)
 }
 
-func (s *Server) panicErr(err error) {
-	panic(err)
+func (s *Server) abort(m idef.IModule, err error) {
+	log.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
-func (s *Server) logErr(err error) {
-	log.Fatal(err)
+func (s *Server) noabort(m idef.IModule, err error) {
+	log.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
-func (s *Server) before(state idef.ServerState, onError ...func(error)) {
+func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, error)) {
 	for _, m := range s.modules {
 		hook := m.Hook(state, 0)
 		for _, h := range hook {
 			if err := h(); err != nil {
 				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
-					f(err)
+					f(m, err)
 				}
 			}
 		}
 	}
 }
 
-func (s *Server) after(state idef.ServerState, onError ...func(error)) {
+func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, error)) {
 	for _, m := range s.modules {
 		hook := m.Hook(state, 1)
 		for _, h := range hook {
 			if err := h(); err != nil {
 				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
-					f(err)
+					f(m, err)
 				}
 			}
 		}

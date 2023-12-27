@@ -1,9 +1,11 @@
 package timerimpl
 
 import (
+	"east/core/idef"
 	"east/core/timer"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
+	"errors"
 )
 
 type service struct {
@@ -12,16 +14,22 @@ type service struct {
 }
 
 func New(d *domain.Domain) api.ITimer {
-	return &service{
+	s := &service{
 		Domain:    d,
 		TimerHeap: timer.NewTimerHeap(d),
 	}
+	s.After(idef.ServerStateInit, s.afterInit)
+	s.Before(idef.ServerStateStop, s.beforeStop)
+	return s
 }
 
-func (s *service) Init() {
-	// 加载定时器数据
+func (s *service) afterInit() error {
+	// 加载数据
+	return errors.New("timer error")
+	return nil
 }
 
-func (s *service) Destroy() {
-	// 定时器数据落地
+func (s *service) beforeStop() error {
+	// 数据落地
+	return nil
 }
