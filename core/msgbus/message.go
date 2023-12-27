@@ -68,7 +68,6 @@ func warpRPCCb[T any](cb func(resp T, err error)) func(resp any, err error) {
 func messageDispatch(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	modName, oneOfMod := findCastOpt[string](opts, keyOneOfModules)
-	var castSucc bool
 	for _, recv := range recvs {
 		if !ok {
 			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
@@ -79,15 +78,10 @@ func messageDispatch(msg any, opts ...castOpt) {
 		}
 		select {
 		case recv.MQ() <- msg:
-			castSucc = true
 		default:
 			onCastFail(recv, msg)
 		}
 	}
-	if castSucc {
-		return
-	}
-	log.Errorf("message cast mq full %s %s", util.StructName(msg), util.String(msg))
 }
 
 // onCastFail 消息投递失败处理

@@ -18,22 +18,27 @@ type Module struct {
 }
 
 func New() idef.IModule {
-	lister, err := net.Listen("tcp", iconf.String("tcp-addr", "127.0.0.1:9527"))
-	if err != nil {
-		panic(err)
-	}
 	m := &Module{
 		Module: module.New(define.ModTypTCPAgent, 100000),
-		lister: lister,
 		conns:  map[uint64]*userAgent{},
 	}
 	m.initHandler()
+	m.After(idef.ServerStateInit, m.afterInit)
+	m.After(idef.ServerStateRun, m.afterRun)
 	return m
 }
 
-func (m *Module) Run() {
+func (m *Module) afterInit() (err error) {
+	m.lister, err = net.Listen("tcp", iconf.String("tcp-addr", "127.0.0.1:9527"))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Module) afterRun() error {
 	go m.accept()
-	m.Module.Run()
+	return nil
 }
 
 func (m *Module) accept() {

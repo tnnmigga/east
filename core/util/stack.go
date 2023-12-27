@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+func Panic(err error) {
+	panic(err)
+}
+
 func RecoverPanic() {
 	if r := recover(); r != nil {
 		log.Errorf("%v: %s", r, debug.Stack())

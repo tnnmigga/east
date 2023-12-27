@@ -19,18 +19,19 @@ var (
 )
 
 type Module struct {
-	name     string
-	mq       chan any
-	handlers map[reflect.Type]*idef.Handler
-	closeSig chan struct{}
+	name      string
+	mq        chan any
+	handlers  map[reflect.Type]*idef.Handler
+	hooks     [idef.ServerStateMax][2][]func() error
+	closeSign chan struct{}
 }
 
 func New(name string, mqLen int32) *Module {
 	return &Module{
-		name:     name,
-		mq:       make(chan any, mqLen),
-		handlers: map[reflect.Type]*idef.Handler{},
-		closeSig: make(chan struct{}, 1),
+		name:      name,
+		mq:        make(chan any, mqLen),
+		handlers:  map[reflect.Type]*idef.Handler{},
+		closeSign: make(chan struct{}, 1),
 	}
 }
 
@@ -42,10 +43,6 @@ func (m *Module) MQ() chan any {
 	return m.mq
 }
 
-func (m *Module) Handlers() map[reflect.Type]*idef.Handler {
-	return m.handlers
-}
-
 func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	_, ok := m.handlers[mType]
 	if ok {
@@ -55,11 +52,25 @@ func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	m.handlers[mType] = handler
 }
 
+func (m *Module) Hook(state idef.ServerState, stage int) []func() error {
+	return m.hooks[state][stage]
+}
+
+func (m *Module) Before(state idef.ServerState, hook func() error) {
+	m.hooks[state][0] = append(m.hooks[state][0], hook)
+}
+
+func (m *Module) After(state idef.ServerState, hook func() error) {
+	if state >= idef.ServerStateClose {
+		panic("module after close hook not support")
+	}
+	m.hooks[state][1] = append(m.hooks[state][1], hook)
+}
+
 func (m *Module) Run() {
-	defer util.RecoverPanic()
 	defer func() {
 		log.Infof("%v has stoped", m.Name())
-		m.closeSig <- struct{}{}
+		m.closeSign <- struct{}{}
 	}()
 	for msg := range m.MQ() {
 		msgType := reflect.TypeOf(msg)
@@ -77,8 +88,7 @@ func (m *Module) Run() {
 func (m *Module) Stop() {
 	log.Infof("try stop %s", m.name)
 	close(m.mq)
-	<-m.closeSig
-	// log.Infof("stop %s success", m.name)
+	<-m.closeSign
 }
 
 func (m *Module) cb(msg any) {

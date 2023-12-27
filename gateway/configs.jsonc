@@ -5,6 +5,7 @@
     "nats-url": "nats://127.0.0.1:4222",
     // mongo
     // log
-    "log-stdout": "log.txt",
-    "log-stderr": "log.txt"
+    // "log-encoding": "console", // console(default) or json
+    "log-stdout": "log.txt", // default stdout
+    "log-stderr": "log.txt" // default stderr
 }

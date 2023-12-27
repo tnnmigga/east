@@ -3,7 +3,6 @@ package util
 import (
 	"io"
 	"os"
-	"regexp"
 )
 
 func ReadFile(name string) []byte {
@@ -16,11 +15,4 @@ func ReadFile(name string) []byte {
 		panic(err)
 	}
 	return b
-}
-
-func Uncomment(b []byte) []byte {
-	reg := regexp.MustCompile(`/\*{1,2}[\s\S]*?\*/`)
-	b = reg.ReplaceAll(b, []byte("\n"))
-	reg = regexp.MustCompile(`\s//[\s\S]*?\n`)
-	return reg.ReplaceAll(b, []byte("\n"))
 }

@@ -24,13 +24,30 @@ const (
 
 type Module struct {
 	*module.Module
-	conn   *nats.Conn
-	js     jetstream.JetStream
-	stream jetstream.Stream
-	cons   jetstream.Consumer
+	conn         *nats.Conn
+	js           jetstream.JetStream
+	stream       jetstream.Stream
+	cons         jetstream.Consumer
+	consCtx      jetstream.ConsumeContext
+	castSub      *nats.Subscription
+	broadcastSub *nats.Subscription
+	queueSub     *nats.Subscription
+	rpcSub       *nats.Subscription
 }
 
 func New(name string) idef.IModule {
+	m := &Module{
+		Module: module.New(name, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
+	}
+	m.initHandler()
+	m.After(idef.ServerStateInit, m.afterInit)
+	m.After(idef.ServerStateRun, m.afterRun)
+	m.Before(idef.ServerStateStop, m.beforeStop)
+	m.After(idef.ServerStateStop, m.afterStop)
+	return m
+}
+
+func (m *Module) afterInit() error {
 	conn, err := nats.Connect(
 		iconf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
@@ -41,23 +58,49 @@ func New(name string) idef.IModule {
 		}),
 	)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	m := &Module{
-		Module: module.New(name, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
-		conn:   conn,
+	m.conn = conn
+	m.js, err = jetstream.New(m.conn)
+	if err != nil {
+		return err
 	}
-	m.initHandler()
-	return m
+	m.stream, err = m.js.Stream(context.Background(), castStreamName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (m *Module) Run() {
-	stop, err := m.initSubcribe()
+func (m *Module) afterRun() (err error) {
+	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
+		Durable:       fmt.Sprintf("%s-%d", iconf.ServerType(), iconf.ServerID()),
+		FilterSubject: streamCastSubject(iconf.ServerID()),
+	})
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer stop()
-	m.Module.Run()
+	m.consCtx, err = m.cons.Consume(m.streamRecv)
+	if err != nil {
+		return err
+	}
+	m.castSub, err = m.conn.Subscribe(castSubject(iconf.ServerID()), m.recv)
+	if err != nil {
+		return err
+	}
+	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
+	if err != nil {
+		return err
+	}
+	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(iconf.ServerType()), iconf.ServerType(), m.recv)
+	if err != nil {
+		return err
+	}
+	m.rpcSub, err = m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func castSubject(serverID uint32) string {
@@ -80,51 +123,19 @@ func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
-func (m *Module) initSubcribe() (stop func(), err error) {
-	m.js, err = jetstream.New(m.conn)
-	if err != nil {
-		return nil, err
-	}
-	m.stream, err = m.js.Stream(context.Background(), castStreamName)
-	if err != nil {
-		return nil, err
-	}
-	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("%s-%d", iconf.ServerType(), iconf.ServerID()),
-		FilterSubject: streamCastSubject(iconf.ServerID()),
-	})
-	if err != nil {
-		return nil, err
-	}
-	consCtx, err := m.cons.Consume(m.streamRecv)
-	if err != nil {
-		return nil, err
-	}
-	castSub, err := m.conn.Subscribe(castSubject(iconf.ServerID()), m.recv)
-	if err != nil {
-		return nil, err
-	}
-	broadcastSub, err := m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
-	if err != nil {
-		return nil, err
-	}
-	queueSub, err := m.conn.QueueSubscribe(randomCastSubject(iconf.ServerType()), iconf.ServerType(), m.recv)
-	if err != nil {
-		return nil, err
-	}
-	rpcSub, err := m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
-	if err != nil {
-		return nil, err
-	}
-	return func() {
-		consCtx.Stop()
-		castSub.Drain()
-		broadcastSub.Drain()
-		queueSub.Drain()
-		rpcSub.Drain()
-		<-m.js.PublishAsyncComplete()
-		m.conn.Close()
-	}, nil
+func (m *Module) beforeStop() error {
+	m.consCtx.Stop()
+	m.castSub.Drain()
+	m.broadcastSub.Drain()
+	m.queueSub.Drain()
+	m.rpcSub.Drain()
+	return nil
+}
+
+func (m *Module) afterStop() error {
+	<-m.js.PublishAsyncComplete()
+	m.conn.Close()
+	return nil
 }
 
 func (m *Module) streamRecv(msg jetstream.Msg) {
