@@ -12,3 +12,10 @@ type IModule interface {
 	RegisterHandler(mType reflect.Type, handler *Handler)
 	Hook(state ServerState, stage int) []func() error
 }
+
+type IServer interface {
+	Init()
+	Run()
+	Stop()
+	Close()
+}

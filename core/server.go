@@ -20,7 +20,7 @@ type Server struct {
 	wg      *sync.WaitGroup
 }
 
-func NewServer(modules ...idef.IModule) *Server {
+func NewServer(modules ...idef.IModule) idef.IServer {
 	server := &Server{
 		modules: make([]idef.IModule, 0, len(modules)+1),
 		wg:      &sync.WaitGroup{},
