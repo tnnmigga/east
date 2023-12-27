@@ -13,5 +13,4 @@ func Init(d *domain.Domain) {
 	d.PutImpl(domain.EventImplIndex, eventimpl.New(d))
 	d.PutImpl(domain.TimerImplIndex, timerimpl.New(d))
 	d.PutImpl(domain.UserImplIndex, userimpl.New(d))
-	d.Init()
 }

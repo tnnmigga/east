@@ -19,7 +19,7 @@ type Module struct {
 
 func New() idef.IModule {
 	m := &Module{
-		Module: module.New(define.ModTypTCPAgent, 100000),
+		Module: module.New(define.ModTypTCPAgent, module.DefaultMQLen),
 		conns:  map[uint64]*userAgent{},
 	}
 	m.initHandler()

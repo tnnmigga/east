@@ -1,9 +1,8 @@
 package idef
 
 type Handler struct {
-	Name string
-	Cb   func(msg any)
-	RPC  func(msg any, resp func(any))
+	Cb  func(msg any)
+	RPC func(msg any, resp func(any))
 }
 
 type CastPackage struct {
