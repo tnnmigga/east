@@ -3,7 +3,6 @@ package core
 import (
 	"east/core/iconf"
 	"east/core/idef"
-	"east/core/infra"
 	"east/core/infra/nats"
 	"east/core/log"
 	"east/core/sys"
@@ -25,7 +24,7 @@ func NewServer(modules ...idef.IModule) idef.IServer {
 		modules: make([]idef.IModule, 0, len(modules)+1),
 		wg:      &sync.WaitGroup{},
 	}
-	server.modules = append(server.modules, nats.New(infra.ModTypNats)) // nats最后停止
+	server.modules = append(server.modules, nats.New()) // nats最后停止
 	server.modules = append(server.modules, modules...)
 	return server
 }

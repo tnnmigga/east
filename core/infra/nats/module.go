@@ -5,6 +5,7 @@ import (
 	"east/core/codec"
 	"east/core/iconf"
 	"east/core/idef"
+	"east/core/infra"
 	"east/core/log"
 	"east/core/module"
 	"east/core/msgbus"
@@ -35,9 +36,9 @@ type Module struct {
 	rpcSub       *nats.Subscription
 }
 
-func New(name string) idef.IModule {
+func New() idef.IModule {
 	m := &Module{
-		Module: module.New(name, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
+		Module: module.New(infra.ModTypNats, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
 	}
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)

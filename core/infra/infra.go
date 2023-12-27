@@ -1,5 +1,6 @@
 package infra
 
 const (
-	ModTypNats = "nats"
+	ModTypNats  = "nats"
+	ModTypMongo = "mongo"
 )

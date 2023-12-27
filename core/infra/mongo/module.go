@@ -2,7 +2,9 @@ package mongo
 
 import (
 	"context"
+	"east/core/iconf"
 	"east/core/idef"
+	"east/core/infra"
 	"east/core/module"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,20 +17,27 @@ type Module struct {
 	mongocli *mongo.Client
 }
 
-func New(name, url string) idef.IModule {
-	cli, err := mongo.Connect(context.Background(), options.Client().ApplyURI(url))
-	if err != nil {
-		panic(err)
+func New() idef.IModule {
+	m := &Module{
+		Module: module.New(infra.ModTypMongo, module.DefaultMQLen),
 	}
-	return &Module{
-		Module:   module.New(name, module.DefaultMQLen),
-		mongocli: cli,
-	}
+	m.Before(idef.ServerStateRun, m.beforeRun)
+	m.After(idef.ServerStateStop, m.afterStop)
+	return m
 }
 
-func (m *Module) Run() {
-	if err := m.mongocli.Ping(context.Background(), readpref.Primary()); err != nil {
-		panic(err)
+func (m *Module) beforeRun() (err error) {
+	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(iconf.String("mongo-url", "mongodb://localhost")))
+	if err != nil {
+		return err
 	}
-	m.Module.Run()
+	if err := m.mongocli.Ping(context.Background(), readpref.Primary()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Module) afterStop() (err error) {
+	m.mongocli.Disconnect(context.Background())
+	return nil
 }
