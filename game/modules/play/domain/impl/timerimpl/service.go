@@ -5,7 +5,6 @@ import (
 	"east/core/timer"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
-	"errors"
 )
 
 type service struct {
@@ -25,7 +24,6 @@ func New(d *domain.Domain) api.ITimer {
 
 func (s *service) afterInit() error {
 	// 加载数据
-	return errors.New("timer error")
 	return nil
 }
 
