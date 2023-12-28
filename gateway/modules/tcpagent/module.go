@@ -4,22 +4,22 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
-	"east/core/module"
+	"east/core/mod"
 	"east/define"
 	"net"
 	"sync"
 )
 
-type Module struct {
-	*module.Module
+type module struct {
+	*mod.Module
 	sync.RWMutex
 	lister net.Listener
 	conns  map[uint64]*userAgent
 }
 
 func New() idef.IModule {
-	m := &Module{
-		Module: module.New(define.ModTypTCPAgent, module.DefaultMQLen),
+	m := &module{
+		Module: mod.New(define.ModTypTCPAgent, mod.DefaultMQLen),
 		conns:  map[uint64]*userAgent{},
 	}
 	m.initHandler()
@@ -28,7 +28,7 @@ func New() idef.IModule {
 	return m
 }
 
-func (m *Module) afterInit() (err error) {
+func (m *module) afterInit() (err error) {
 	m.lister, err = net.Listen("tcp", iconf.String("tcp-addr", "127.0.0.1:9527"))
 	if err != nil {
 		return err
@@ -36,12 +36,12 @@ func (m *Module) afterInit() (err error) {
 	return nil
 }
 
-func (m *Module) afterRun() error {
+func (m *module) afterRun() error {
 	go m.accept()
 	return nil
 }
 
-func (m *Module) accept() {
+func (m *module) accept() {
 	for {
 		conn, err := m.lister.Accept()
 		log.Infof("new conn!")

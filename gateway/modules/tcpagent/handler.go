@@ -6,11 +6,11 @@ import (
 	"east/pb"
 )
 
-func (m *Module) initHandler() {
+func (m *module) initHandler() {
 	msgbus.RegisterHandler(m, m.onS2CPackage)
 }
 
-func (m *Module) onS2CPackage(pkg *pb.S2CPackage) {
+func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
 	m.RLock()
 	defer m.RUnlock()
 	agent, ok := m.conns[pkg.UserID]

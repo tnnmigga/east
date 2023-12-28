@@ -5,28 +5,28 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/infra"
-	"east/core/module"
+	"east/core/mod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-type Module struct {
-	*module.Module
+type module struct {
+	*mod.Module
 	mongocli *mongo.Client
 }
 
 func New() idef.IModule {
-	m := &Module{
-		Module: module.New(infra.ModTypMongo, module.DefaultMQLen),
+	m := &module{
+		Module: mod.New(infra.ModTypMongo, mod.DefaultMQLen),
 	}
 	m.Before(idef.ServerStateRun, m.beforeRun)
 	m.After(idef.ServerStateStop, m.afterStop)
 	return m
 }
 
-func (m *Module) beforeRun() (err error) {
+func (m *module) beforeRun() (err error) {
 	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(iconf.String("mongo-url", "mongodb://localhost")))
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (m *Module) beforeRun() (err error) {
 	return nil
 }
 
-func (m *Module) afterStop() (err error) {
+func (m *module) afterStop() (err error) {
 	m.mongocli.Disconnect(context.Background())
 	return nil
 }

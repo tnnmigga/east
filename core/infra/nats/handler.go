@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (m *Module) initHandler() {
+func (m *module) initHandler() {
 	msgbus.RegisterHandler(m, m.onCastPackage)
 	msgbus.RegisterHandler(m, m.onStreamCastPackage)
 	msgbus.RegisterHandler(m, m.onBroadcastPackage)
@@ -18,7 +18,7 @@ func (m *Module) initHandler() {
 	msgbus.RegisterHandler(m, m.onRPCRequest)
 }
 
-func (m *Module) onCastPackage(pkg *idef.CastPackage) {
+func (m *module) onCastPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(castSubject(pkg.ServerID), b)
 	if err != nil {
@@ -26,7 +26,7 @@ func (m *Module) onCastPackage(pkg *idef.CastPackage) {
 	}
 }
 
-func (m *Module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
+func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	b := codec.Encode(pkg.Body)
 	_, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
 	if err != nil {
@@ -34,7 +34,7 @@ func (m *Module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	}
 }
 
-func (m *Module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
+func (m *module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(broadcastSubject(pkg.ServerType), b)
 	if err != nil {
@@ -42,7 +42,7 @@ func (m *Module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	}
 }
 
-func (m *Module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
+func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(randomCastSubject(pkg.ServerType), b)
 	if err != nil {
@@ -50,7 +50,7 @@ func (m *Module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	}
 }
 
-func (m *Module) onRPCRequest(req *idef.RPCRequest) {
+func (m *module) onRPCRequest(req *idef.RPCRequest) {
 	b := codec.Encode(req.Req)
 	sys.Go(func() {
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)

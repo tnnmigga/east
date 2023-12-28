@@ -7,7 +7,7 @@ import (
 	"east/core/idef"
 	"east/core/infra"
 	"east/core/log"
-	"east/core/module"
+	"east/core/mod"
 	"east/core/msgbus"
 	"east/core/sys"
 	"east/core/util"
@@ -23,8 +23,8 @@ const (
 	castStreamName = "stream-cast"
 )
 
-type Module struct {
-	*module.Module
+type module struct {
+	*mod.Module
 	conn         *nats.Conn
 	js           jetstream.JetStream
 	stream       jetstream.Stream
@@ -37,8 +37,8 @@ type Module struct {
 }
 
 func New() idef.IModule {
-	m := &Module{
-		Module: module.New(infra.ModTypNats, iconf.Int32("nats-mq-len", module.DefaultMQLen)),
+	m := &module{
+		Module: mod.New(infra.ModTypNats, iconf.Int32("nats-mq-len", mod.DefaultMQLen)),
 	}
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
@@ -48,7 +48,7 @@ func New() idef.IModule {
 	return m
 }
 
-func (m *Module) afterInit() error {
+func (m *module) afterInit() error {
 	conn, err := nats.Connect(
 		iconf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
@@ -73,7 +73,7 @@ func (m *Module) afterInit() error {
 	return nil
 }
 
-func (m *Module) afterRun() (err error) {
+func (m *module) afterRun() (err error) {
 	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
 		Durable:       fmt.Sprintf("%s-%d", iconf.ServerType(), iconf.ServerID()),
 		FilterSubject: streamCastSubject(iconf.ServerID()),
@@ -124,7 +124,7 @@ func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
-func (m *Module) beforeStop() error {
+func (m *module) beforeStop() error {
 	m.consCtx.Stop()
 	m.castSub.Drain()
 	m.broadcastSub.Drain()
@@ -133,13 +133,13 @@ func (m *Module) beforeStop() error {
 	return nil
 }
 
-func (m *Module) afterStop() error {
+func (m *module) afterStop() error {
 	<-m.js.PublishAsyncComplete()
 	m.conn.Close()
 	return nil
 }
 
-func (m *Module) streamRecv(msg jetstream.Msg) {
+func (m *module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
 	pkg, err := codec.Decode(msg.Data())
@@ -150,7 +150,7 @@ func (m *Module) streamRecv(msg jetstream.Msg) {
 	msgbus.Cast(iconf.ServerID(), pkg)
 }
 
-func (m *Module) recv(msg *nats.Msg) {
+func (m *module) recv(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
@@ -160,7 +160,7 @@ func (m *Module) recv(msg *nats.Msg) {
 	msgbus.Cast(iconf.ServerID(), pkg)
 }
 
-func (m *Module) rpc(msg *nats.Msg) {
+func (m *module) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {

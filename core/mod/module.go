@@ -1,4 +1,4 @@
-package module
+package mod
 
 import (
 	"east/core/idef"
