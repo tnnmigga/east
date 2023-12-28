@@ -22,7 +22,7 @@ type Module struct {
 	name      string
 	mq        chan any
 	handlers  map[reflect.Type]*idef.Handler
-	hooks     [idef.ServerStateMax][2][]func() error
+	hooks     [idef.ServerStateClose + 1][2][]func() error
 	closeSign chan struct{}
 }
 
