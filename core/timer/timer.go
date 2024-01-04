@@ -49,7 +49,7 @@ func NewTimerHeap(m idef.IModule) *TimerHeap {
 	return h
 }
 
-func (h *TimerHeap) Create(delay time.Duration, ctx any) uint64 {
+func (h *TimerHeap) New(delay time.Duration, ctx any) uint64 {
 	t := &timerCtx{
 		ID:   idgen.NewUUID(),
 		Time: util.NowNs() + delay,

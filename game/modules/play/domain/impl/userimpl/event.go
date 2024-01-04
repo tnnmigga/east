@@ -16,7 +16,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 	msgbus.Cast(iconf.ServerID(), &mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
-		Ops: []*mongo.MongoOp{
+		Ops: []*mongo.MongoSaveOp{
 			{
 				Filter: bson.M{
 					"_id": 1,
@@ -26,5 +26,12 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 				},
 			},
 		},
+	})
+	msgbus.AsyncCall(s, iconf.ServerID(), &mongo.MongoLoad{
+		DBName:   "test",
+		CollName: "test",
+		Filter:   bson.M{},
+	}, func(res any, err error) {
+		log.Info(res, err)
 	})
 }

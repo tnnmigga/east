@@ -4,7 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type MongoOp struct {
+type MongoSaveOp struct {
 	Filter bson.M
 	Value  any
 }
@@ -12,12 +12,11 @@ type MongoOp struct {
 type MongoSave struct {
 	DBName   string
 	CollName string
-	Ops      []*MongoOp
+	Ops      []*MongoSaveOp
 }
 
 type MongoLoad struct {
 	DBName   string
 	CollName string
 	Filter   bson.M
-	
 }

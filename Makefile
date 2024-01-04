@@ -19,3 +19,5 @@ client:
 	node tools/fakecli/main.js
 
 br: ba run
+
+rerun: stop br

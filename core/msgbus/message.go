@@ -79,7 +79,7 @@ func AsyncCall[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, 
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 	recvs, ok := recvers[reflect.TypeOf(req)]
 	if !ok {
-		log.Errorf("message cast recv not fuound %v", util.StructName(req))
+		log.Errorf("recvs not fuound %v", util.StructName(req))
 		return
 	}
 	sys.Go(func() {
@@ -102,6 +102,7 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 		case callResp.Resp = <-callReq.Resp:
 		case callResp.Err = <-callReq.Err:
 		}
+		m.Assign(callResp)
 	})
 }
 

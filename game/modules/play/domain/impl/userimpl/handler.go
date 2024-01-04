@@ -17,7 +17,7 @@ func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 		Topic:   define.EventUserSayHello,
 		Value:   1,
 	})
-	s.TimerImpl().Create(time.Second*2, &timerSayHello{
+	s.TimerImpl().New(time.Second*2, &timerSayHello{
 		Text: "hello client!",
 	})
 }

@@ -29,9 +29,14 @@ func (m *module) onMongoSave(msg *MongoSave) {
 	log.Info(res, err)
 }
 
-func (m *module) onMongoLoad(msg *MongoLoad, resolve func(any), reject func(error)) {
-	cur, _ := m.mongocli.Database(msg.DBName).Collection(msg.CollName).Find(context.Background(), msg.Filter)
-	var res any
-	cur.Decode(res)
-	resolve(res)
+func (m *module) onMongoLoad(msg *MongoLoad, respFn func(any), errFn func(error)) {
+	// cur, _ := m.mongocli.Database(msg.DBName).Collection(msg.CollName).Find(context.Background(), msg.Filter)
+	res := map[int]int{1: 1}
+	// err := cur.Decode(res)
+	// if err != nil {
+	// 	log.Info("aaaaa", err)
+	// 	errFn(err)
+	// 	return
+	// }
+	respFn(res)
 }
