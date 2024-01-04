@@ -2,7 +2,7 @@ package idef
 
 type Handler struct {
 	Cb  func(msg any)
-	RPC func(msg any, resp func(any))
+	RPC func(req any, resolve func(any), reject func(error))
 }
 
 type CastPackage struct {
@@ -25,17 +25,23 @@ type RandomCastPackage struct {
 	Body       any
 }
 
+type AsyncCallRequest struct {
+	Req  any
+	Resp chan any
+	Err  chan error
+}
+
+type AsyncCallResponse struct {
+	Module IModule
+	Req    any
+	Resp   any
+	Err    error
+	Cb     func(resp any, err error)
+}
+
 type RPCRequest struct {
 	Module   IModule
 	ServerID uint32
 	Req      any
-	Resp     any
 	Cb       func(resp any, err error)
-	Err      error
-}
-
-type RPCPackage struct {
-	Req  any
-	Resp chan any
-	Err  chan error
 }

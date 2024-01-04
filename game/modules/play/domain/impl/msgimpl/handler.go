@@ -9,10 +9,6 @@ import (
 	"east/pb"
 )
 
-func (s *service) regMsgHandler() {
-	msgbus.RegisterHandler(s, s.onC2SPackage)
-}
-
 func (m *service) onC2SPackage(msg *pb.C2SPackage) {
 	pkg, err := codec.Decode(msg.Body)
 	if err != nil {

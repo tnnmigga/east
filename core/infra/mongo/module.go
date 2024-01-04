@@ -21,6 +21,7 @@ func New() idef.IModule {
 	m := &module{
 		Module: mod.New(infra.ModTypMongo, mod.DefaultMQLen),
 	}
+	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
 	m.After(idef.ServerStateStop, m.afterStop)
 	return m

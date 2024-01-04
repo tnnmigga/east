@@ -10,10 +10,6 @@ import (
 	"time"
 )
 
-func (s *service) registerMsgHandler() {
-	msgbus.RegisterHandler(s, s.onSayHelloReq)
-}
-
 func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 	log.Infof("client say hello %v", msg.Text)
 	msgbus.Cast(iconf.ServerID(), &eventbus.Event{

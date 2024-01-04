@@ -14,8 +14,8 @@ const (
 )
 
 var (
-	rpcPackage = reflect.TypeOf((*idef.RPCPackage)(nil))
-	rpcRequest = reflect.TypeOf((*idef.RPCRequest)(nil))
+	rpcReqType  = reflect.TypeOf((*idef.AsyncCallRequest)(nil))
+	rpcRespType = reflect.TypeOf((*idef.AsyncCallResponse)(nil))
 )
 
 type Module struct {
@@ -39,8 +39,12 @@ func (m *Module) Name() string {
 	return m.name
 }
 
-func (m *Module) MQ() chan any {
-	return m.mq
+func (m *Module) Assign(msg any) {
+	select {
+	case m.mq <- msg:
+	default:
+		log.Errorf("modele %s mq full, lose %s", m.name, util.String(msg))
+	}
 }
 
 func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
@@ -72,13 +76,13 @@ func (m *Module) Run() {
 		log.Infof("%v has stoped", m.Name())
 		m.closeSign <- struct{}{}
 	}()
-	for msg := range m.MQ() {
+	for msg := range m.mq {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
-		case rpcPackage: // 被发起rpc
-			m.rpc(msg.(*idef.RPCPackage))
-		case rpcRequest: // rpc请求完成
-			m.rpcResp(msg.(*idef.RPCRequest))
+		case rpcReqType: // 被发起rpc
+			m.rpc(msg.(*idef.AsyncCallRequest))
+		case rpcRespType: // rpc请求完成
+			m.rpcResp(msg.(*idef.AsyncCallResponse))
 		default:
 			m.cb(msg)
 		}
@@ -102,7 +106,7 @@ func (m *Module) cb(msg any) {
 	fns.Cb(msg)
 }
 
-func (m *Module) rpc(msg *idef.RPCPackage) {
+func (m *Module) rpc(msg *idef.AsyncCallRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -116,10 +120,12 @@ func (m *Module) rpc(msg *idef.RPCPackage) {
 	}
 	fns.RPC(msg.Req, func(v any) {
 		msg.Resp <- v
+	}, func(err error) {
+		msg.Err <- err
 	})
 }
 
-func (m *Module) rpcResp(req *idef.RPCRequest) {
+func (m *Module) rpcResp(req *idef.AsyncCallResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

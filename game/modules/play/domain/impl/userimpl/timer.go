@@ -6,10 +6,6 @@ import (
 	"east/pb"
 )
 
-func (s *service) registerTimerHandler() {
-	msgbus.RegisterHandler(s, s.onTimerSayHello)
-}
-
 type timerSayHello struct {
 	Text string
 }

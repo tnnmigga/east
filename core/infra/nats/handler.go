@@ -7,6 +7,7 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/sys"
+	"errors"
 	"time"
 )
 
@@ -53,12 +54,27 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 func (m *module) onRPCRequest(req *idef.RPCRequest) {
 	b := codec.Encode(req.Req)
 	sys.Go(func() {
-		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
-		if err == nil {
-			req.Resp, req.Err = codec.Decode(msg.Data)
-		} else {
-			req.Err = err
+		resp := &idef.AsyncCallResponse{
+			Module: req.Module,
+			Req:    req.Req,
+			Cb:     req.Cb,
 		}
-		req.Module.MQ() <- req
+		defer req.Module.Assign(resp)
+		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
+		if err != nil {
+			resp.Err = err
+			return
+		}
+		rpcResp0, err := codec.Decode(msg.Data)
+		if err != nil {
+			resp.Err = errors.New("RPCPkg decode error")
+			return
+		}
+		rpcResp := rpcResp0.(*RPCResponse)
+		if len(rpcResp.Err) != 0 {
+			resp.Err = errors.New(rpcResp.Err)
+			return
+		}
+		resp.Resp, resp.Err = codec.Decode(msg.Data)
 	})
 }

@@ -4,13 +4,27 @@ import (
 	"east/core/iconf"
 	"east/core/idef"
 	"east/core/log"
+	"east/core/sys"
 	"east/core/util"
+	"errors"
+	"time"
 
 	"reflect"
 )
 
 var (
-	recvers map[reflect.Type][]IRecver
+	ErrRPCTimeout = errors.New("rpc timeout")
+)
+
+func init() {
+	iconf.RegInitFn(func() {
+		rpcMaxWaitTime = time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second
+	})
+}
+
+var (
+	recvers        map[reflect.Type][]IRecver
+	rpcMaxWaitTime time.Duration
 )
 
 func init() {
@@ -19,12 +33,12 @@ func init() {
 
 type IRecver interface {
 	Name() string
-	MQ() chan any
+	Assign(any)
 }
 
 func Cast(serverID uint32, msg any, opts ...castOpt) {
 	if serverID == iconf.ServerID() {
-		messageDispatch(msg, opts...)
+		dispatchMsg(msg, opts...)
 		return
 	}
 	if nonuse, find := findCastOpt[bool](opts, keyNonuseStream); nonuse && find { // 不使用流
@@ -48,43 +62,67 @@ func Broadcast(serverType string, msg any) {
 	Cast(iconf.ServerID(), pkg)
 }
 
-func RPC[T any](module idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
-	pkg := &idef.RPCRequest{
-		Module:   module,
+func AsyncCall[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+	if serverID == iconf.ServerID() {
+		localCall(m, req, warpCb(cb))
+		return
+	}
+	rpcReq := &idef.RPCRequest{
+		Module:   m,
 		ServerID: serverID,
 		Req:      req,
-		Cb:       warpRPCCb(cb),
+		Cb:       warpCb(cb),
 	}
-	Cast(iconf.ServerID(), pkg)
+	Cast(iconf.ServerID(), rpcReq)
 }
 
-func warpRPCCb[T any](cb func(resp T, err error)) func(resp any, err error) {
+func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
+	recvs, ok := recvers[reflect.TypeOf(req)]
+	if !ok {
+		log.Errorf("message cast recv not fuound %v", util.StructName(req))
+		return
+	}
+	sys.Go(func() {
+		callReq := &idef.AsyncCallRequest{
+			Req:  req,
+			Resp: make(chan any, 1),
+			Err:  make(chan error, 1),
+		}
+		callResp := &idef.AsyncCallResponse{
+			Module: m,
+			Req:    req,
+			Cb:     warpCb(cb),
+		}
+		recvs[0].Assign(callReq)
+		timer := time.NewTimer(rpcMaxWaitTime)
+		defer timer.Stop()
+		select {
+		case <-timer.C:
+			callResp.Err = ErrRPCTimeout
+		case callResp.Resp = <-callReq.Resp:
+		case callResp.Err = <-callReq.Err:
+		}
+	})
+}
+
+func warpCb[T any](cb func(resp T, err error)) func(resp any, err error) {
 	return func(pkg any, err error) {
 		resp := pkg.(T)
 		cb(resp, err)
 	}
 }
 
-func messageDispatch(msg any, opts ...castOpt) {
+func dispatchMsg(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
+	if !ok {
+		log.Errorf("message cast recv not fuound %v", util.StructName(msg))
+		return
+	}
 	modName, oneOfMod := findCastOpt[string](opts, keyOneOfModules)
 	for _, recv := range recvs {
-		if !ok {
-			log.Errorf("message cast recv not fuound %v", util.StructName(msg))
-			return
-		}
 		if oneOfMod && modName != recv.Name() {
 			continue
 		}
-		select {
-		case recv.MQ() <- msg:
-		default:
-			onCastFail(recv, msg)
-		}
+		recv.Assign(msg)
 	}
-}
-
-// onCastFail 消息投递失败处理
-func onCastFail(recver IRecver, msg any) {
-	log.Errorf("message cast faild, %s %s", util.StructName(msg), util.String(msg))
 }

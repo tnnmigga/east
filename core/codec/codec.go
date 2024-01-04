@@ -68,7 +68,7 @@ func Decode(b []byte) (msg any, err error) {
 	msgID := binary.LittleEndian.Uint32(b)
 	desc, ok := msgIDToDesc[msgID]
 	if !ok {
-		return nil, fmt.Errorf("message decode msgid error %d", msgID)
+		return nil, fmt.Errorf("message decode msgid not found %d", msgID)
 	}
 	msg = desc.New()
 	switch desc.MarshalType {

@@ -20,12 +20,12 @@ func RegisterHandler[T any](m idef.IModule, fn func(msg T)) {
 	})
 }
 
-func RegisterRPC[T any](m idef.IModule, fn func(msg T, resp func(msg any))) {
+func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject func(error))) {
 	msgType := reflect.TypeOf(new(T))
 	m.RegisterHandler(msgType, &idef.Handler{
-		RPC: func(msg0 any, resp func(any)) {
+		RPC: func(msg0 any, res func(any), rej func(error)) {
 			msg := msg0.(T)
-			fn(msg, resp)
+			fn(msg, res, rej)
 		},
 	})
 }

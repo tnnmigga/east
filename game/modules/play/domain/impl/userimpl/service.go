@@ -1,6 +1,9 @@
 package userimpl
 
 import (
+	"east/core/idef"
+	"east/core/msgbus"
+	"east/define"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
 )
@@ -10,16 +13,16 @@ type service struct {
 }
 
 func New(d *domain.Domain) api.IMsg {
-	return &service{
+	s := &service{
 		Domain: d,
 	}
+	s.After(idef.ServerStateInit, s.afterInit)
+	return s
 }
 
-func (s *service) Init() {
-	s.registerMsgHandler()
-	s.registerEventHandler()
-	s.registerTimerHandler()
-}
-
-func (s *service) Destroy() {
+func (s *service) afterInit() error {
+	msgbus.RegisterHandler(s, s.onSayHelloReq)
+	msgbus.RegisterHandler(s, s.onTimerSayHello)
+	s.EventImpl().RegisterHandler(define.EventUserSayHello, s.onEventUserMsg)
+	return nil
 }

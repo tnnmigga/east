@@ -1,0 +1,15 @@
+syntax = "proto3";
+package pb;
+
+import "vendor/github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package                           = "nats";
+option (gogoproto.goproto_enum_prefix_all)  = false;
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+
+message RPCResponse {
+    bytes Data = 1;
+    string Err = 2;
+}

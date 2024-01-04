@@ -2,6 +2,7 @@ package msgimpl
 
 import (
 	"east/core/codec"
+	"east/core/idef"
 	"east/core/msgbus"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
@@ -13,16 +14,16 @@ type service struct {
 }
 
 func New(d *domain.Domain) api.IMsg {
-	return &service{
+	s := &service{
 		Domain: d,
 	}
+	s.After(idef.ServerStateInit, s.afterInit)
+	return s
 }
 
-func (s *service) Init() {
-	s.regMsgHandler()
-}
-
-func (s *service) Destroy() {
+func (s *service) afterInit() error {
+	msgbus.RegisterHandler(s, s.onC2SPackage)
+	return nil
 }
 
 func (s *service) Notify(userID uint64, msg any) {

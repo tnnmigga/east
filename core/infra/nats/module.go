@@ -9,7 +9,6 @@ import (
 	"east/core/log"
 	"east/core/mod"
 	"east/core/msgbus"
-	"east/core/sys"
 	"east/core/util"
 	"fmt"
 	"time"
@@ -40,6 +39,8 @@ func New() idef.IModule {
 	m := &module{
 		Module: mod.New(infra.ModTypNats, iconf.Int32("nats-mq-len", mod.DefaultMQLen)),
 	}
+	codec.Register((*RPCRequest)(nil))
+	codec.Register((*RPCResponse)(nil))
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)
@@ -162,27 +163,19 @@ func (m *module) recv(msg *nats.Msg) {
 
 func (m *module) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
-	pkg, err := codec.Decode(msg.Data)
+	req, err := codec.Decode(msg.Data)
+	rpcResp := &RPCResponse{}
 	if err != nil {
-		log.Errorf("nats rpc decode msg error: %v", err)
+		rpcResp.Err = fmt.Sprintf("req decode msg error: %v", err)
+		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	rpcMsg := &idef.RPCPackage{
-		Req:  pkg,
-		Resp: make(chan any, 1),
-		Err:  make(chan error, 1),
-	}
-	msgbus.Cast(iconf.ServerID(), rpcMsg)
-	sys.Go(func() {
-		timer := time.After(time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second)
-		select {
-		case <-timer:
-			log.Errorf("nats rpc call timeout %v", util.StructName(rpcMsg.Req))
-		case resp := <-rpcMsg.Resp:
-			b := codec.Encode(resp)
-			m.conn.Publish(msg.Reply, b)
-		case err := <-rpcMsg.Err:
-			log.Errorf("nats rpc call %v error %v", util.StructName(rpcMsg.Req), err)
+	msgbus.AsyncCall[any](m, iconf.ServerID(), req, func(resp any, err error) {
+		if err != nil {
+			rpcResp.Err = err.Error()
+		} else {
+			rpcResp.Data = codec.Encode(resp)
 		}
+		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 	})
 }
