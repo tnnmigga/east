@@ -3,6 +3,7 @@ package log
 import (
 	"east/core/iconf"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -16,7 +17,7 @@ func Init() {
 	var logLevel zap.AtomicLevel
 	err := logLevel.UnmarshalText([]byte(iconf.String("log-level", "debug")))
 	if err != nil {
-		panic(fmt.Errorf("log Init level error: %v", err))
+		log.Fatal(fmt.Errorf("log Init level error: %v", err))
 	}
 	conf := zap.Config{
 		Level:             logLevel,
@@ -37,7 +38,7 @@ func Init() {
 	}
 	l, err := conf.Build(zap.AddCallerSkip(1))
 	if err != nil {
-		panic(fmt.Errorf("log Init conf build error: %v", err))
+		log.Fatal(fmt.Errorf("log Init conf build error: %v", err))
 	}
 	logger = l.Sugar()
 }

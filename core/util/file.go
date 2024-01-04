@@ -2,17 +2,18 @@ package util
 
 import (
 	"io"
+	"log"
 	"os"
 )
 
 func ReadFile(name string) []byte {
 	file, err := os.OpenFile(name, os.O_RDONLY, 0)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	b, err := io.ReadAll(file)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	return b
 }

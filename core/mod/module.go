@@ -51,7 +51,7 @@ func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
-		panic(fmt.Errorf("RegisterHandler multiple registration %v", mType))
+		log.Fatal(fmt.Errorf("RegisterHandler multiple registration %v", mType))
 	}
 	m.handlers[mType] = handler
 }
@@ -66,7 +66,7 @@ func (m *Module) Before(state idef.ServerState, hook func() error) {
 
 func (m *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateClose {
-		panic("module after close hook not support")
+		log.Fatal("module after close hook not support")
 	}
 	m.hooks[state][1] = append(m.hooks[state][1], hook)
 }

@@ -4,6 +4,7 @@ import (
 	"east/core/codec"
 	"east/core/idef"
 	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -32,7 +33,7 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 
 func registerRecver(mType reflect.Type, recver IRecver) {
 	if _, has := recvers[mType]; has {
-		panic(fmt.Errorf("message has registered %v", mType.Elem().Name()))
+		log.Fatal(fmt.Errorf("message has registered %v", mType.Elem().Name()))
 	}
 	recvers[mType] = append(recvers[mType], recver)
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/gogo/protobuf/proto"
@@ -39,7 +40,7 @@ func Register(v any) {
 	name := util.StructName(v)
 	id := msgID(v)
 	if _, has := msgIDToDesc[id]; has {
-		panic(fmt.Errorf("msgid duplicat %v %d", name, id))
+		log.Fatalf("msgid duplicat %v %d", name, id)
 	}
 	mType := reflect.TypeOf(v)
 	if mType.Kind() == reflect.Ptr {
@@ -86,13 +87,13 @@ func toBytes(v any) []byte {
 	if v0, ok := v.(proto.Message); ok {
 		b, err := proto.Marshal(v0)
 		if err != nil {
-			panic(fmt.Errorf("message encode error %v", err))
+			log.Panic(fmt.Errorf("message encode error %v", err))
 		}
 		return b
 	}
 	b, err := bson.Marshal(v)
 	if err != nil {
-		panic(fmt.Errorf("message encode error %v", err))
+		log.Panic(fmt.Errorf("message encode error %v", err))
 	}
 	return b
 }

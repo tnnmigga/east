@@ -3,6 +3,7 @@ package iconf
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"regexp"
 
 	"gopkg.in/yaml.v3"
@@ -19,7 +20,7 @@ func LoadFromJSON(b []byte) {
 	b = uncomment(b)
 	err := json.Unmarshal(b, &confs)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	afterLoad()
 }
