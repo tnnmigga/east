@@ -39,7 +39,6 @@ func New() idef.IModule {
 	m := &module{
 		Module: mod.New(infra.ModTypNats, iconf.Int32("nats-mq-len", mod.DefaultMQLen)),
 	}
-	codec.Register((*RPCRequest)(nil))
 	codec.Register((*RPCResponse)(nil))
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
