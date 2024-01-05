@@ -106,9 +106,17 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 	})
 }
 
-func warpCb[T any](cb func(resp T, err error)) func(resp any, err error) {
+func warpCb[T any](cb func(T, error)) func(any, error) {
 	return func(pkg any, err error) {
-		resp := pkg.(T)
+		if err != nil {
+			var empty T
+			cb(empty, err)
+			return
+		}
+		resp, ok := pkg.(T)
+		if !ok {
+			log.Panicf("async call resp type error, need %s, cur %s", util.StructName(new(T)), util.StructName(pkg))
+		}
 		cb(resp, err)
 	}
 }
