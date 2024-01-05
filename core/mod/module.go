@@ -14,8 +14,8 @@ const (
 )
 
 var (
-	rpcReqType  = reflect.TypeOf((*idef.AsyncCallRequest)(nil))
-	rpcRespType = reflect.TypeOf((*idef.AsyncCallResponse)(nil))
+	rpcReqType  = reflect.TypeOf((*idef.RPCRequest)(nil))
+	rpcRespType = reflect.TypeOf((*idef.RPCResponse)(nil))
 )
 
 type Module struct {
@@ -80,9 +80,9 @@ func (m *Module) Run() {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
 		case rpcReqType: // 被发起rpc
-			m.rpc(msg.(*idef.AsyncCallRequest))
+			m.rpc(msg.(*idef.RPCRequest))
 		case rpcRespType: // rpc请求完成
-			m.rpcResp(msg.(*idef.AsyncCallResponse))
+			m.rpcResp(msg.(*idef.RPCResponse))
 		default:
 			m.cb(msg)
 		}
@@ -106,7 +106,7 @@ func (m *Module) cb(msg any) {
 	h.Cb(msg)
 }
 
-func (m *Module) rpc(msg *idef.AsyncCallRequest) {
+func (m *Module) rpc(msg *idef.RPCRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -125,7 +125,7 @@ func (m *Module) rpc(msg *idef.AsyncCallRequest) {
 	})
 }
 
-func (m *Module) rpcResp(req *idef.AsyncCallResponse) {
+func (m *Module) rpcResp(req *idef.RPCResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

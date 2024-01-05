@@ -27,7 +27,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 			},
 		},
 	})
-	msgbus.AsyncCall(s, iconf.ServerID(), &mongo.MongoLoad{
+	msgbus.RPC(s, iconf.ServerID(), &mongo.MongoLoad{
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},

@@ -62,12 +62,12 @@ func Broadcast(serverType string, msg any) {
 	Cast(iconf.ServerID(), pkg)
 }
 
-func AsyncCall[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
 	if serverID == iconf.ServerID() {
 		localCall(m, req, warpCb(cb))
 		return
 	}
-	rpcReq := &idef.RPCRequest{
+	rpcReq := &idef.RPCPackage{
 		Module:   m,
 		ServerID: serverID,
 		Req:      req,
@@ -83,12 +83,12 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 		return
 	}
 	sys.Go(func() {
-		callReq := &idef.AsyncCallRequest{
+		callReq := &idef.RPCRequest{
 			Req:  req,
 			Resp: make(chan any, 1),
 			Err:  make(chan error, 1),
 		}
-		callResp := &idef.AsyncCallResponse{
+		callResp := &idef.RPCResponse{
 			Module: m,
 			Req:    req,
 			Cb:     warpCb(cb),

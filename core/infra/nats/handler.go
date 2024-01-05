@@ -16,7 +16,7 @@ func (m *module) initHandler() {
 	msgbus.RegisterHandler(m, m.onStreamCastPackage)
 	msgbus.RegisterHandler(m, m.onBroadcastPackage)
 	msgbus.RegisterHandler(m, m.onRandomCastPackage)
-	msgbus.RegisterHandler(m, m.onRPCRequest)
+	msgbus.RegisterHandler(m, m.onRPCPackage)
 }
 
 func (m *module) onCastPackage(pkg *idef.CastPackage) {
@@ -51,10 +51,10 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	}
 }
 
-func (m *module) onRPCRequest(req *idef.RPCRequest) {
+func (m *module) onRPCPackage(req *idef.RPCPackage) {
 	b := codec.Encode(req.Req)
 	sys.Go(func() {
-		resp := &idef.AsyncCallResponse{
+		resp := &idef.RPCResponse{
 			Module: req.Module,
 			Req:    req.Req,
 			Cb:     req.Cb,

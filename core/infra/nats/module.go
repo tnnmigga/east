@@ -169,7 +169,7 @@ func (m *module) rpc(msg *nats.Msg) {
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.AsyncCall[any](m, iconf.ServerID(), req, func(resp any, err error) {
+	msgbus.RPC[any](m, iconf.ServerID(), req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {

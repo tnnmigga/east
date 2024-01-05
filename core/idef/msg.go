@@ -25,13 +25,13 @@ type RandomCastPackage struct {
 	Body       any
 }
 
-type AsyncCallRequest struct {
+type RPCRequest struct {
 	Req  any
 	Resp chan any
 	Err  chan error
 }
 
-type AsyncCallResponse struct {
+type RPCResponse struct {
 	Module IModule
 	Req    any
 	Resp   any
@@ -39,7 +39,7 @@ type AsyncCallResponse struct {
 	Cb     func(resp any, err error)
 }
 
-type RPCRequest struct {
+type RPCPackage struct {
 	Module   IModule
 	ServerID uint32
 	Req      any
