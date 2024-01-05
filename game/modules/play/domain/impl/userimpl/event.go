@@ -7,12 +7,14 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (s *service) onEventUserMsg(event *eventbus.Event) {
 	log.Infof("user event %v", util.String(event))
+	time.Sleep(time.Second * 10)
 	msgbus.Cast(iconf.ServerID(), &mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
@@ -31,7 +33,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},
-	}, func(res int, err error) {
+	}, func(res any, err error) {
 		log.Info(res, err)
 	})
 }

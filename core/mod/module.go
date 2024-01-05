@@ -39,6 +39,10 @@ func (m *Module) Name() string {
 	return m.name
 }
 
+func (m *Module) MQ() chan any {
+	return m.mq
+}
+
 func (m *Module) Assign(msg any) {
 	select {
 	case m.mq <- msg:

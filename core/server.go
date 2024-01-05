@@ -50,6 +50,7 @@ func (s *Server) Run() {
 func (s *Server) Stop() {
 	s.before(idef.ServerStateStop, s.noabort)
 	log.Info("server try to stop")
+	s.waitMsgHandling(time.Minute)
 	sys.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
@@ -73,6 +74,24 @@ func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
 		defer wg.Done()
 		m.Run()
 	}()
+}
+
+func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
+	maxCheckCount := maxWaitTime / time.Second * 10
+	for ; maxCheckCount > 0; maxCheckCount-- {
+		time.Sleep(100 * time.Millisecond)
+		isEmpty := true
+		for _, m := range s.modules {
+			if len(m.MQ()) != 0 {
+				isEmpty = false
+				break
+			}
+		}
+		if isEmpty {
+			return
+		}
+	}
+	log.Errorf("wait msg handing timeout")
 }
 
 func (s *Server) abort(m idef.IModule, err error) {
