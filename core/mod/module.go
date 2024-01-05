@@ -98,12 +98,12 @@ func (m *Module) Stop() {
 func (m *Module) cb(msg any) {
 	defer util.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
-	fns, ok := m.handlers[msgType]
+	h, ok := m.handlers[msgType]
 	if !ok {
 		log.Errorf("handler not exist %v", msgType)
 		return
 	}
-	fns.Cb(msg)
+	h.Cb(msg)
 }
 
 func (m *Module) rpc(msg *idef.AsyncCallRequest) {
@@ -113,12 +113,12 @@ func (m *Module) rpc(msg *idef.AsyncCallRequest) {
 		}
 	}()
 	msgType := reflect.TypeOf(msg.Req)
-	fns, ok := m.handlers[msgType]
+	h, ok := m.handlers[msgType]
 	if !ok {
 		msg.Err <- fmt.Errorf("rpc handler not found %v", msgType)
 		return
 	}
-	fns.RPC(msg.Req, func(v any) {
+	h.RPC(msg.Req, func(v any) {
 		msg.Resp <- v
 	}, func(err error) {
 		msg.Err <- err
