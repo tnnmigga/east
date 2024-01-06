@@ -28,7 +28,7 @@ func (com *component) onMongoSave(req *MongoSave) {
 		ms = append(ms, m)
 	}
 	sys.GoWithGroup(req.Key(), func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		_, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
 		cancel()
 		if err != nil {
@@ -41,7 +41,7 @@ func (com *component) onMongoLoad(req *MongoLoad, resolve func(any), reject func
 	sys.GoWithGroup(req.Key(), func() {
 		cur, _ := com.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		res := []bson.M{}
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		err := cur.All(ctx, &res)
 		cancel()
 		if err != nil {
