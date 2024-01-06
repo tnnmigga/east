@@ -52,7 +52,7 @@ func (wkg *workerGroup) run(key string, fn func()) {
 	wkg.mu.Unlock()
 	w.wait <- fn
 	if pending == 1 {
-		Go(w.run)
+		Go(w.work)
 	}
 }
 
@@ -62,7 +62,7 @@ type worker struct {
 	pending int32
 }
 
-func (w *worker) run() {
+func (w *worker) work() {
 	for {
 		select {
 		case fn := <-w.wait:
