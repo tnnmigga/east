@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func RegisterHandler[T any](com idef.IComponent, fn func(msg T)) {
+func RegisterHandler[T any](com idef.IComponent, fn func(T)) {
 	mValue := *new(T)
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)
