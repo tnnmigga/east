@@ -1,6 +1,8 @@
 package mongo
 
 import (
+	"fmt"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -15,8 +17,16 @@ type MongoSave struct {
 	Ops      []*MongoSaveOp
 }
 
+func (m *MongoSave) Key() string {
+	return fmt.Sprintf("%s-%s", m.DBName, m.CollName)
+}
+
 type MongoLoad struct {
 	DBName   string
 	CollName string
 	Filter   bson.M
+}
+
+func (m *MongoLoad) Key() string {
+	return fmt.Sprintf("%s-%s", m.DBName, m.CollName)
 }

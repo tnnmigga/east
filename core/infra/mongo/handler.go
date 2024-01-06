@@ -4,6 +4,7 @@ import (
 	"context"
 	"east/core/log"
 	"east/core/msgbus"
+	"east/core/sys"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,17 +26,23 @@ func (com *component) onMongoSave(req *MongoSave) {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	res, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(context.Background(), ms)
-	log.Info(res, err)
+	sys.GoWithGroup(req.Key(), func() {
+		_, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(context.Background(), ms)
+		if err != nil {
+			log.Errorf("mongo save error %v", err)
+		}
+	})
 }
 
-func (com *component) onMongoLoad(msg *MongoLoad, resolve func(any), reject func(error)) {
-	cur, _ := com.mongocli.Database(msg.DBName).Collection(msg.CollName).Find(context.Background(), msg.Filter)
-	res := []bson.M{}
-	err := cur.All(context.Background(), &res)
-	if err != nil {
-		reject(err)
-		return
-	}
-	resolve(res)
+func (com *component) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
+	sys.GoWithGroup(req.Key(), func() {
+		cur, _ := com.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
+		res := []bson.M{}
+		err := cur.All(context.Background(), &res)
+		if err != nil {
+			reject(err)
+			return
+		}
+		resolve(res)
+	})
 }
