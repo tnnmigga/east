@@ -65,12 +65,15 @@ func (com *Component) Hook(state idef.ServerState, stage int) []func() error {
 }
 
 func (com *Component) Before(state idef.ServerState, hook func() error) {
+	if state <= idef.ServerStateInit {
+		panic("component after close hook not support")
+	}
 	com.hooks[state][0] = append(com.hooks[state][0], hook)
 }
 
 func (com *Component) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateClose {
-		log.Fatal("component after close hook not support")
+		panic("component after close hook not support")
 	}
 	com.hooks[state][1] = append(com.hooks[state][1], hook)
 }
