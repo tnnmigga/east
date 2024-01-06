@@ -15,17 +15,17 @@ import (
 )
 
 type Server struct {
-	modules []idef.IModule
-	wg      *sync.WaitGroup
+	compts []idef.IComponent
+	wg     *sync.WaitGroup
 }
 
-func NewServer(modules ...idef.IModule) idef.IServer {
+func NewServer(compts ...idef.IComponent) idef.IServer {
 	server := &Server{
-		modules: make([]idef.IModule, 0, len(modules)+1),
-		wg:      &sync.WaitGroup{},
+		compts: make([]idef.IComponent, 0, len(compts)+1),
+		wg:     &sync.WaitGroup{},
 	}
-	server.modules = append(server.modules, nats.New()) // nats最后停止
-	server.modules = append(server.modules, modules...)
+	server.compts = append(server.compts, nats.New()) // nats最后停止
+	server.compts = append(server.compts, compts...)
 	return server
 }
 
@@ -40,8 +40,8 @@ func (s *Server) Init() {
 func (s *Server) Run() {
 	s.before(idef.ServerStateRun, s.abort)
 	log.Info("server try to run")
-	for _, m := range s.modules {
-		s.runModule(s.wg, m)
+	for _, com := range s.compts {
+		s.runCompt(s.wg, com)
 	}
 	log.Info("server running successfully")
 	s.after(idef.ServerStateRun, s.abort)
@@ -52,9 +52,9 @@ func (s *Server) Stop() {
 	log.Info("server try to stop")
 	s.waitMsgHandling(time.Minute)
 	sys.WaitGoDone(time.Minute)
-	for i := len(s.modules) - 1; i >= 0; i-- {
-		m := s.modules[i]
-		util.ExecAndRecover(m.Stop)
+	for i := len(s.compts) - 1; i >= 0; i-- {
+		com := s.compts[i]
+		util.ExecAndRecover(com.Stop)
 	}
 	s.wg.Wait()
 	log.Info("server stoped successfully")
@@ -67,12 +67,12 @@ func (s *Server) Close() {
 	os.Exit(0)
 }
 
-func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
+func (s *Server) runCompt(wg *sync.WaitGroup, com idef.IComponent) {
 	wg.Add(1)
 	go func() {
 		defer util.RecoverPanic()
 		defer wg.Done()
-		m.Run()
+		com.Run()
 	}()
 }
 
@@ -81,8 +81,8 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 	for ; maxCheckCount > 0; maxCheckCount-- {
 		time.Sleep(100 * time.Millisecond)
 		isEmpty := true
-		for _, m := range s.modules {
-			if len(m.MQ()) != 0 {
+		for _, com := range s.compts {
+			if len(com.MQ()) != 0 {
 				isEmpty = false
 				break
 			}
@@ -94,36 +94,36 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 	log.Errorf("wait msg handing timeout")
 }
 
-func (s *Server) abort(m idef.IModule, err error) {
-	log.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+func (s *Server) abort(com idef.IComponent, err error) {
+	log.Fatalf("component %s, on %s, error: %v", com.Name(), util.Caller(3), err)
 }
 
-func (s *Server) noabort(m idef.IModule, err error) {
-	log.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+func (s *Server) noabort(com idef.IComponent, err error) {
+	log.Errorf("component %s, on %s, error: %v", com.Name(), util.Caller(3), err)
 }
 
-func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, error)) {
-	for _, m := range s.modules {
-		hook := m.Hook(state, 0)
+func (s *Server) before(state idef.ServerState, onError ...func(idef.IComponent, error)) {
+	for _, com := range s.compts {
+		hook := com.Hook(state, 0)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
+				log.Errorf("server before %#v error, component %s, error %v", state, com.Name(), err)
 				for _, f := range onError {
-					f(m, err)
+					f(com, err)
 				}
 			}
 		}
 	}
 }
 
-func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, error)) {
-	for _, m := range s.modules {
-		hook := m.Hook(state, 1)
+func (s *Server) after(state idef.ServerState, onError ...func(idef.IComponent, error)) {
+	for _, com := range s.compts {
+		hook := com.Hook(state, 1)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
+				log.Errorf("server before %#v error, component %s, error %v", state, com.Name(), err)
 				for _, f := range onError {
-					f(m, err)
+					f(com, err)
 				}
 			}
 		}

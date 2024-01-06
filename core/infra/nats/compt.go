@@ -3,7 +3,7 @@ package nats
 import (
 	"context"
 	"east/core/codec"
-	"east/core/com"
+	"east/core/compt"
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra"
@@ -22,8 +22,8 @@ const (
 	castStreamName = "stream-cast"
 )
 
-type module struct {
-	*com.Component
+type component struct {
+	*compt.Component
 	conn         *nats.Conn
 	js           jetstream.JetStream
 	stream       jetstream.Stream
@@ -35,20 +35,20 @@ type module struct {
 	rpcSub       *nats.Subscription
 }
 
-func New() idef.IModule {
-	m := &module{
-		Component: com.New(infra.ModTypNats, conf.Int32("nats-mq-len", com.DefaultMQLen)),
+func New() idef.IComponent {
+	com := &component{
+		Component: compt.New(infra.ModTypNats, conf.Int32("nats-mq-len", compt.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
-	m.initHandler()
-	m.After(idef.ServerStateInit, m.afterInit)
-	m.After(idef.ServerStateRun, m.afterRun)
-	m.Before(idef.ServerStateStop, m.beforeStop)
-	m.After(idef.ServerStateStop, m.afterStop)
-	return m
+	com.initHandler()
+	com.After(idef.ServerStateInit, com.afterInit)
+	com.After(idef.ServerStateRun, com.afterRun)
+	com.Before(idef.ServerStateStop, com.beforeStop)
+	com.After(idef.ServerStateStop, com.afterStop)
+	return com
 }
 
-func (m *module) afterInit() error {
+func (com *component) afterInit() error {
 	conn, err := nats.Connect(
 		conf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
@@ -61,43 +61,43 @@ func (m *module) afterInit() error {
 	if err != nil {
 		return err
 	}
-	m.conn = conn
-	m.js, err = jetstream.New(m.conn)
+	com.conn = conn
+	com.js, err = jetstream.New(com.conn)
 	if err != nil {
 		return err
 	}
-	m.stream, err = m.js.Stream(context.Background(), castStreamName)
+	com.stream, err = com.js.Stream(context.Background(), castStreamName)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *module) afterRun() (err error) {
-	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
+func (com *component) afterRun() (err error) {
+	com.cons, err = com.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
 		Durable:       fmt.Sprintf("%s-%d", conf.ServerType(), conf.ServerID()),
 		FilterSubject: streamCastSubject(conf.ServerID()),
 	})
 	if err != nil {
 		return err
 	}
-	m.consCtx, err = m.cons.Consume(m.streamRecv)
+	com.consCtx, err = com.cons.Consume(com.streamRecv)
 	if err != nil {
 		return err
 	}
-	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID()), m.recv)
+	com.castSub, err = com.conn.Subscribe(castSubject(conf.ServerID()), com.recv)
 	if err != nil {
 		return err
 	}
-	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType()), m.recv)
+	com.broadcastSub, err = com.conn.Subscribe(broadcastSubject(conf.ServerType()), com.recv)
 	if err != nil {
 		return err
 	}
-	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType()), conf.ServerType(), m.recv)
+	com.queueSub, err = com.conn.QueueSubscribe(randomCastSubject(conf.ServerType()), conf.ServerType(), com.recv)
 	if err != nil {
 		return err
 	}
-	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID()), m.rpc)
+	com.rpcSub, err = com.conn.Subscribe(rpcSubject(conf.ServerID()), com.rpc)
 	if err != nil {
 		return err
 	}
@@ -124,22 +124,22 @@ func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
-func (m *module) beforeStop() error {
-	m.consCtx.Stop()
-	m.castSub.Drain()
-	m.broadcastSub.Drain()
-	m.queueSub.Drain()
-	m.rpcSub.Drain()
+func (com *component) beforeStop() error {
+	com.consCtx.Stop()
+	com.castSub.Drain()
+	com.broadcastSub.Drain()
+	com.queueSub.Drain()
+	com.rpcSub.Drain()
 	return nil
 }
 
-func (m *module) afterStop() error {
-	<-m.js.PublishAsyncComplete()
-	m.conn.Close()
+func (com *component) afterStop() error {
+	<-com.js.PublishAsyncComplete()
+	com.conn.Close()
 	return nil
 }
 
-func (m *module) streamRecv(msg jetstream.Msg) {
+func (com *component) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
 	pkg, err := codec.Decode(msg.Data())
@@ -150,7 +150,7 @@ func (m *module) streamRecv(msg jetstream.Msg) {
 	msgbus.Cast(conf.ServerID(), pkg)
 }
 
-func (m *module) recv(msg *nats.Msg) {
+func (com *component) recv(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
@@ -160,21 +160,21 @@ func (m *module) recv(msg *nats.Msg) {
 	msgbus.Cast(conf.ServerID(), pkg)
 }
 
-func (m *module) rpc(msg *nats.Msg) {
+func (com *component) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	req, err := codec.Decode(msg.Data)
 	rpcResp := &RPCResponse{}
 	if err != nil {
 		rpcResp.Err = fmt.Sprintf("req decode msg error: %v", err)
-		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
+		com.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.RPC[any](m, conf.ServerID(), req, func(resp any, err error) {
+	msgbus.RPC[any](com, conf.ServerID(), req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {
 			rpcResp.Data = codec.Encode(resp)
 		}
-		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
+		com.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 	})
 }

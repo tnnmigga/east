@@ -9,12 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (m *module) registerHandler() {
-	msgbus.RegisterHandler(m, m.onMongoSave)
-	msgbus.RegisterRPC(m, m.onMongoLoad)
+func (com *component) registerHandler() {
+	msgbus.RegisterHandler(com, com.onMongoSave)
+	msgbus.RegisterRPC(com, com.onMongoLoad)
 }
 
-func (m *module) onMongoSave(req *MongoSave) {
+func (com *component) onMongoSave(req *MongoSave) {
 	ms := make([]mongo.WriteModel, 0, len(req.Ops))
 	for _, op := range req.Ops {
 		b, err := bson.Marshal(op.Value)
@@ -25,12 +25,12 @@ func (m *module) onMongoSave(req *MongoSave) {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	res, err := m.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(context.Background(), ms)
+	res, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(context.Background(), ms)
 	log.Info(res, err)
 }
 
-func (m *module) onMongoLoad(msg *MongoLoad, resolve func(any), reject func(error)) {
-	cur, _ := m.mongocli.Database(msg.DBName).Collection(msg.CollName).Find(context.Background(), msg.Filter)
+func (com *component) onMongoLoad(msg *MongoLoad, resolve func(any), reject func(error)) {
+	cur, _ := com.mongocli.Database(msg.DBName).Collection(msg.CollName).Find(context.Background(), msg.Filter)
 	res := []bson.M{}
 	err := cur.All(context.Background(), &res)
 	if err != nil {

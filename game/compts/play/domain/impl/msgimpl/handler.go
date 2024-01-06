@@ -9,7 +9,7 @@ import (
 	"east/pb"
 )
 
-func (m *service) onC2SPackage(msg *pb.C2SPackage) {
+func (s *service) onC2SPackage(msg *pb.C2SPackage) {
 	pkg, err := codec.Decode(msg.Body)
 	if err != nil {
 		log.Errorf("msg decode error %v", err)

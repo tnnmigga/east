@@ -4,8 +4,8 @@ import (
 	"east/core/codec"
 	"east/core/idef"
 	"east/core/msgbus"
-	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/api"
+	"east/game/compts/play/domain"
+	"east/game/compts/play/domain/api"
 	"east/pb"
 )
 

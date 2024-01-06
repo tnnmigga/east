@@ -3,7 +3,7 @@ package main
 import (
 	"east/core"
 	"east/core/sys"
-	"east/gateway/modules/tcpagent"
+	"east/gateway/compts/tcpagent"
 )
 
 func main() {

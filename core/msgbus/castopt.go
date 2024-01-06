@@ -8,7 +8,7 @@ type castOpt struct {
 const (
 	keyNone         = "none"
 	keyNonuseStream = "nonuse-stream"
-	keyOneOfModules = "one-of-modules"
+	keyOneOfCompts  = "one-of-compts"
 )
 
 func findCastOpt[T any](opts []castOpt, key string) (value T, find bool) {
@@ -29,7 +29,7 @@ func NonuseStream() castOpt {
 
 func OneOfMods(modName string) castOpt {
 	return castOpt{
-		key:   keyOneOfModules,
+		key:   keyOneOfCompts,
 		value: modName,
 	}
 }

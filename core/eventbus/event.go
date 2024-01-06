@@ -56,8 +56,8 @@ func (bus *EventBus) removeSubscriber(name string) {
 
 func (bus *EventBus) find(sub ISubscriber) bool {
 	subName := sub.Name()
-	for _, m := range bus.subs {
-		for _, v := range m {
+	for _, sub := range bus.subs {
+		for _, v := range sub {
 			if v.Name() == subName {
 				return true
 			}
@@ -75,11 +75,11 @@ func (bus *EventBus) dispatch(event *Event) {
 	}
 }
 
-func New(m idef.IModule) *EventBus {
+func New(com idef.IComponent) *EventBus {
 	bus := &EventBus{
 		subs: map[string][]ISubscriber{},
 	}
-	msgbus.RegisterHandler(m, bus.dispatch)
+	msgbus.RegisterHandler(com, bus.dispatch)
 	return bus
 }
 

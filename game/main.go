@@ -4,7 +4,7 @@ import (
 	"east/core"
 	"east/core/infra/mongo"
 	"east/core/sys"
-	"east/game/modules/play"
+	"east/game/compts/play"
 )
 
 func main() {

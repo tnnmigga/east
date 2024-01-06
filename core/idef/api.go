@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-type IModule interface {
+type IComponent interface {
 	Name() string
 	Assign(any)
 	MQ() chan any
