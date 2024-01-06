@@ -2,7 +2,7 @@ package nats
 
 import (
 	"east/core/codec"
-	"east/core/iconf"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
@@ -60,7 +60,7 @@ func (m *module) onRPCPackage(req *idef.RPCPackage) {
 			Cb:     req.Cb,
 		}
 		defer req.Module.Assign(resp)
-		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(iconf.Int64("rpc-wait-time", 10))*time.Second)
+		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(conf.Int64("rpc-wait-time", 10))*time.Second)
 		if err != nil {
 			resp.Err = err
 			return

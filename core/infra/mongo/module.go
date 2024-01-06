@@ -2,10 +2,10 @@ package mongo
 
 import (
 	"context"
-	"east/core/iconf"
+	"east/core/com"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra"
-	"east/core/mod"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,13 +13,13 @@ import (
 )
 
 type module struct {
-	*mod.Module
+	*com.Component
 	mongocli *mongo.Client
 }
 
 func New() idef.IModule {
 	m := &module{
-		Module: mod.New(infra.ModTypMongo, mod.DefaultMQLen),
+		Component: com.New(infra.ModTypMongo, com.DefaultMQLen),
 	}
 	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
@@ -28,7 +28,7 @@ func New() idef.IModule {
 }
 
 func (m *module) beforeRun() (err error) {
-	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(iconf.String("mongo-url", "mongodb://localhost")))
+	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(conf.String("mongo-url", "mongodb://localhost")))
 	if err != nil {
 		return err
 	}

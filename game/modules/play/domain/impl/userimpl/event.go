@@ -1,8 +1,8 @@
 package userimpl
 
 import (
+	"east/core/conf"
 	"east/core/eventbus"
-	"east/core/iconf"
 	"east/core/infra/mongo"
 	"east/core/log"
 	"east/core/msgbus"
@@ -15,7 +15,7 @@ import (
 func (s *service) onEventUserMsg(event *eventbus.Event) {
 	log.Infof("user event %v", util.String(event))
 	time.Sleep(time.Second * 10)
-	msgbus.Cast(iconf.ServerID(), &mongo.MongoSave{
+	msgbus.Cast(conf.ServerID(), &mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
 		Ops: []*mongo.MongoSaveOp{
@@ -29,7 +29,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 			},
 		},
 	})
-	msgbus.RPC(s, iconf.ServerID(), &mongo.MongoLoad{
+	msgbus.RPC(s, conf.ServerID(), &mongo.MongoLoad{
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},

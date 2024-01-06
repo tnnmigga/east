@@ -1,4 +1,4 @@
-package mod
+package com
 
 import (
 	"east/core/idef"
@@ -18,7 +18,7 @@ var (
 	rpcRespType = reflect.TypeOf((*idef.RPCResponse)(nil))
 )
 
-type Module struct {
+type Component struct {
 	name      string
 	mq        chan any
 	handlers  map[reflect.Type]*idef.Handler
@@ -26,8 +26,8 @@ type Module struct {
 	closeSign chan struct{}
 }
 
-func New(name string, mqLen int32) *Module {
-	return &Module{
+func New(name string, mqLen int32) *Component {
+	return &Component{
 		name:      name,
 		mq:        make(chan any, mqLen),
 		handlers:  map[reflect.Type]*idef.Handler{},
@@ -35,15 +35,15 @@ func New(name string, mqLen int32) *Module {
 	}
 }
 
-func (m *Module) Name() string {
+func (m *Component) Name() string {
 	return m.name
 }
 
-func (m *Module) MQ() chan any {
+func (m *Component) MQ() chan any {
 	return m.mq
 }
 
-func (m *Module) Assign(msg any) {
+func (m *Component) Assign(msg any) {
 	select {
 	case m.mq <- msg:
 	default:
@@ -51,7 +51,7 @@ func (m *Module) Assign(msg any) {
 	}
 }
 
-func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
+func (m *Component) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
@@ -60,22 +60,22 @@ func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	m.handlers[mType] = handler
 }
 
-func (m *Module) Hook(state idef.ServerState, stage int) []func() error {
+func (m *Component) Hook(state idef.ServerState, stage int) []func() error {
 	return m.hooks[state][stage]
 }
 
-func (m *Module) Before(state idef.ServerState, hook func() error) {
+func (m *Component) Before(state idef.ServerState, hook func() error) {
 	m.hooks[state][0] = append(m.hooks[state][0], hook)
 }
 
-func (m *Module) After(state idef.ServerState, hook func() error) {
+func (m *Component) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateClose {
 		log.Fatal("module after close hook not support")
 	}
 	m.hooks[state][1] = append(m.hooks[state][1], hook)
 }
 
-func (m *Module) Run() {
+func (m *Component) Run() {
 	defer func() {
 		log.Infof("%v has stoped", m.Name())
 		m.closeSign <- struct{}{}
@@ -93,13 +93,13 @@ func (m *Module) Run() {
 	}
 }
 
-func (m *Module) Stop() {
+func (m *Component) Stop() {
 	log.Infof("try stop %s", m.name)
 	close(m.mq)
 	<-m.closeSign
 }
 
-func (m *Module) cb(msg any) {
+func (m *Component) cb(msg any) {
 	defer util.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
 	h, ok := m.handlers[msgType]
@@ -110,7 +110,7 @@ func (m *Module) cb(msg any) {
 	h.Cb(msg)
 }
 
-func (m *Module) rpc(msg *idef.RPCRequest) {
+func (m *Component) rpc(msg *idef.RPCRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -129,7 +129,7 @@ func (m *Module) rpc(msg *idef.RPCRequest) {
 	})
 }
 
-func (m *Module) rpcResp(req *idef.RPCResponse) {
+func (m *Component) rpcResp(req *idef.RPCResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

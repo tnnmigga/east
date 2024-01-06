@@ -1,7 +1,7 @@
 package timer
 
 import (
-	"east/core/iconf"
+	"east/core/conf"
 	"east/core/msgbus"
 	"east/core/util"
 )
@@ -11,6 +11,6 @@ func (h *TimerHeap) onTimerTrigger(msg *timerTrigger) {
 	nowNs := util.NowNs()
 	for top := h.Top(); top != nil && top.Time <= nowNs; top = h.Top() {
 		h.Pop()
-		msgbus.Cast(iconf.ServerID(), top.Ctx)
+		msgbus.Cast(conf.ServerID(), top.Ctx)
 	}
 }

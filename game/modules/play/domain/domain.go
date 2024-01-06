@@ -1,20 +1,20 @@
 package domain
 
 import (
+	"east/core/com"
 	"east/core/domain"
-	"east/core/mod"
 	"east/game/modules/play/domain/api"
 )
 
 type Domain struct {
-	*mod.Module
+	*com.Component
 	*domain.Pool
 }
 
-func New(m *mod.Module) *Domain {
+func New(m *com.Component) *Domain {
 	d := &Domain{
-		Module: m,
-		Pool:   domain.NewPool(MaxImplIndex),
+		Component: m,
+		Pool:      domain.NewPool(MaxImplIndex),
 	}
 	return d
 }

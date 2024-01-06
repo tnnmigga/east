@@ -1,7 +1,7 @@
 package msgbus
 
 import (
-	"east/core/iconf"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/log"
 	"east/core/sys"
@@ -17,8 +17,8 @@ var (
 )
 
 func init() {
-	iconf.RegInitFn(func() {
-		rpcMaxWaitTime = time.Duration(iconf.Int64("rpc-wait-time", 10)) * time.Second
+	conf.RegInitFn(func() {
+		rpcMaxWaitTime = time.Duration(conf.Int64("rpc-wait-time", 10)) * time.Second
 	})
 }
 
@@ -37,18 +37,18 @@ type IRecver interface {
 }
 
 func Cast(serverID uint32, msg any, opts ...castOpt) {
-	if serverID == iconf.ServerID() {
+	if serverID == conf.ServerID() {
 		dispatchMsg(msg, opts...)
 		return
 	}
 	if nonuse, find := findCastOpt[bool](opts, keyNonuseStream); nonuse && find { // 不使用流
-		Cast(iconf.ServerID(), &idef.CastPackage{
+		Cast(conf.ServerID(), &idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
 		}, opts...)
 		return
 	}
-	Cast(iconf.ServerID(), &idef.StreamCastPackage{
+	Cast(conf.ServerID(), &idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
 	}, opts...)
@@ -59,11 +59,11 @@ func Broadcast(serverType string, msg any) {
 		ServerType: serverType,
 		Body:       msg,
 	}
-	Cast(iconf.ServerID(), pkg)
+	Cast(conf.ServerID(), pkg)
 }
 
 func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
-	if serverID == iconf.ServerID() {
+	if serverID == conf.ServerID() {
 		localCall(m, req, warpCb(cb))
 		return
 	}
@@ -73,7 +73,7 @@ func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err er
 		Req:      req,
 		Cb:       warpCb(cb),
 	}
-	Cast(iconf.ServerID(), rpcReq)
+	Cast(conf.ServerID(), rpcReq)
 }
 
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {

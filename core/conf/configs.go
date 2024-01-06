@@ -1,4 +1,4 @@
-package iconf
+package conf
 
 import (
 	"encoding/json"

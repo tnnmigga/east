@@ -1,7 +1,7 @@
 package core
 
 import (
-	"east/core/iconf"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra/nats"
 	"east/core/log"
@@ -31,7 +31,7 @@ func NewServer(modules ...idef.IModule) idef.IServer {
 
 func (s *Server) Init() {
 	s.before(idef.ServerStateInit, s.abort)
-	iconf.LoadFromJSON(util.ReadFile("configs.jsonc"))
+	conf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	log.Init()
 	log.Info("server initialization")
 	s.after(idef.ServerStateInit, s.abort)

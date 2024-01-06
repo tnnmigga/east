@@ -3,7 +3,7 @@ package timer
 import (
 	"context"
 	"east/core/algorithm"
-	"east/core/iconf"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/msgbus"
 	"east/core/sys"
@@ -99,5 +99,5 @@ func (h *TimerHeap) tryNextTrigger() {
 }
 
 func (h *TimerHeap) trigger() {
-	msgbus.Cast(iconf.ServerID(), &timerTrigger{}, msgbus.OneOfMods(h.module.Name()))
+	msgbus.Cast(conf.ServerID(), &timerTrigger{}, msgbus.OneOfMods(h.module.Name()))
 }

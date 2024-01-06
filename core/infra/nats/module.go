@@ -3,11 +3,11 @@ package nats
 import (
 	"context"
 	"east/core/codec"
-	"east/core/iconf"
+	"east/core/com"
+	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra"
 	"east/core/log"
-	"east/core/mod"
 	"east/core/msgbus"
 	"east/core/util"
 	"fmt"
@@ -23,7 +23,7 @@ const (
 )
 
 type module struct {
-	*mod.Module
+	*com.Component
 	conn         *nats.Conn
 	js           jetstream.JetStream
 	stream       jetstream.Stream
@@ -37,7 +37,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: mod.New(infra.ModTypNats, iconf.Int32("nats-mq-len", mod.DefaultMQLen)),
+		Component: com.New(infra.ModTypNats, conf.Int32("nats-mq-len", com.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
 	m.initHandler()
@@ -50,7 +50,7 @@ func New() idef.IModule {
 
 func (m *module) afterInit() error {
 	conn, err := nats.Connect(
-		iconf.String("nats-url", nats.DefaultURL),
+		conf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
 		nats.MaxReconnects(10),
 		nats.ReconnectWait(time.Second),
@@ -75,8 +75,8 @@ func (m *module) afterInit() error {
 
 func (m *module) afterRun() (err error) {
 	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("%s-%d", iconf.ServerType(), iconf.ServerID()),
-		FilterSubject: streamCastSubject(iconf.ServerID()),
+		Durable:       fmt.Sprintf("%s-%d", conf.ServerType(), conf.ServerID()),
+		FilterSubject: streamCastSubject(conf.ServerID()),
 	})
 	if err != nil {
 		return err
@@ -85,19 +85,19 @@ func (m *module) afterRun() (err error) {
 	if err != nil {
 		return err
 	}
-	m.castSub, err = m.conn.Subscribe(castSubject(iconf.ServerID()), m.recv)
+	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID()), m.recv)
 	if err != nil {
 		return err
 	}
-	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(iconf.ServerType()), m.recv)
+	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType()), m.recv)
 	if err != nil {
 		return err
 	}
-	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(iconf.ServerType()), iconf.ServerType(), m.recv)
+	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType()), conf.ServerType(), m.recv)
 	if err != nil {
 		return err
 	}
-	m.rpcSub, err = m.conn.Subscribe(rpcSubject(iconf.ServerID()), m.rpc)
+	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID()), m.rpc)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func (m *module) streamRecv(msg jetstream.Msg) {
 		log.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(iconf.ServerID(), pkg)
+	msgbus.Cast(conf.ServerID(), pkg)
 }
 
 func (m *module) recv(msg *nats.Msg) {
@@ -157,7 +157,7 @@ func (m *module) recv(msg *nats.Msg) {
 		log.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(iconf.ServerID(), pkg)
+	msgbus.Cast(conf.ServerID(), pkg)
 }
 
 func (m *module) rpc(msg *nats.Msg) {
@@ -169,7 +169,7 @@ func (m *module) rpc(msg *nats.Msg) {
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.RPC[any](m, iconf.ServerID(), req, func(resp any, err error) {
+	msgbus.RPC[any](m, conf.ServerID(), req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {
