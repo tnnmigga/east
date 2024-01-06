@@ -5,6 +5,7 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/sys"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,7 +28,9 @@ func (com *component) onMongoSave(req *MongoSave) {
 		ms = append(ms, m)
 	}
 	sys.GoWithGroup(req.Key(), func() {
-		_, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(context.Background(), ms)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		_, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
+		cancel()
 		if err != nil {
 			log.Errorf("mongo save error %v", err)
 		}
@@ -38,11 +41,13 @@ func (com *component) onMongoLoad(req *MongoLoad, resolve func(any), reject func
 	sys.GoWithGroup(req.Key(), func() {
 		cur, _ := com.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		res := []bson.M{}
-		err := cur.All(context.Background(), &res)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		err := cur.All(ctx, &res)
+		cancel()
 		if err != nil {
 			reject(err)
-			return
+		} else {
+			resolve(res)
 		}
-		resolve(res)
 	})
 }

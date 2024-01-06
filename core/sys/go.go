@@ -51,36 +51,37 @@ func (wkg *workerGroup) run(key string, fn func()) {
 	pending := w.pending
 	wkg.mu.Unlock()
 	w.wait <- fn
-	if pending > 1 {
-		return
+	if pending == 1 {
+		Go(w.run)
 	}
-	Go(func() {
-		for {
-			select {
-			case fn := <-w.wait:
-				util.ExecAndRecover(fn)
-				w.pending--
-			default:
-				wkg.mu.Lock()
-				var empty bool
-				if w.pending == 0 {
-					wkg.group.Delete(w.key)
-					wkg.workerPool.Put(w)
-					empty = true
-				}
-				wkg.mu.Unlock()
-				if empty {
-					return
-				}
-			}
-		}
-	})
 }
 
 type worker struct {
 	key     string
 	wait    chan func()
 	pending int32
+}
+
+func (w *worker) run() {
+	for {
+		select {
+		case fn := <-w.wait:
+			util.ExecAndRecover(fn)
+			w.pending--
+		default:
+			wkg.mu.Lock()
+			var empty bool
+			if w.pending == 0 {
+				wkg.group.Delete(w.key)
+				wkg.workerPool.Put(w)
+				empty = true
+			}
+			wkg.mu.Unlock()
+			if empty {
+				return
+			}
+		}
+	}
 }
 
 func Go[T gocall](fn T) {
