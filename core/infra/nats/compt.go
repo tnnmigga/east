@@ -173,7 +173,7 @@ func (com *component) rpc(msg *nats.Msg) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {
-			rpcResp.Data = codec.Encode(resp)
+			rpcResp.Data = codec.Marshal(resp)
 		}
 		com.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 	})

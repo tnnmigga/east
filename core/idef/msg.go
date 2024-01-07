@@ -43,5 +43,6 @@ type RPCPackage struct {
 	Compt    IComponent
 	ServerID uint32
 	Req      any
+	Resp     any
 	Cb       func(resp any, err error)
 }

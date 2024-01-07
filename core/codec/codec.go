@@ -55,7 +55,7 @@ func Register(v any) {
 
 func Encode(v any) []byte {
 	msgID := msgID(v)
-	bytes := toBytes(v)
+	bytes := Marshal(v)
 	body := make([]byte, 4, len(bytes)+4)
 	binary.LittleEndian.PutUint32(body, msgID)
 	body = append(body, bytes...)
@@ -72,18 +72,11 @@ func Decode(b []byte) (msg any, err error) {
 		return nil, fmt.Errorf("message decode msgid not found %d", msgID)
 	}
 	msg = desc.New()
-	switch desc.MarshalType {
-	case marshalTypeGogoproto:
-		err = proto.Unmarshal(b[4:], msg.(proto.Message))
-	case marshalTypeBSON:
-		err = bson.Unmarshal(b[4:], msg)
-	default:
-		err = errors.New("invalid marshal type")
-	}
+	err = Unmarshal(b[4:], msg)
 	return msg, err
 }
 
-func toBytes(v any) []byte {
+func Marshal(v any) []byte {
 	if v0, ok := v.(proto.Message); ok {
 		b, err := proto.Marshal(v0)
 		if err != nil {
@@ -96,6 +89,17 @@ func toBytes(v any) []byte {
 		log.Panic(fmt.Errorf("message encode error %v", err))
 	}
 	return b
+}
+
+func Unmarshal(b []byte, addr any) error {
+	switch marshalType(addr) {
+	case marshalTypeGogoproto:
+		return proto.Unmarshal(b, addr.(proto.Message))
+	case marshalTypeBSON:
+		return bson.Unmarshal(b, addr)
+	default:
+		return errors.New("invalid marshal type")
+	}
 }
 
 func msgID(v any) uint32 {

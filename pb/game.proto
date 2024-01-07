@@ -10,14 +10,16 @@ option (gogoproto.goproto_sizecache_all)    = false;
 
 message C2SPackage {
     uint64 userID = 1;
-    bytes body = 2;
+    bytes body    = 2;
 }
 
 message S2CPackage {
     uint64 userID = 1;
-    bytes body = 2;
+    bytes body    = 2;
 }
 
-message UserLoginReq {
-    uint64 userID = 1; 
-}
+message UserLoginReq { uint64 userID = 1; }
+
+message TestRPC {}
+
+message TestRPCRes { int32 v = 1; }

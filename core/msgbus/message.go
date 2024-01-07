@@ -86,6 +86,7 @@ func RPC[T any](com idef.IComponent, serverID uint32, req any, cb func(resp T, e
 		Compt:    com,
 		ServerID: serverID,
 		Req:      req,
+		Resp:     util.New[T](),
 		Cb:       warpCb(cb),
 	}
 	CastLocal(rpcReq)

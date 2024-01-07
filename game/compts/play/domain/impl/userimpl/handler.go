@@ -20,3 +20,9 @@ func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 		Text: "hello client!",
 	})
 }
+
+func (s *service) onRPCTest(req *pb.TestRPC, resolve func(any), reject func(error)) {
+	resolve(&pb.TestRPCRes{
+		V: 22,
+	})
+}

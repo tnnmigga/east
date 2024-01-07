@@ -23,6 +23,7 @@ func New(d *domain.Domain) api.IMsg {
 func (s *service) afterInit() error {
 	msgbus.RegisterHandler(s, s.onSayHelloReq)
 	msgbus.RegisterHandler(s, s.onTimerSayHello)
+	msgbus.RegisterRPC(s, s.onRPCTest)
 	s.EventImpl().RegisterHandler(define.EventUserSayHello, s.onEventUserMsg)
 	return nil
 }

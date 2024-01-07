@@ -7,6 +7,7 @@ import (
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"east/pb"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -33,6 +34,12 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 		Filter:   bson.M{},
 		Data:     []bson.M{},
 	}, func(res any, err error) {
-		log.Info(res, err)
+		log.Info("db load", res, err)
+	})
+	msgbus.RPC(s, 1888, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
+		log.Info("remote call", resp, err)
+	})
+	msgbus.RPC(s, conf.ServerID(), &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
+		log.Info("local call", resp, err)
 	})
 }

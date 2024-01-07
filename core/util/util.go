@@ -1,6 +1,9 @@
 package util
 
-import "time"
+import (
+	"reflect"
+	"time"
+)
 
 func IfElse[T any](ok bool, a, b T) T {
 	if ok {
@@ -44,4 +47,13 @@ func NowNs() time.Duration {
 
 func NowMs() float64 {
 	return float64(time.Now().UnixNano()) / float64(time.Millisecond)
+}
+
+func New[T any]() any {
+	var v T
+	typeOf := reflect.TypeOf(v)
+	for typeOf.Kind() == reflect.Pointer {
+		typeOf = typeOf.Elem()
+	}
+	return reflect.New(typeOf).Interface()
 }

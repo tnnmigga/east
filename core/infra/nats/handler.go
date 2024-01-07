@@ -58,6 +58,7 @@ func (com *component) onRPCPackage(req *idef.RPCPackage) {
 			Compt: req.Compt,
 			Req:   req.Req,
 			Cb:    req.Cb,
+			Resp:  req.Resp,
 		}
 		defer req.Compt.Assign(resp)
 		msg, err := com.conn.Request(rpcSubject(req.ServerID), b, time.Duration(conf.Int64("rpc-wait-time", 10))*time.Second)
@@ -75,6 +76,6 @@ func (com *component) onRPCPackage(req *idef.RPCPackage) {
 			resp.Err = errors.New(rpcResp.Err)
 			return
 		}
-		resp.Resp, resp.Err = codec.Decode(msg.Data)
+		resp.Err = codec.Unmarshal(rpcResp.Data, resp.Resp)
 	})
 }
