@@ -58,8 +58,8 @@ func (wkg *workerGroup) run(key string, fn func()) {
 
 type worker struct {
 	key     string
-	pending    chan func()
-	count int32
+	pending chan func()
+	count   int32
 }
 
 func (w *worker) work() {
