@@ -36,14 +36,14 @@ type workerGroup struct {
 	mu         sync.Mutex
 }
 
-func (wkg *workerGroup) run(key string, fn func()) {
+func (wkg *workerGroup) run(name string, fn func()) {
 	wkg.mu.Lock()
 	var w *worker
-	value, ok := wkg.group.Load(key)
+	value, ok := wkg.group.Load(name)
 	if !ok {
 		w = wkg.workerPool.Get().(*worker)
-		w.key = key
-		wkg.group.Store(key, w)
+		w.name = name
+		wkg.group.Store(name, w)
 	} else {
 		w = value.(*worker)
 	}
@@ -57,7 +57,7 @@ func (wkg *workerGroup) run(key string, fn func()) {
 }
 
 type worker struct {
-	key     string
+	name    string
 	pending chan func()
 	count   int32
 }
@@ -72,7 +72,7 @@ func (w *worker) work() {
 			wkg.mu.Lock()
 			var empty bool
 			if w.count == 0 {
-				wkg.group.Delete(w.key)
+				wkg.group.Delete(w.name)
 				wkg.workerPool.Put(w)
 				empty = true
 			}
@@ -103,8 +103,8 @@ func Go[T gocall](fn T) {
 	}
 }
 
-func GoWithGroup(key string, fn func()) {
-	wkg.run(key, fn)
+func GoWithGroup(name string, fn func()) {
+	wkg.run(name, fn)
 }
 
 func WaitGoDone(maxWaitTime time.Duration) {
