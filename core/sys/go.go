@@ -19,7 +19,7 @@ func newWorkerGroup() *workerGroup {
 		workerPool: sync.Pool{
 			New: func() any {
 				return &worker{
-					wait: make(chan func(), 256),
+					pending: make(chan func(), 256),
 				}
 			},
 		},
@@ -47,10 +47,10 @@ func (wkg *workerGroup) run(key string, fn func()) {
 	} else {
 		w = value.(*worker)
 	}
-	w.pending++
-	pending := w.pending
+	w.count++
+	pending := w.count
 	wkg.mu.Unlock()
-	w.wait <- fn
+	w.pending <- fn
 	if pending == 1 {
 		Go(w.work)
 	}
@@ -58,20 +58,20 @@ func (wkg *workerGroup) run(key string, fn func()) {
 
 type worker struct {
 	key     string
-	wait    chan func()
-	pending int32
+	pending    chan func()
+	count int32
 }
 
 func (w *worker) work() {
 	for {
 		select {
-		case fn := <-w.wait:
+		case fn := <-w.pending:
 			util.ExecAndRecover(fn)
-			w.pending--
+			w.count--
 		default:
 			wkg.mu.Lock()
 			var empty bool
-			if w.pending == 0 {
+			if w.count == 0 {
 				wkg.group.Delete(w.key)
 				wkg.workerPool.Put(w)
 				empty = true
