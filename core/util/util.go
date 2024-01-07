@@ -49,6 +49,7 @@ func NowMs() float64 {
 	return float64(time.Now().UnixNano()) / float64(time.Millisecond)
 }
 
+// New 泛型和interface转换并去掉多层指针
 func New[T any]() any {
 	var v T
 	typeOf := reflect.TypeOf(v)
