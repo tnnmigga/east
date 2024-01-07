@@ -25,6 +25,7 @@ type MongoLoad struct {
 	DBName   string
 	CollName string
 	Filter   bson.M
+	Data     any
 }
 
 func (m *MongoLoad) Key() string {

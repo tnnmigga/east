@@ -31,6 +31,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},
+		Data:     []bson.M{},
 	}, func(res any, err error) {
 		log.Info(res, err)
 	})

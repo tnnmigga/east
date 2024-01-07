@@ -40,14 +40,13 @@ func (com *component) onMongoSave(req *MongoSave) {
 func (com *component) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
 	sys.GoWithGroup(req.Key(), func() {
 		cur, _ := com.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
-		res := []bson.M{}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		err := cur.All(ctx, &res)
+		err := cur.All(ctx, &req.Data)
 		cancel()
 		if err != nil {
 			reject(err)
 		} else {
-			resolve(res)
+			resolve(req.Data)
 		}
 	})
 }
