@@ -9,6 +9,7 @@ const (
 	keyNone         = "none"
 	keyNonuseStream = "nonuse-stream"
 	keyOneOfCompts  = "one-of-compts"
+	keyServerID     = "server-id"
 )
 
 func findCastOpt[T any](opts []castOpt, key string) (value T, find bool) {
@@ -31,5 +32,12 @@ func OneOfMods(modName string) castOpt {
 	return castOpt{
 		key:   keyOneOfCompts,
 		value: modName,
+	}
+}
+
+func ServerID(serverID uint32) castOpt {
+	return castOpt{
+		key:   keyServerID,
+		value: serverID,
 	}
 }

@@ -1,7 +1,6 @@
 package userimpl
 
 import (
-	"east/core/conf"
 	"east/core/eventbus"
 	"east/core/log"
 	"east/core/msgbus"
@@ -12,7 +11,7 @@ import (
 
 func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 	log.Infof("client say hello %v", msg.Text)
-	msgbus.Cast(conf.ServerID(), &eventbus.Event{
+	msgbus.CastLocal(&eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,
 		Value:   1,

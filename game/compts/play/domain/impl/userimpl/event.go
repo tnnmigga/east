@@ -13,7 +13,7 @@ import (
 
 func (s *service) onEventUserMsg(event *eventbus.Event) {
 	log.Infof("user event %v", util.String(event))
-	msgbus.Cast(conf.ServerID(), &mongo.MongoSave{
+	msgbus.CastLocal(&mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
 		Ops: []*mongo.MongoSaveOp{

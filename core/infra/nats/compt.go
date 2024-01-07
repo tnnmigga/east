@@ -147,7 +147,7 @@ func (com *component) streamRecv(msg jetstream.Msg) {
 		log.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(conf.ServerID(), pkg)
+	msgbus.CastLocal(pkg)
 }
 
 func (com *component) recv(msg *nats.Msg) {
@@ -157,7 +157,7 @@ func (com *component) recv(msg *nats.Msg) {
 		log.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	msgbus.Cast(conf.ServerID(), pkg)
+	msgbus.CastLocal(pkg)
 }
 
 func (com *component) rpc(msg *nats.Msg) {

@@ -1,12 +1,10 @@
 package msgimpl
 
 import (
-	"east/core/codec"
 	"east/core/idef"
 	"east/core/msgbus"
 	"east/game/compts/play/domain"
 	"east/game/compts/play/domain/api"
-	"east/pb"
 )
 
 type service struct {
@@ -26,12 +24,12 @@ func (s *service) afterInit() error {
 	return nil
 }
 
-func (s *service) Notify(userID uint64, msg any) {
-	msgbus.Cast(1, &pb.S2CPackage{
-		UserID: userID,
-		Body:   codec.Encode(msg),
-	})
-}
+// func (s *service) Notify(userID uint64, msg any) {
+// 	msgbus.Cast(&pb.S2CPackage{
+// 		UserID: userID,
+// 		Body:   codec.Encode(msg),
+// 	})
+// }
 
 type UserMessage interface {
 	UserID() uint64

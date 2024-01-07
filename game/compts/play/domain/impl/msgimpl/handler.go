@@ -2,7 +2,6 @@ package msgimpl
 
 import (
 	"east/core/codec"
-	"east/core/conf"
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
@@ -16,5 +15,5 @@ func (s *service) onC2SPackage(msg *pb.C2SPackage) {
 		return
 	}
 	log.Errorf("recv user %d msg %s", msg.UserID, util.String(pkg))
-	msgbus.Cast(conf.ServerID(), pkg)
+	msgbus.CastLocal(pkg)
 }

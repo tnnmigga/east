@@ -1,7 +1,6 @@
 package eventbus
 
 import (
-	"east/core/conf"
 	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
@@ -84,7 +83,7 @@ func New(com idef.IComponent) *EventBus {
 }
 
 func (bus *EventBus) Cast(event *Event) {
-	msgbus.Cast(conf.ServerID(), event)
+	msgbus.CastLocal(event)
 }
 
 func (bus *EventBus) SyncCast(event *Event) {

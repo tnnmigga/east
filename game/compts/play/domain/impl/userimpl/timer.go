@@ -11,10 +11,10 @@ type timerSayHello struct {
 }
 
 func (s *service) onTimerSayHello(ctx *timerSayHello) {
-	msgbus.Cast(1888, &pb.S2CPackage{
+	msgbus.Cast(&pb.S2CPackage{
 		UserID: 1,
 		Body: codec.Encode(&pb.SayHelloResp{
 			Text: ctx.Text,
 		}),
-	}, msgbus.NonuseStream())
+	}, msgbus.NonuseStream(), msgbus.ServerID(1888))
 }
