@@ -22,7 +22,7 @@ type Component struct {
 	name      string
 	mq        chan any
 	handlers  map[reflect.Type]*idef.Handler
-	hooks     [idef.ServerStateClose + 1][2][]func() error
+	hooks     [idef.ServerStateExit + 1][2][]func() error
 	closeSign chan struct{}
 }
 
@@ -72,7 +72,7 @@ func (com *Component) Before(state idef.ServerState, hook func() error) {
 }
 
 func (com *Component) After(state idef.ServerState, hook func() error) {
-	if state >= idef.ServerStateClose {
+	if state >= idef.ServerStateExit {
 		panic("component after close hook not support")
 	}
 	com.hooks[state][1] = append(com.hooks[state][1], hook)

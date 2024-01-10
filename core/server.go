@@ -19,17 +19,19 @@ type Server struct {
 	wg     *sync.WaitGroup
 }
 
-func NewServer(compts ...idef.IComponent) idef.IServer {
+func NewServer(compts ...idef.IComponent) *Server {
 	server := &Server{
 		compts: make([]idef.IComponent, 0, len(compts)+1),
 		wg:     &sync.WaitGroup{},
 	}
 	server.compts = append(server.compts, nats.New()) // nats最后停止
 	server.compts = append(server.compts, compts...)
+	server.init()
+	server.run()
 	return server
 }
 
-func (s *Server) Init() {
+func (s *Server) init() {
 	s.before(idef.ServerStateInit, s.abort)
 	conf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	log.Init()
@@ -37,7 +39,7 @@ func (s *Server) Init() {
 	s.after(idef.ServerStateInit, s.abort)
 }
 
-func (s *Server) Run() {
+func (s *Server) run() {
 	s.before(idef.ServerStateRun, s.abort)
 	log.Info("server try to run")
 	for _, com := range s.compts {
@@ -47,7 +49,7 @@ func (s *Server) Run() {
 	s.after(idef.ServerStateRun, s.abort)
 }
 
-func (s *Server) Stop() {
+func (s *Server) stop() {
 	s.before(idef.ServerStateStop, s.noabort)
 	log.Info("server try to stop")
 	s.waitMsgHandling(time.Minute)
@@ -59,10 +61,15 @@ func (s *Server) Stop() {
 	s.wg.Wait()
 	log.Info("server stoped successfully")
 	s.after(idef.ServerStateStop, s.noabort)
+	s.exit()
 }
 
-func (s *Server) Close() {
-	s.before(idef.ServerStateClose, s.noabort)
+func (s *Server) Exit() {
+	s.stop()
+}
+
+func (s *Server) exit() {
+	s.before(idef.ServerStateExit, s.noabort)
 	log.Info("server close")
 	os.Exit(0)
 }

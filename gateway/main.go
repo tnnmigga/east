@@ -10,9 +10,6 @@ func main() {
 	server := core.NewServer(
 		tcpagent.New(),
 	)
-	server.Init()
-	server.Run()
+	defer server.Exit()
 	sys.WaitExitSignal()
-	server.Stop()
-	server.Close()
 }

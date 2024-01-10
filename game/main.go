@@ -12,9 +12,6 @@ func main() {
 		play.New(),
 		mongo.New(),
 	)
-	server.Init()
-	server.Run()
+	defer server.Exit()
 	sys.WaitExitSignal()
-	server.Stop()
-	server.Close()
 }
