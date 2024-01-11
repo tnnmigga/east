@@ -1,4 +1,4 @@
-pbc:
+gamepb:
 	protoc --proto_path=./ --gofast_out=.  pb/*.proto
 
 corepb:
