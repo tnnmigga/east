@@ -7,6 +7,9 @@
 *.dll
 *.so
 *.dylib
+.idea
+.vscode
+log.txt
 
 # Test binary, built with `go test -c`
 *.test
@@ -19,3 +22,8 @@
 
 # Go workspace file
 go.work
+vendor
+test.go
+test
+node_modules
+bin

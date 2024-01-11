@@ -1,0 +1,7 @@
+Language: Proto
+BasedOnStyle: LLVM
+AlignConsecutiveAssignments: true
+IndentWidth: 4
+UseTab: Never
+...
+
