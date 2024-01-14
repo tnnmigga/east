@@ -98,5 +98,5 @@ func (h *TimerHeap) tryNextTrigger() {
 }
 
 func (h *TimerHeap) trigger() {
-	msgbus.CastLocal(&timerTrigger{}, msgbus.OneOfMods(h.component.Name()))
+	msgbus.CastLocal(&timerTrigger{}, msgbus.OneOfCompts(h.component.Name()))
 }

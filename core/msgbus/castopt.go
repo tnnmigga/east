@@ -28,7 +28,7 @@ func NonuseStream() castOpt {
 	}
 }
 
-func OneOfMods(modName string) castOpt {
+func OneOfCompts(modName string) castOpt {
 	return castOpt{
 		key:   keyOneOfCompts,
 		value: modName,
