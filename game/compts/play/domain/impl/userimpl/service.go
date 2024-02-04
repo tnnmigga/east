@@ -1,7 +1,7 @@
 package userimpl
 
 import (
-	define1 "east/core/idef"
+	"east/core/idef"
 	"east/core/msgbus"
 	"east/define"
 	"east/game/compts/play/domain"
@@ -16,7 +16,7 @@ func New(d *domain.Domain) api.IMsg {
 	s := &service{
 		Domain: d,
 	}
-	s.After(define1.ServerStateInit, s.afterInit)
+	s.After(idef.ServerStateInit, s.afterInit)
 	return s
 }
 
