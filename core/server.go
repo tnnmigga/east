@@ -32,7 +32,6 @@ func NewServer(compts ...idef.IComponent) *Server {
 }
 
 func (s *Server) init() {
-	s.before(idef.ServerStateInit, s.abort)
 	conf.LoadFromJSON(util.ReadFile("configs.jsonc"))
 	log.Init()
 	log.Info("server initialization")
@@ -60,7 +59,6 @@ func (s *Server) stop() {
 	}
 	s.wg.Wait()
 	log.Info("server stoped successfully")
-	s.after(idef.ServerStateStop, s.noabort)
 	s.exit()
 }
 
