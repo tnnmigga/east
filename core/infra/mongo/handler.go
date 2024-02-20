@@ -11,12 +11,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (com *component) registerHandler() {
-	msgbus.RegisterHandler(com, com.onMongoSave)
-	msgbus.RegisterRPC(com, com.onMongoLoad)
+func (m *module) registerHandler() {
+	msgbus.RegisterHandler(m, m.onMongoSave)
+	msgbus.RegisterRPC(m, m.onMongoLoad)
 }
 
-func (com *component) onMongoSave(req *MongoSave) {
+func (m *module) onMongoSave(req *MongoSave) {
 	ms := make([]mongo.WriteModel, 0, len(req.Ops))
 	for _, op := range req.Ops {
 		b, err := bson.Marshal(op.Value)
@@ -29,7 +29,7 @@ func (com *component) onMongoSave(req *MongoSave) {
 	}
 	sys.GoWithGroup(req.Key(), func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		_, err := com.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
+		_, err := m.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
 		cancel()
 		if err != nil {
 			log.Errorf("mongo save error %v", err)
@@ -37,9 +37,9 @@ func (com *component) onMongoSave(req *MongoSave) {
 	})
 }
 
-func (com *component) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
+func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
 	sys.GoWithGroup(req.Key(), func() {
-		cur, _ := com.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
+		cur, _ := m.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		err := cur.All(ctx, &req.Data)
 		cancel()

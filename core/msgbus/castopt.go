@@ -8,7 +8,7 @@ type castOpt struct {
 const (
 	keyNone         = "none"
 	keyNonuseStream = "nonuse-stream"
-	keyOneOfCompts  = "one-of-compts"
+	keyOneOfMods    = "one-of-mods"
 	keyServerID     = "server-id"
 )
 
@@ -28,9 +28,9 @@ func NonuseStream() castOpt {
 	}
 }
 
-func OneOfCompts(modName string) castOpt {
+func OneOfMods(modName string) castOpt {
 	return castOpt{
-		key:   keyOneOfCompts,
+		key:   keyOneOfMods,
 		value: modName,
 	}
 }

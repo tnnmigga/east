@@ -3,8 +3,8 @@ package msgimpl
 import (
 	"east/core/idef"
 	"east/core/msgbus"
-	"east/game/compts/play/domain"
-	"east/game/compts/play/domain/api"
+	"east/game/modules/play/domain"
+	"east/game/modules/play/domain/api"
 )
 
 type service struct {

@@ -1,4 +1,4 @@
-package compt
+package basic
 
 import (
 	"east/core/idef"
@@ -66,14 +66,14 @@ func (com *Module) Hook(state idef.ServerState, stage int) []func() error {
 
 func (com *Module) Before(state idef.ServerState, hook func() error) {
 	if state <= idef.ServerStateInit {
-		panic("component after close hook not support")
+		panic("module after close hook not support")
 	}
 	com.hooks[state][0] = append(com.hooks[state][0], hook)
 }
 
 func (com *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateExit {
-		panic("component after close hook not support")
+		panic("module after close hook not support")
 	}
 	com.hooks[state][1] = append(com.hooks[state][1], hook)
 }

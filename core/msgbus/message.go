@@ -60,7 +60,7 @@ func CastLocal(msg any, opts ...castOpt) {
 		log.Errorf("message cast recv not fuound %v", util.StructName(msg))
 		return
 	}
-	modName, oneOfMod := findCastOpt[string](opts, keyOneOfCompts)
+	modName, oneOfMod := findCastOpt[string](opts, keyOneOfMods)
 	for _, recv := range recvs {
 		if oneOfMod && modName != recv.Name() {
 			continue
@@ -77,13 +77,13 @@ func Broadcast(serverType string, msg any) {
 	CastLocal(pkg)
 }
 
-func RPC[T any](com idef.IComponent, serverID uint32, req any, cb func(resp T, err error)) {
+func RPC[T any](com idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
 	if serverID == conf.ServerID() {
 		localCall(com, req, warpCb(cb))
 		return
 	}
 	rpcReq := &idef.RPCPackage{
-		Compt:    com,
+		Module:   com,
 		ServerID: serverID,
 		Req:      req,
 		Resp:     util.New[T](),
@@ -92,7 +92,7 @@ func RPC[T any](com idef.IComponent, serverID uint32, req any, cb func(resp T, e
 	CastLocal(rpcReq)
 }
 
-func localCall(com idef.IComponent, req any, cb func(resp any, err error)) {
+func localCall(com idef.IModule, req any, cb func(resp any, err error)) {
 	recvs, ok := recvers[reflect.TypeOf(req)]
 	if !ok {
 		log.Errorf("recvs not fuound %v", util.StructName(req))
@@ -105,9 +105,9 @@ func localCall(com idef.IComponent, req any, cb func(resp any, err error)) {
 			Err:  make(chan error, 1),
 		}
 		callResp := &idef.RPCResponse{
-			Compt: com,
-			Req:   req,
-			Cb:    warpCb(cb),
+			Module: com,
+			Req:    req,
+			Cb:     warpCb(cb),
 		}
 		recvs[0].Assign(callReq)
 		timer := time.NewTimer(rpcMaxWaitTime)

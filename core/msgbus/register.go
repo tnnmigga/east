@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func RegisterHandler[T any](com idef.IComponent, fn func(T)) {
+func RegisterHandler[T any](com idef.IModule, fn func(T)) {
 	mValue := *new(T)
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)
@@ -21,7 +21,7 @@ func RegisterHandler[T any](com idef.IComponent, fn func(T)) {
 	})
 }
 
-func RegisterRPC[T any](com idef.IComponent, fn func(msg T, resolve func(any), reject func(error))) {
+func RegisterRPC[T any](com idef.IModule, fn func(msg T, resolve func(any), reject func(error))) {
 	mValue := *new(T)
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)

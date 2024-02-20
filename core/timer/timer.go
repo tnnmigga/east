@@ -35,13 +35,13 @@ func (t *timerCtx) Value() time.Duration {
 
 type TimerHeap struct {
 	algorithm.Heap[uint64, time.Duration, *timerCtx]
-	component idef.IComponent
-	timer     *time.Timer
+	module idef.IModule
+	timer  *time.Timer
 }
 
-func NewTimerHeap(com idef.IComponent) *TimerHeap {
+func NewTimerHeap(com idef.IModule) *TimerHeap {
 	h := &TimerHeap{
-		component: com,
+		module: com,
 	}
 	msgbus.RegisterHandler(com, h.onTimerTrigger)
 	sys.Go(h.tryNextTrigger)
@@ -98,5 +98,5 @@ func (h *TimerHeap) tryNextTrigger() {
 }
 
 func (h *TimerHeap) trigger() {
-	msgbus.CastLocal(&timerTrigger{}, msgbus.OneOfCompts(h.component.Name()))
+	msgbus.CastLocal(&timerTrigger{}, msgbus.OneOfMods(h.module.Name()))
 }

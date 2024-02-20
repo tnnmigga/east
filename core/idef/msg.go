@@ -32,15 +32,15 @@ type RPCRequest struct {
 }
 
 type RPCResponse struct {
-	Compt IComponent
-	Req   any
-	Resp  any
-	Err   error
-	Cb    func(resp any, err error)
+	Module IModule
+	Req    any
+	Resp   any
+	Err    error
+	Cb     func(resp any, err error)
 }
 
 type RPCPackage struct {
-	Compt    IComponent
+	Module   IModule
 	ServerID uint32
 	Req      any
 	Resp     any

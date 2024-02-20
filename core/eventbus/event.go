@@ -74,7 +74,7 @@ func (bus *EventBus) dispatch(event *Event) {
 	}
 }
 
-func New(com idef.IComponent) *EventBus {
+func New(com idef.IModule) *EventBus {
 	bus := &EventBus{
 		subs: map[string][]ISubscriber{},
 	}

@@ -1,7 +1,7 @@
 package tcpagent
 
 import (
-	"east/core/compt"
+	"east/core/basic"
 	"east/core/conf"
 	define1 "east/core/idef"
 	"east/core/log"
@@ -10,16 +10,16 @@ import (
 	"sync"
 )
 
-type component struct {
-	*compt.Module
+type module struct {
+	*basic.Module
 	sync.RWMutex
 	lister net.Listener
 	conns  map[uint64]*userAgent
 }
 
-func New() define1.IComponent {
-	com := &component{
-		Module: compt.New(define.ModTypTCPAgent, compt.DefaultMQLen),
+func New() define1.IModule {
+	com := &module{
+		Module: basic.New(define.ModTypTCPAgent, basic.DefaultMQLen),
 		conns:  map[uint64]*userAgent{},
 	}
 	com.initHandler()
@@ -28,7 +28,7 @@ func New() define1.IComponent {
 	return com
 }
 
-func (com *component) afterInit() (err error) {
+func (com *module) afterInit() (err error) {
 	com.lister, err = net.Listen("tcp", conf.String("tcp-addr", "127.0.0.1:9527"))
 	if err != nil {
 		return err
@@ -36,12 +36,12 @@ func (com *component) afterInit() (err error) {
 	return nil
 }
 
-func (com *component) afterRun() error {
+func (com *module) afterRun() error {
 	go com.accept()
 	return nil
 }
 
-func (com *component) accept() {
+func (com *module) accept() {
 	for {
 		conn, err := com.lister.Accept()
 		log.Infof("new conn!")

@@ -11,57 +11,57 @@ import (
 	"time"
 )
 
-func (com *module) initHandler() {
-	msgbus.RegisterHandler(com, com.onCastPackage)
-	msgbus.RegisterHandler(com, com.onStreamCastPackage)
-	msgbus.RegisterHandler(com, com.onBroadcastPackage)
-	msgbus.RegisterHandler(com, com.onRandomCastPackage)
-	msgbus.RegisterHandler(com, com.onRPCPackage)
+func (m *module) initHandler() {
+	msgbus.RegisterHandler(m, m.onCastPackage)
+	msgbus.RegisterHandler(m, m.onStreamCastPackage)
+	msgbus.RegisterHandler(m, m.onBroadcastPackage)
+	msgbus.RegisterHandler(m, m.onRandomCastPackage)
+	msgbus.RegisterHandler(m, m.onRPCPackage)
 }
 
-func (com *module) onCastPackage(pkg *idef.CastPackage) {
+func (m *module) onCastPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
-	err := com.conn.Publish(castSubject(pkg.ServerID), b)
+	err := m.conn.Publish(castSubject(pkg.ServerID), b)
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
 }
 
-func (com *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
+func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	b := codec.Encode(pkg.Body)
-	_, err := com.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
+	_, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
 }
 
-func (com *module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
+func (m *module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
-	err := com.conn.Publish(broadcastSubject(pkg.ServerType), b)
+	err := m.conn.Publish(broadcastSubject(pkg.ServerType), b)
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
 }
 
-func (com *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
+func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	b := codec.Encode(pkg.Body)
-	err := com.conn.Publish(randomCastSubject(pkg.ServerType), b)
+	err := m.conn.Publish(randomCastSubject(pkg.ServerType), b)
 	if err != nil {
 		log.Errorf("nats publish error %v", err)
 	}
 }
 
-func (com *module) onRPCPackage(req *idef.RPCPackage) {
+func (m *module) onRPCPackage(req *idef.RPCPackage) {
 	b := codec.Encode(req.Req)
 	sys.Go(func() {
 		resp := &idef.RPCResponse{
-			Compt: req.Compt,
-			Req:   req.Req,
-			Cb:    req.Cb,
-			Resp:  req.Resp,
+			Module: req.Module,
+			Req:    req.Req,
+			Cb:     req.Cb,
+			Resp:   req.Resp,
 		}
-		defer req.Compt.Assign(resp)
-		msg, err := com.conn.Request(rpcSubject(req.ServerID), b, time.Duration(conf.Int64("rpc-wait-time", 10))*time.Second)
+		defer req.Module.Assign(resp)
+		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(conf.Int64("rpc-wait-time", 10))*time.Second)
 		if err != nil {
 			resp.Err = err
 			return
