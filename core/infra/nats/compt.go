@@ -22,7 +22,7 @@ const (
 	castStreamName = "stream-cast"
 )
 
-type component struct {
+type module struct {
 	*compt.Module
 	conn         *nats.Conn
 	js           jetstream.JetStream
@@ -36,7 +36,7 @@ type component struct {
 }
 
 func New() idef.IComponent {
-	com := &component{
+	com := &module{
 		Module: compt.New(infra.ModTypNats, conf.Int32("nats-mq-len", compt.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
@@ -48,7 +48,7 @@ func New() idef.IComponent {
 	return com
 }
 
-func (com *component) afterInit() error {
+func (com *module) afterInit() error {
 	conn, err := nats.Connect(
 		conf.String("nats-url", nats.DefaultURL),
 		nats.RetryOnFailedConnect(true),
@@ -73,7 +73,7 @@ func (com *component) afterInit() error {
 	return nil
 }
 
-func (com *component) afterRun() (err error) {
+func (com *module) afterRun() (err error) {
 	com.cons, err = com.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
 		Durable:       fmt.Sprintf("%s-%d", conf.ServerType(), conf.ServerID()),
 		FilterSubject: streamCastSubject(conf.ServerID()),
@@ -124,7 +124,7 @@ func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
-func (com *component) beforeStop() error {
+func (com *module) beforeStop() error {
 	com.consCtx.Stop()
 	com.castSub.Drain()
 	com.broadcastSub.Drain()
@@ -133,13 +133,13 @@ func (com *component) beforeStop() error {
 	return nil
 }
 
-func (com *component) afterStop() error {
+func (com *module) afterStop() error {
 	<-com.js.PublishAsyncComplete()
 	com.conn.Close()
 	return nil
 }
 
-func (com *component) streamRecv(msg jetstream.Msg) {
+func (com *module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
 	pkg, err := codec.Decode(msg.Data())
@@ -150,7 +150,7 @@ func (com *component) streamRecv(msg jetstream.Msg) {
 	msgbus.CastLocal(pkg)
 }
 
-func (com *component) recv(msg *nats.Msg) {
+func (com *module) recv(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
@@ -160,7 +160,7 @@ func (com *component) recv(msg *nats.Msg) {
 	msgbus.CastLocal(pkg)
 }
 
-func (com *component) rpc(msg *nats.Msg) {
+func (com *module) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	req, err := codec.Decode(msg.Data)
 	rpcResp := &RPCResponse{}
