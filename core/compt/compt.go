@@ -18,7 +18,7 @@ var (
 	rpcRespType = reflect.TypeOf((*idef.RPCResponse)(nil))
 )
 
-type Component struct {
+type Module struct {
 	name      string
 	mq        chan any
 	handlers  map[reflect.Type]*idef.Handler
@@ -26,8 +26,8 @@ type Component struct {
 	closeSign chan struct{}
 }
 
-func New(name string, mqLen int32) *Component {
-	return &Component{
+func New(name string, mqLen int32) *Module {
+	return &Module{
 		name:      name,
 		mq:        make(chan any, mqLen),
 		handlers:  map[reflect.Type]*idef.Handler{},
@@ -35,15 +35,15 @@ func New(name string, mqLen int32) *Component {
 	}
 }
 
-func (com *Component) Name() string {
+func (com *Module) Name() string {
 	return com.name
 }
 
-func (com *Component) MQ() chan any {
+func (com *Module) MQ() chan any {
 	return com.mq
 }
 
-func (com *Component) Assign(msg any) {
+func (com *Module) Assign(msg any) {
 	select {
 	case com.mq <- msg:
 	default:
@@ -51,7 +51,7 @@ func (com *Component) Assign(msg any) {
 	}
 }
 
-func (com *Component) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
+func (com *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	_, ok := com.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
@@ -60,25 +60,25 @@ func (com *Component) RegisterHandler(mType reflect.Type, handler *idef.Handler)
 	com.handlers[mType] = handler
 }
 
-func (com *Component) Hook(state idef.ServerState, stage int) []func() error {
+func (com *Module) Hook(state idef.ServerState, stage int) []func() error {
 	return com.hooks[state][stage]
 }
 
-func (com *Component) Before(state idef.ServerState, hook func() error) {
+func (com *Module) Before(state idef.ServerState, hook func() error) {
 	if state <= idef.ServerStateInit {
 		panic("component after close hook not support")
 	}
 	com.hooks[state][0] = append(com.hooks[state][0], hook)
 }
 
-func (com *Component) After(state idef.ServerState, hook func() error) {
+func (com *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateExit {
 		panic("component after close hook not support")
 	}
 	com.hooks[state][1] = append(com.hooks[state][1], hook)
 }
 
-func (com *Component) Run() {
+func (com *Module) Run() {
 	defer func() {
 		log.Infof("%v has stoped", com.Name())
 		com.closeSign <- struct{}{}
@@ -96,13 +96,13 @@ func (com *Component) Run() {
 	}
 }
 
-func (com *Component) Stop() {
+func (com *Module) Stop() {
 	log.Infof("try stop %s", com.name)
 	close(com.mq)
 	<-com.closeSign
 }
 
-func (com *Component) cb(msg any) {
+func (com *Module) cb(msg any) {
 	defer util.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
 	h, ok := com.handlers[msgType]
@@ -113,7 +113,7 @@ func (com *Component) cb(msg any) {
 	h.Cb(msg)
 }
 
-func (com *Component) rpc(msg *idef.RPCRequest) {
+func (com *Module) rpc(msg *idef.RPCRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -132,7 +132,7 @@ func (com *Component) rpc(msg *idef.RPCRequest) {
 	})
 }
 
-func (com *Component) rpcResp(req *idef.RPCResponse) {
+func (com *Module) rpcResp(req *idef.RPCResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

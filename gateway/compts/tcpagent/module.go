@@ -11,7 +11,7 @@ import (
 )
 
 type component struct {
-	*compt.Component
+	*compt.Module
 	sync.RWMutex
 	lister net.Listener
 	conns  map[uint64]*userAgent
@@ -19,8 +19,8 @@ type component struct {
 
 func New() define1.IComponent {
 	com := &component{
-		Component: compt.New(define.ModTypTCPAgent, compt.DefaultMQLen),
-		conns:     map[uint64]*userAgent{},
+		Module: compt.New(define.ModTypTCPAgent, compt.DefaultMQLen),
+		conns:  map[uint64]*userAgent{},
 	}
 	com.initHandler()
 	com.After(define1.ServerStateInit, com.afterInit)

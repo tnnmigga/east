@@ -13,13 +13,13 @@ import (
 )
 
 type component struct {
-	*compt.Component
+	*compt.Module
 	mongocli *mongo.Client
 }
 
 func New() idef.IComponent {
 	com := &component{
-		Component: compt.New(infra.ModTypMongo, compt.DefaultMQLen),
+		Module: compt.New(infra.ModTypMongo, compt.DefaultMQLen),
 	}
 	com.registerHandler()
 	com.Before(idef.ServerStateRun, com.beforeRun)

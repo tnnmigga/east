@@ -7,14 +7,14 @@ import (
 )
 
 type Domain struct {
-	*compt.Component
+	*compt.Module
 	*domain.Pool
 }
 
-func New(com *compt.Component) *Domain {
+func New(com *compt.Module) *Domain {
 	d := &Domain{
-		Component: com,
-		Pool:      domain.NewPool(MaxImplIndex),
+		Module: com,
+		Pool:   domain.NewPool(MaxImplIndex),
 	}
 	return d
 }

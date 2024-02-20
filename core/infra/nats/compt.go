@@ -23,7 +23,7 @@ const (
 )
 
 type component struct {
-	*compt.Component
+	*compt.Module
 	conn         *nats.Conn
 	js           jetstream.JetStream
 	stream       jetstream.Stream
@@ -37,7 +37,7 @@ type component struct {
 
 func New() idef.IComponent {
 	com := &component{
-		Component: compt.New(infra.ModTypNats, conf.Int32("nats-mq-len", compt.DefaultMQLen)),
+		Module: compt.New(infra.ModTypNats, conf.Int32("nats-mq-len", compt.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
 	com.initHandler()
