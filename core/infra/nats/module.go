@@ -18,7 +18,6 @@ import (
 )
 
 const (
-	ModuleName     = "nats"
 	castStreamName = "stream-cast"
 )
 
@@ -37,7 +36,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: basic.New(infra.ModTypNats, conf.Int32("nats-mq-len", basic.DefaultMQLen)),
+		Module: basic.New(infra.ModNameNats, conf.Int32("nats-mq-len", basic.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
 	m.initHandler()

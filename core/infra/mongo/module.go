@@ -19,7 +19,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: basic.New(infra.ModTypMongo, basic.DefaultMQLen),
+		Module: basic.New(infra.ModNameMongo, basic.DefaultMQLen),
 	}
 	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
