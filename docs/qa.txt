@@ -1,6 +1,6 @@
 1.运行环境需要哪些
   go1.21
-  nats, 并通过nats stream add "stream-cast"命令创建流
+  nats, 并通过nats stream add "stream-cast"命令创建流, 订阅主题填:stream.cast.*
 
 2.快速编译运行服务器
   make br
