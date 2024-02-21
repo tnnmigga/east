@@ -77,13 +77,13 @@ func Broadcast(serverType string, msg any) {
 	CastLocal(pkg)
 }
 
-func RPC[T any](com idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
 	if serverID == conf.ServerID() {
-		localCall(com, req, warpCb(cb))
+		localCall(m, req, warpCb(cb))
 		return
 	}
 	rpcReq := &idef.RPCPackage{
-		Module:   com,
+		Module:   m,
 		ServerID: serverID,
 		Req:      req,
 		Resp:     util.New[T](),
@@ -92,7 +92,7 @@ func RPC[T any](com idef.IModule, serverID uint32, req any, cb func(resp T, err 
 	CastLocal(rpcReq)
 }
 
-func localCall(com idef.IModule, req any, cb func(resp any, err error)) {
+func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 	recvs, ok := recvers[reflect.TypeOf(req)]
 	if !ok {
 		log.Errorf("recvs not fuound %v", util.StructName(req))
@@ -105,7 +105,7 @@ func localCall(com idef.IModule, req any, cb func(resp any, err error)) {
 			Err:  make(chan error, 1),
 		}
 		callResp := &idef.RPCResponse{
-			Module: com,
+			Module: m,
 			Req:    req,
 			Cb:     warpCb(cb),
 		}
@@ -118,7 +118,7 @@ func localCall(com idef.IModule, req any, cb func(resp any, err error)) {
 		case callResp.Resp = <-callReq.Resp:
 		case callResp.Err = <-callReq.Err:
 		}
-		com.Assign(callResp)
+		m.Assign(callResp)
 	})
 }
 

@@ -13,9 +13,9 @@ type module struct {
 }
 
 func New() idef.IModule {
-	com := &module{
+	m := &module{
 		Domain: domain.New(basic.New(define.ModTypPlay, basic.DefaultMQLen)),
 	}
-	impl.Init(com.Domain)
-	return com
+	impl.Init(m.Domain)
+	return m
 }

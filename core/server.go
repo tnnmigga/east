@@ -41,8 +41,8 @@ func (s *Server) init() {
 func (s *Server) run() {
 	s.before(idef.ServerStateRun, s.abort)
 	log.Info("server try to run")
-	for _, com := range s.modules {
-		s.runModule(s.wg, com)
+	for _, m := range s.modules {
+		s.runModule(s.wg, m)
 	}
 	log.Info("server running successfully")
 	s.after(idef.ServerStateRun, s.abort)
@@ -54,8 +54,8 @@ func (s *Server) stop() {
 	s.waitMsgHandling(time.Minute)
 	sys.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
-		com := s.modules[i]
-		util.ExecAndRecover(com.Stop)
+		m := s.modules[i]
+		util.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
 	log.Info("server stoped successfully")
@@ -72,12 +72,12 @@ func (s *Server) exit() {
 	os.Exit(0)
 }
 
-func (s *Server) runModule(wg *sync.WaitGroup, com idef.IModule) {
+func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
 	wg.Add(1)
 	go func() {
 		defer util.RecoverPanic()
 		defer wg.Done()
-		com.Run()
+		m.Run()
 	}()
 }
 
@@ -86,8 +86,8 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 	for ; maxCheckCount > 0; maxCheckCount-- {
 		time.Sleep(100 * time.Millisecond)
 		isEmpty := true
-		for _, com := range s.modules {
-			if len(com.MQ()) != 0 {
+		for _, m := range s.modules {
+			if len(m.MQ()) != 0 {
 				isEmpty = false
 				break
 			}
@@ -99,22 +99,22 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 	log.Errorf("wait msg handing timeout")
 }
 
-func (s *Server) abort(com idef.IModule, err error) {
-	log.Fatalf("module %s, on %s, error: %v", com.Name(), util.Caller(3), err)
+func (s *Server) abort(m idef.IModule, err error) {
+	log.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
-func (s *Server) noabort(com idef.IModule, err error) {
-	log.Errorf("module %s, on %s, error: %v", com.Name(), util.Caller(3), err)
+func (s *Server) noabort(m idef.IModule, err error) {
+	log.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
 func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, error)) {
-	for _, com := range s.modules {
-		hook := com.Hook(state, 0)
+	for _, m := range s.modules {
+		hook := m.Hook(state, 0)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, com.Name(), err)
+				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
-					f(com, err)
+					f(m, err)
 				}
 			}
 		}
@@ -122,13 +122,13 @@ func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, er
 }
 
 func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, error)) {
-	for _, com := range s.modules {
-		hook := com.Hook(state, 1)
+	for _, m := range s.modules {
+		hook := m.Hook(state, 1)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, com.Name(), err)
+				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
-					f(com, err)
+					f(m, err)
 				}
 			}
 		}

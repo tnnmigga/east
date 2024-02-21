@@ -74,11 +74,11 @@ func (bus *EventBus) dispatch(event *Event) {
 	}
 }
 
-func New(com idef.IModule) *EventBus {
+func New(m idef.IModule) *EventBus {
 	bus := &EventBus{
 		subs: map[string][]ISubscriber{},
 	}
-	msgbus.RegisterHandler(com, bus.dispatch)
+	msgbus.RegisterHandler(m, bus.dispatch)
 	return bus
 }
 

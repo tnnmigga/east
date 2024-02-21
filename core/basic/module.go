@@ -35,77 +35,77 @@ func New(name string, mqLen int32) *Module {
 	}
 }
 
-func (com *Module) Name() string {
-	return com.name
+func (m *Module) Name() string {
+	return m.name
 }
 
-func (com *Module) MQ() chan any {
-	return com.mq
+func (m *Module) MQ() chan any {
+	return m.mq
 }
 
-func (com *Module) Assign(msg any) {
+func (m *Module) Assign(msg any) {
 	select {
-	case com.mq <- msg:
+	case m.mq <- msg:
 	default:
-		log.Errorf("modele %s mq full, lose %s", com.name, util.String(msg))
+		log.Errorf("modele %s mq full, lose %s", m.name, util.String(msg))
 	}
 }
 
-func (com *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
-	_, ok := com.handlers[mType]
+func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
+	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
 		log.Fatal(fmt.Errorf("RegisterHandler multiple registration %v", mType))
 	}
-	com.handlers[mType] = handler
+	m.handlers[mType] = handler
 }
 
-func (com *Module) Hook(state idef.ServerState, stage int) []func() error {
-	return com.hooks[state][stage]
+func (m *Module) Hook(state idef.ServerState, stage int) []func() error {
+	return m.hooks[state][stage]
 }
 
-func (com *Module) Before(state idef.ServerState, hook func() error) {
+func (m *Module) Before(state idef.ServerState, hook func() error) {
 	if state <= idef.ServerStateInit {
 		panic("module after close hook not support")
 	}
-	com.hooks[state][0] = append(com.hooks[state][0], hook)
+	m.hooks[state][0] = append(m.hooks[state][0], hook)
 }
 
-func (com *Module) After(state idef.ServerState, hook func() error) {
+func (m *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateExit {
 		panic("module after close hook not support")
 	}
-	com.hooks[state][1] = append(com.hooks[state][1], hook)
+	m.hooks[state][1] = append(m.hooks[state][1], hook)
 }
 
-func (com *Module) Run() {
+func (m *Module) Run() {
 	defer func() {
-		log.Infof("%v has stoped", com.Name())
-		com.closeSign <- struct{}{}
+		log.Infof("%v has stoped", m.Name())
+		m.closeSign <- struct{}{}
 	}()
-	for msg := range com.mq {
+	for msg := range m.mq {
 		msgType := reflect.TypeOf(msg)
 		switch msgType {
 		case rpcReqType: // 被发起rpc
-			com.rpc(msg.(*idef.RPCRequest))
+			m.rpc(msg.(*idef.RPCRequest))
 		case rpcRespType: // rpc请求完成
-			com.rpcResp(msg.(*idef.RPCResponse))
+			m.rpcResp(msg.(*idef.RPCResponse))
 		default:
-			com.cb(msg)
+			m.cb(msg)
 		}
 	}
 }
 
-func (com *Module) Stop() {
-	log.Infof("try stop %s", com.name)
-	close(com.mq)
-	<-com.closeSign
+func (m *Module) Stop() {
+	log.Infof("try stop %s", m.name)
+	close(m.mq)
+	<-m.closeSign
 }
 
-func (com *Module) cb(msg any) {
+func (m *Module) cb(msg any) {
 	defer util.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
-	h, ok := com.handlers[msgType]
+	h, ok := m.handlers[msgType]
 	if !ok {
 		log.Errorf("handler not exist %v", msgType)
 		return
@@ -113,14 +113,14 @@ func (com *Module) cb(msg any) {
 	h.Cb(msg)
 }
 
-func (com *Module) rpc(msg *idef.RPCRequest) {
+func (m *Module) rpc(msg *idef.RPCRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
 		}
 	}()
 	msgType := reflect.TypeOf(msg.Req)
-	h, ok := com.handlers[msgType]
+	h, ok := m.handlers[msgType]
 	if !ok {
 		msg.Err <- fmt.Errorf("rpc handler not found %v", msgType)
 		return
@@ -132,7 +132,7 @@ func (com *Module) rpc(msg *idef.RPCRequest) {
 	})
 }
 
-func (com *Module) rpcResp(req *idef.RPCResponse) {
+func (m *Module) rpcResp(req *idef.RPCResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

@@ -3,7 +3,7 @@ package tcpagent
 import (
 	"east/core/basic"
 	"east/core/conf"
-	define1 "east/core/idef"
+	"east/core/idef"
 	"east/core/log"
 	"east/define"
 	"net"
@@ -17,33 +17,33 @@ type module struct {
 	conns  map[uint64]*userAgent
 }
 
-func New() define1.IModule {
-	com := &module{
+func New() idef.IModule {
+	m := &module{
 		Module: basic.New(define.ModTypTCPAgent, basic.DefaultMQLen),
 		conns:  map[uint64]*userAgent{},
 	}
-	com.initHandler()
-	com.After(define1.ServerStateInit, com.afterInit)
-	com.After(define1.ServerStateRun, com.afterRun)
-	return com
+	m.initHandler()
+	m.After(idef.ServerStateInit, m.afterInit)
+	m.After(idef.ServerStateRun, m.afterRun)
+	return m
 }
 
-func (com *module) afterInit() (err error) {
-	com.lister, err = net.Listen("tcp", conf.String("tcp-addr", "127.0.0.1:9527"))
+func (m *module) afterInit() (err error) {
+	m.lister, err = net.Listen("tcp", conf.String("tcp-addr", "127.0.0.1:9527"))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (com *module) afterRun() error {
-	go com.accept()
+func (m *module) afterRun() error {
+	go m.accept()
 	return nil
 }
 
-func (com *module) accept() {
+func (m *module) accept() {
 	for {
-		conn, err := com.lister.Accept()
+		conn, err := m.lister.Accept()
 		log.Infof("new conn!")
 		if err != nil {
 			log.Errorf("tcpagent accept error %v", err)
@@ -55,9 +55,9 @@ func (com *module) accept() {
 			conn:     conn,
 			mq:       make(chan []byte, 256),
 		}
-		com.Lock()
-		com.conns[uid] = agent
-		com.Unlock()
+		m.Lock()
+		m.conns[uid] = agent
+		m.Unlock()
 		agent.run()
 	}
 }

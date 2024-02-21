@@ -39,11 +39,11 @@ type TimerHeap struct {
 	timer  *time.Timer
 }
 
-func NewTimerHeap(com idef.IModule) *TimerHeap {
+func NewTimerHeap(m idef.IModule) *TimerHeap {
 	h := &TimerHeap{
-		module: com,
+		module: m,
 	}
-	msgbus.RegisterHandler(com, h.onTimerTrigger)
+	msgbus.RegisterHandler(m, h.onTimerTrigger)
 	sys.Go(h.tryNextTrigger)
 	return h
 }

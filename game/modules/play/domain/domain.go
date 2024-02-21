@@ -11,9 +11,9 @@ type Domain struct {
 	*domain.Pool
 }
 
-func New(com *basic.Module) *Domain {
+func New(m *basic.Module) *Domain {
 	d := &Domain{
-		Module: com,
+		Module: m,
 		Pool:   domain.NewPool(MaxImplIndex),
 	}
 	return d
