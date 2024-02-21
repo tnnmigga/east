@@ -58,7 +58,7 @@ type vType interface {
 
 func Any[T vType](name string) (v T, ok bool) {
 	if v, has := confs[name]; has {
-		return v.(T), true // 允许不存在不允许类型错误
+		return v.(T), true // 允许不存在, 不允许类型错误
 	}
 	return v, false
 }
