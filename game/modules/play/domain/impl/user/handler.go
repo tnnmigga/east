@@ -1,4 +1,4 @@
-package userimpl
+package user
 
 import (
 	"east/core/eventbus"
@@ -16,7 +16,7 @@ func (s *service) onSayHelloReq(msg *pb.SayHelloReq) {
 		Topic:   define.EventUserSayHello,
 		Value:   1,
 	})
-	s.TimerImpl().New(time.Second*2, &timerSayHello{
+	s.TimerCase().New(time.Second*2, &timerSayHello{
 		Text: "hello client!",
 	})
 }

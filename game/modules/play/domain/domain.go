@@ -14,31 +14,31 @@ type Domain struct {
 func New(m *basic.Module) *Domain {
 	d := &Domain{
 		Module: m,
-		Pool:   domain.NewPool(MaxImplIndex),
+		Pool:   domain.NewPool(MaxCaseIndex),
 	}
 	return d
 }
 
 const (
-	MsgImplIndex = iota
-	EventImplIndex
-	TimerImplIndex
-	UserImplIndex
-	MaxImplIndex
+	MsgCaseIndex = iota
+	EventCaseIndex
+	TimerCaseIndex
+	UserCaseIndex
+	MaxCaseIndex
 )
 
 func (d *Domain) MsgCase() api.IMsg {
-	return d.GetImpl(MsgImplIndex).(api.IMsg)
+	return d.GetImpl(MsgCaseIndex).(api.IMsg)
 }
 
-func (d *Domain) EventImpl() api.IEvent {
-	return d.GetImpl(EventImplIndex).(api.IEvent)
+func (d *Domain) EventCase() api.IEvent {
+	return d.GetImpl(EventCaseIndex).(api.IEvent)
 }
 
-func (d *Domain) TimerImpl() api.ITimer {
-	return d.GetImpl(TimerImplIndex).(api.ITimer)
+func (d *Domain) TimerCase() api.ITimer {
+	return d.GetImpl(TimerCaseIndex).(api.ITimer)
 }
 
-func (d *Domain) UserImpl() api.IUser {
-	return d.GetImpl(UserImplIndex).(api.IUser)
+func (d *Domain) UserCase() api.IUser {
+	return d.GetImpl(UserCaseIndex).(api.IUser)
 }

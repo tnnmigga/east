@@ -1,4 +1,4 @@
-package userimpl
+package user
 
 import (
 	"east/core/codec"

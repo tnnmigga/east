@@ -1,4 +1,4 @@
-package timerimpl
+package timer
 
 import (
 	"east/core/idef"

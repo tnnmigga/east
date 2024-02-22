@@ -1,4 +1,4 @@
-package msgimpl
+package msg
 
 import (
 	"east/core/codec"

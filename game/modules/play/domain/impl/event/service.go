@@ -1,4 +1,4 @@
-package eventimpl
+package event
 
 import (
 	"east/core/eventbus"

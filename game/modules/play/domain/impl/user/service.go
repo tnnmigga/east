@@ -1,8 +1,9 @@
-package msgimpl
+package user
 
 import (
 	"east/core/idef"
 	"east/core/msgbus"
+	"east/define"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
 )
@@ -20,21 +21,9 @@ func New(d *domain.Domain) api.IMsg {
 }
 
 func (s *service) afterInit() error {
-	msgbus.RegisterHandler(s, s.onC2SPackage)
+	msgbus.RegisterHandler(s, s.onSayHelloReq)
+	msgbus.RegisterHandler(s, s.onTimerSayHello)
+	msgbus.RegisterRPC(s, s.onRPCTest)
+	s.EventCase().RegisterHandler(define.EventUserSayHello, s.onEventUserMsg)
 	return nil
-}
-
-// func (s *service) Notify(userID uint64, msg any) {
-// 	msgbus.Cast(&pb.S2CPackage{
-// 		UserID: userID,
-// 		Body:   codec.Encode(msg),
-// 	})
-// }
-
-type UserMessage interface {
-	UserID() uint64
-}
-
-func RegUserMsgHandler[T UserMessage](fn func(user any, msg T)) { //
-
 }
