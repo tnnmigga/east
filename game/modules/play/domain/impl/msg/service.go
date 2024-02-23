@@ -7,20 +7,20 @@ import (
 	"east/game/modules/play/domain/api"
 )
 
-type service struct {
+type useCase struct {
 	*domain.Domain
 }
 
 func New(d *domain.Domain) api.IMsg {
-	s := &service{
+	s := &useCase{
 		Domain: d,
 	}
 	s.After(idef.ServerStateInit, s.afterInit)
 	return s
 }
 
-func (s *service) afterInit() error {
-	msgbus.RegisterHandler(s, s.onC2SPackage)
+func (c *useCase) afterInit() error {
+	msgbus.RegisterHandler(c, c.onC2SPackage)
 	return nil
 }
 
@@ -31,10 +31,10 @@ func (s *service) afterInit() error {
 // 	})
 // }
 
-type UserMessage interface {
-	UserID() uint64
+type PlayerMessage interface {
+	PlayerID() uint64
 }
 
-func RegUserMsgHandler[T UserMessage](fn func(user any, msg T)) { //
+func RegPlayerMsgHandler[T PlayerMessage](fn func(p any, msg T)) { //
 
 }

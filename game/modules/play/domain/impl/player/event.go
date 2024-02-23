@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (s *service) onEventUserMsg(event *eventbus.Event) {
+func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 	log.Infof("user event %v", util.String(event))
 	msgbus.CastLocal(&mongo.MongoSave{
 		DBName:   "test",
@@ -28,7 +28,7 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 			},
 		},
 	})
-	msgbus.RPC(s, conf.ServerID(), &mongo.MongoLoad{
+	msgbus.RPC(c, conf.ServerID(), &mongo.MongoLoad{
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},
@@ -36,10 +36,10 @@ func (s *service) onEventUserMsg(event *eventbus.Event) {
 	}, func(res any, err error) {
 		log.Info("db load", res, err)
 	})
-	msgbus.RPC(s, 1888, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
+	msgbus.RPC(c, 1888, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
 		log.Info("remote call", resp, err)
 	})
-	msgbus.RPC(s, conf.ServerID(), &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
+	msgbus.RPC(c, conf.ServerID(), &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
 		log.Info("local call", resp, err)
 	})
 }

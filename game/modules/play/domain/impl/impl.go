@@ -9,8 +9,8 @@ import (
 )
 
 func Init(d *domain.Domain) {
-	d.PutImpl(domain.MsgCaseIndex, msg.New(d))
-	d.PutImpl(domain.EventCaseIndex, event.New(d))
-	d.PutImpl(domain.TimerCaseIndex, timer.New(d))
-	d.PutImpl(domain.UserCaseIndex, player.New(d))
+	d.PutCase(domain.MsgCaseIndex, msg.New(d))
+	d.PutCase(domain.EventCaseIndex, event.New(d))
+	d.PutCase(domain.TimerCaseIndex, timer.New(d))
+	d.PutCase(domain.UserCaseIndex, player.New(d))
 }

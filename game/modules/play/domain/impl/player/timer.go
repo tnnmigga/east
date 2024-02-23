@@ -10,7 +10,7 @@ type timerSayHello struct {
 	Text string
 }
 
-func (s *service) onTimerSayHello(ctx *timerSayHello) {
+func (c *useCase) onTimerSayHello(ctx *timerSayHello) {
 	msgbus.Cast(&pb.S2CPackage{
 		UserID: 1,
 		Body: codec.Encode(&pb.SayHelloResp{

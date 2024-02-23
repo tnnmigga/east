@@ -8,22 +8,22 @@ import (
 	"east/game/modules/play/domain/api"
 )
 
-type service struct {
+type useCase struct {
 	*domain.Domain
 }
 
 func New(d *domain.Domain) api.IMsg {
-	s := &service{
+	s := &useCase{
 		Domain: d,
 	}
 	s.After(idef.ServerStateInit, s.afterInit)
 	return s
 }
 
-func (s *service) afterInit() error {
-	msgbus.RegisterHandler(s, s.onSayHelloReq)
-	msgbus.RegisterHandler(s, s.onTimerSayHello)
-	msgbus.RegisterRPC(s, s.onRPCTest)
-	s.EventCase().RegisterHandler(define.EventUserSayHello, s.onEventUserMsg)
+func (c *useCase) afterInit() error {
+	msgbus.RegisterHandler(c, c.onSayHelloReq)
+	msgbus.RegisterHandler(c, c.onTimerSayHello)
+	msgbus.RegisterRPC(c, c.onRPCTest)
+	c.EventCase().RegisterHandler(define.EventUserSayHello, c.onEventUserMsg)
 	return nil
 }

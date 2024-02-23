@@ -28,17 +28,17 @@ const (
 )
 
 func (d *Domain) MsgCase() api.IMsg {
-	return d.GetImpl(MsgCaseIndex).(api.IMsg)
+	return d.GetCase(MsgCaseIndex).(api.IMsg)
 }
 
 func (d *Domain) EventCase() api.IEvent {
-	return d.GetImpl(EventCaseIndex).(api.IEvent)
+	return d.GetCase(EventCaseIndex).(api.IEvent)
 }
 
 func (d *Domain) TimerCase() api.ITimer {
-	return d.GetImpl(TimerCaseIndex).(api.ITimer)
+	return d.GetCase(TimerCaseIndex).(api.ITimer)
 }
 
 func (d *Domain) UserCase() api.IUser {
-	return d.GetImpl(UserCaseIndex).(api.IUser)
+	return d.GetCase(UserCaseIndex).(api.IUser)
 }
