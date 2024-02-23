@@ -8,7 +8,6 @@ import (
 	"east/core/msgbus"
 	"east/core/sys"
 	"errors"
-	"time"
 )
 
 func (m *module) initHandler() {
@@ -61,7 +60,7 @@ func (m *module) onRPCPackage(req *idef.RPCPackage) {
 			Resp:   req.Resp,
 		}
 		defer req.Module.Assign(resp)
-		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, time.Duration(conf.Int64("rpc-wait-time", 10))*time.Second)
+		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, conf.MaxRPCWaitTime)
 		if err != nil {
 			resp.Err = err
 			return

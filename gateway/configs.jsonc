@@ -1,11 +1,17 @@
 {
-    "server-id": 1888,
-    "server-type": "gateway",
-    // nats
-    "nats-url": "nats://127.0.0.1:4222",
-    // mongo
-    // log
-    // "log-encoding": "console", // console(default) or json
-    "log-stdout": "log.txt", // default stdout
-    "log-stderr": "log.txt" // default stderr
+    "server": {
+        "id": 1888,
+        "type": "gateway"
+    },
+    "gateway": {
+        "addr": "127.0.0.1:9527"
+    },
+    "nats": {
+        "url": "nats://127.0.0.1:4222",
+        "mq-len": 100000
+    },
+    "log": {
+        "stdout": "log.txt",
+        "stderr": "log.txt"
+    }
 }

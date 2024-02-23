@@ -29,7 +29,7 @@ func New() idef.IModule {
 }
 
 func (m *module) afterInit() (err error) {
-	m.lister, err = net.Listen("tcp", conf.String("tcp-addr", "127.0.0.1:9527"))
+	m.lister, err = net.Listen("tcp", conf.String("gateway.addr", "127.0.0.1:9527"))
 	if err != nil {
 		return err
 	}

@@ -18,13 +18,13 @@ var (
 
 func init() {
 	conf.RegInitFn(func() {
-		rpcMaxWaitTime = time.Duration(conf.Int64("rpc-wait-time", 10)) * time.Second
+		// rpcMaxWaitTime = time.Duration(conf.Int64("rpc-wait-time", 10)) * time.Second
 	})
 }
 
 var (
 	recvers        map[reflect.Type][]IRecver
-	rpcMaxWaitTime time.Duration
+	// rpcMaxWaitTime time.Duration
 )
 
 func init() {
@@ -110,7 +110,7 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 			Cb:     warpCb(cb),
 		}
 		recvs[0].Assign(callReq)
-		timer := time.NewTimer(rpcMaxWaitTime)
+		timer := time.NewTimer(conf.MaxRPCWaitTime)
 		defer timer.Stop()
 		select {
 		case <-timer.C:

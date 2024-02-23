@@ -16,9 +16,9 @@ func ServerType() string {
 }
 
 func initServerConf() {
-	serverID = UInt32("server-id")
-	serverType = String("server-type")
+	serverID = UInt32("server.id")
+	serverType = String("server.type")
 	if len(serverType) == 0 {
-		log.Fatal("server-type is empty")
+		log.Fatal("server.type is empty")
 	}
 }

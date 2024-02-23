@@ -5,12 +5,13 @@ import (
 	"errors"
 	"log"
 	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	confs map[string]any
+	confs map[string]any = map[string]any{}
 	fns   []func()
 )
 
@@ -18,18 +19,22 @@ var errConfigNotFound error = errors.New("configs not found")
 
 func LoadFromJSON(b []byte) {
 	b = uncomment(b)
-	err := json.Unmarshal(b, &confs)
+	tmp := map[string]any{}
+	err := json.Unmarshal(b, &tmp)
 	if err != nil {
 		log.Fatal(err)
 	}
+	transform(tmp, confs, nil)
 	afterLoad()
 }
 
 func LoadFromYAML(b []byte) error {
-	err := yaml.Unmarshal(b, &confs)
+	tmp := map[string]any{}
+	err := yaml.Unmarshal(b, &tmp)
 	if err != nil {
 		return err
 	}
+	transform(tmp, confs, nil)
 	afterLoad()
 	return nil
 }
@@ -43,6 +48,17 @@ func uncomment(b []byte) []byte {
 
 func RegInitFn(fn func()) {
 	fns = append(fns, fn)
+}
+
+func transform(oc map[string]any, nc map[string]any, prefix []string) {
+	for k, v := range oc {
+		switch v := v.(type) {
+		case map[string]any:
+			transform(v, nc, append(prefix, k))
+		default:
+			nc[strings.Join(append(prefix, k), ".")] = oc[k]
+		}
+	}
 }
 
 func afterLoad() {

@@ -28,7 +28,7 @@ func New() idef.IModule {
 }
 
 func (m *module) beforeRun() (err error) {
-	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(conf.String("mongo-url", "mongodb://localhost")))
+	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
 	if err != nil {
 		return err
 	}
