@@ -1,4 +1,4 @@
-package user
+package player
 
 type User struct {
 }
