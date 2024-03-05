@@ -135,7 +135,7 @@ func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, err
 	}
 }
 
-// wrapHook 添加panic处理
+// 添加panic处理
 func wrapHook(h func() error) func() error {
 	return func() (err error) {
 		defer func() {

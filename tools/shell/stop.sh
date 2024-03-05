@@ -1,2 +1,3 @@
-#!/bin/bash
-killall $(pwd)/bin/*
+#!/bin/zsh
+pkill game
+pkill gateway

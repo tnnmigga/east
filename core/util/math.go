@@ -15,3 +15,10 @@ func Min[T constraints.Ordered](a, b T) T {
 	}
 	return b
 }
+
+func IfElse[T any](ok bool, a, b T) T {
+	if ok {
+		return a
+	}
+	return b
+}

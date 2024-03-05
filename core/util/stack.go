@@ -32,7 +32,7 @@ func Caller(skip ...int) string {
 	return runtime.FuncForPC(pc).Name()
 }
 
-// 获取包名
+// PkgName 获取包名
 func PkgName() string {
 	pc, _, _, ok := runtime.Caller(1)
 	if !ok {

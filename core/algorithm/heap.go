@@ -9,7 +9,7 @@ type heapItem[K comparable, V constraints.Ordered] interface {
 	Value() V
 }
 
-// Heap 小顶堆
+// 小顶堆
 type Heap[K comparable, V constraints.Ordered, T heapItem[K, V]] struct {
 	Items []T
 }

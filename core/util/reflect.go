@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"unsafe"
 )
 
 func String(v any) string {
@@ -18,9 +17,12 @@ func String(v any) string {
 	return fmt.Sprintf("[ %s: %v ]", StructName(v), v)
 }
 
-func Address(fn any) uint64 {
-	value := reflect.ValueOf(fn)
-	ptr := unsafe.Pointer(value.Pointer())
-	addr := uintptr(ptr)
-	return uint64(addr)
+// 泛型和interface转换并去掉多层指针
+func New[T any]() any {
+	var v T
+	typeOf := reflect.TypeOf(v)
+	for typeOf.Kind() == reflect.Pointer {
+		typeOf = typeOf.Elem()
+	}
+	return reflect.New(typeOf).Interface()
 }

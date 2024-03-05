@@ -1,9 +1,11 @@
 package redis
 
 import (
+	"context"
 	"east/core/basic"
 	"east/core/conf"
 	"east/core/idef"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -25,5 +27,8 @@ func (m *module) afterInit() error {
 	m.cli = redis.NewClient(&redis.Options{
 		Addr: conf.String("redis.addr", "localhost:6379"),
 	})
-	return nil
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	_, err := m.cli.Ping(ctx).Result()
+	cancel()
+	return err
 }

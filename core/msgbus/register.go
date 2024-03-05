@@ -34,6 +34,7 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 	})
 }
 
+// 注册消息接收者
 func registerRecver(mType reflect.Type, recver IRecver) {
 	if _, has := recvers[mType]; has {
 		log.Fatal(fmt.Errorf("message has registered %v", mType.Elem().Name()))
