@@ -1,4 +1,4 @@
-package nats
+package link
 
 import (
 	"east/core/codec"
@@ -8,6 +8,7 @@ import (
 	"east/core/msgbus"
 	"east/core/sys"
 	"errors"
+	fmt "fmt"
 )
 
 func (m *module) initHandler() {
@@ -22,7 +23,7 @@ func (m *module) onCastPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(castSubject(pkg.ServerID), b)
 	if err != nil {
-		log.Errorf("nats publish error %v", err)
+		log.Errorf("onCastPackage error %v", err)
 	}
 }
 
@@ -30,7 +31,7 @@ func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	b := codec.Encode(pkg.Body)
 	_, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
 	if err != nil {
-		log.Errorf("nats publish error %v", err)
+		log.Errorf("onStreamCastPackage error %v", err)
 	}
 }
 
@@ -38,7 +39,7 @@ func (m *module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(broadcastSubject(pkg.ServerType), b)
 	if err != nil {
-		log.Errorf("nats publish error %v", err)
+		log.Errorf("onBroadcastPackage error %v", err)
 	}
 }
 
@@ -46,7 +47,7 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(randomCastSubject(pkg.ServerType), b)
 	if err != nil {
-		log.Errorf("nats publish error %v", err)
+		log.Errorf("onRandomCastPackage error %v", err)
 	}
 }
 
@@ -67,7 +68,7 @@ func (m *module) onRPCPackage(req *idef.RPCPackage) {
 		}
 		rpcResp0, err := codec.Decode(msg.Data)
 		if err != nil {
-			resp.Err = errors.New("RPCPkg decode error")
+			resp.Err = fmt.Errorf("RPCPkg decode error: %v", err)
 			return
 		}
 		rpcResp := rpcResp0.(*RPCResponse)

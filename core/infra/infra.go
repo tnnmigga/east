@@ -1,6 +1,6 @@
 package infra
 
 const (
-	ModNameNats  = "nats"
+	ModNameLink  = "link"
 	ModNameMongo = "mongo"
 )

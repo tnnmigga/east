@@ -1,4 +1,4 @@
-package nats
+package link
 
 import (
 	"context"
@@ -36,7 +36,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: basic.New(infra.ModNameNats, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
+		Module: basic.New(infra.ModNameLink, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
 	}
 	codec.Register((*RPCResponse)(nil))
 	m.initHandler()

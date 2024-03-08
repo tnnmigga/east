@@ -3,7 +3,7 @@ gamepb:
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
-	protoc --proto_path=./ --gofast_out=source_relative:.  core/infra/nats/*.proto
+	protoc --proto_path=./ --gofast_out=source_relative:.  core/infra/link/*.proto
 
 ba:
 	cd game && go build -o ../bin/game main.go 

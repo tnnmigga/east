@@ -3,7 +3,7 @@ package core
 import (
 	"east/core/conf"
 	"east/core/idef"
-	"east/core/infra/nats"
+	"east/core/infra/link"
 	"east/core/log"
 	"east/core/sys"
 	"east/core/util"
@@ -16,15 +16,15 @@ import (
 
 type Server struct {
 	modules []idef.IModule
-	wg     *sync.WaitGroup
+	wg      *sync.WaitGroup
 }
 
 func NewServer(modules ...idef.IModule) *Server {
 	server := &Server{
 		modules: make([]idef.IModule, 0, len(modules)+1),
-		wg:     &sync.WaitGroup{},
+		wg:      &sync.WaitGroup{},
 	}
-	server.modules = append(server.modules, nats.New()) // nats最后停止
+	server.modules = append(server.modules, link.New()) // nats最后停止
 	server.modules = append(server.modules, modules...)
 	server.init()
 	server.run()
