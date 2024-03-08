@@ -7,13 +7,13 @@ import (
 	"east/game/modules/play/domain/api"
 )
 
-type service struct {
+type useCase struct {
 	*domain.Domain
 	*timer.TimerHeap
 }
 
 func New(d *domain.Domain) api.ITimer {
-	s := &service{
+	s := &useCase{
 		Domain:    d,
 		TimerHeap: timer.NewTimerHeap(d),
 	}
@@ -22,12 +22,12 @@ func New(d *domain.Domain) api.ITimer {
 	return s
 }
 
-func (s *service) afterInit() error {
+func (c *useCase) afterInit() error {
 	// 加载数据
 	return nil
 }
 
-func (s *service) beforeStop() error {
+func (c *useCase) beforeStop() error {
 	// 数据落地
 	return nil
 }

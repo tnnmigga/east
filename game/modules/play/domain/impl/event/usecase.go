@@ -6,13 +6,13 @@ import (
 	"east/game/modules/play/domain/api"
 )
 
-type service struct {
+type useCase struct {
 	*domain.Domain
 	*eventbus.EventBus
 }
 
 func New(d *domain.Domain) api.IEvent {
-	return &service{
+	return &useCase{
 		Domain:   d,
 		EventBus: eventbus.New(d),
 	}

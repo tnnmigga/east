@@ -13,11 +13,11 @@ type useCase struct {
 }
 
 func New(d *domain.Domain) api.IMsg {
-	s := &useCase{
+	c := &useCase{
 		Domain: d,
 	}
-	s.After(idef.ServerStateInit, s.afterInit)
-	return s
+	c.After(idef.ServerStateInit, c.afterInit)
+	return c
 }
 
 func (c *useCase) afterInit() error {
