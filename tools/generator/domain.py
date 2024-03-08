@@ -18,20 +18,13 @@ def writeFile(name, text):
     os.system("go fmt " + name)
 
 
-def init():
-    global path, name
-    dirname = path + "/" + name.lower()
-    if os.path.exists(dirname):
-            print("useCase already exists")
-    os.mkdir(dirname)
-
-
 def genUseCase():
     global path, name
     text = '''
-    package {0}
+    package %s
 
     import (
+    	"east/core/idef"
         "east/game/modules/play/domain"
         "east/game/modules/play/domain/api"
     )
@@ -40,7 +33,7 @@ def genUseCase():
         *domain.Domain
     }
 
-    func New(d *domain.Domain) api.I{1} {
+    func New(d *domain.Domain) api.I%s {
         c := &useCase{
             Domain: d,
         }
@@ -52,17 +45,33 @@ def genUseCase():
         return nil
     }
 
-    '''.format(name.lower(), name)
-    dirname = path + name.lower()
+    ''' % (name.lower(), name)
+    dirname = path + "/domain/impl/" + name.lower()
     writeFile(dirname + "/usecase.go", text)
+
+def genApi():
+    global path, name
+    text = '''
+    package api
+
+    type I%s interface {
+    }
+
+    ''' % name
+    writeFile(path + "/domain/api/" + name.lower() + ".go", text)
 
 def genDomain():
     global path, name
     text = readFile(path + "/domain/domain.go")
-    index = text.find("MaxCaseIndex", 400)
-    text = text[:index] + name + "CaseIndex" + text[index:]
+    index = text.find("MaxCaseIndex", 250, len(text))
+    text = text[:index] + name + "CaseIndex\n" + text[index:]
     writeFile(path + "domain/domain.go", text)
 
+def genImpl():
+    global path, name
+    text = readFile(path + "/domain/impl/impl.go")
+    text = text[:-3] + "d.PutCase(domain.{}CaseIndex, {}.New(d))".format(name, name.lower()) + text[-3:]
+    writeFile(path + "domain/domain.go", text)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -72,11 +81,18 @@ if __name__ == "__main__":
         key, value = arg.split("=")
         if key == "name":
             name = value
-        if key == "module":
-            path = value.lower()
+        if key == "path":
+            path = value
             if path[-1] != "/":
                 path += "/"
-    init()
+    dirname = path + "/domain/impl/" + name.lower()
+    print(dirname)
+    if os.path.exists(dirname):
+        print("useCase already exists")
+        exit()
+    os.mkdir(dirname)
     genUseCase()
     genDomain()
-    print("useCase generated")
+    genApi()
+    genImpl()
+    print(name, "case generated")

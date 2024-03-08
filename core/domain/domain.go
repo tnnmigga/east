@@ -1,19 +1,19 @@
 package domain
 
 type Pool struct {
-	services []any
+	useCases []any
 }
 
 func NewPool(maxCaseIndex int) *Pool {
 	return &Pool{
-		services: make([]any, maxCaseIndex),
+		useCases: make([]any, maxCaseIndex),
 	}
 }
 
 func (p *Pool) PutCase(caseIndex int, useCase any) {
-	p.services[caseIndex] = useCase
+	p.useCases[caseIndex] = useCase
 }
 
 func (p *Pool) GetCase(caseIndex int) any {
-	return p.services[caseIndex]
+	return p.useCases[caseIndex]
 }
