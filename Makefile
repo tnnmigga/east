@@ -1,5 +1,5 @@
-gamepb:
-	protoc --proto_path=./ --gofast_out=.  pb/*.proto
+pbc:
+	python tools/generator/pb.py path=$(path)
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
