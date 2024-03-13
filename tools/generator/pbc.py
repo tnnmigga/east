@@ -49,6 +49,9 @@ def insertIndex(txt):
     return index
 
 if __name__ == '__main__':
+    if not os.path.exists('vendor'):
+        print("vendor not exists, please run `go mod vendor` to generate vendor")
+        exit()
     if len(sys.argv) < 2:
         print("cmd argv error")
         exit()

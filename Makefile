@@ -1,5 +1,5 @@
 pbc:
-	python tools/generator/pb.py path=$(path)
+	python tools/generator/pbc.py path=$(path)
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
