@@ -23,22 +23,22 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type Package1 struct {
+type Package struct {
 	ServerID int32 `protobuf:"varint,1,opt,name=ServerID,proto3" json:"ServerID,omitempty"`
 }
 
-func (m *Package1) Reset()         { *m = Package1{} }
-func (m *Package1) String() string { return proto.CompactTextString(m) }
-func (*Package1) ProtoMessage()    {}
-func (*Package1) Descriptor() ([]byte, []int) {
+func (m *Package) Reset()         { *m = Package{} }
+func (m *Package) String() string { return proto.CompactTextString(m) }
+func (*Package) ProtoMessage()    {}
+func (*Package) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1d243e29fd957930, []int{0}
 }
-func (m *Package1) XXX_Unmarshal(b []byte) error {
+func (m *Package) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Package1) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *Package) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Package1.Marshal(b, m, deterministic)
+		return xxx_messageInfo_Package.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -48,19 +48,19 @@ func (m *Package1) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Package1) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Package1.Merge(m, src)
+func (m *Package) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Package.Merge(m, src)
 }
-func (m *Package1) XXX_Size() int {
+func (m *Package) XXX_Size() int {
 	return m.Size()
 }
-func (m *Package1) XXX_DiscardUnknown() {
-	xxx_messageInfo_Package1.DiscardUnknown(m)
+func (m *Package) XXX_DiscardUnknown() {
+	xxx_messageInfo_Package.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Package1 proto.InternalMessageInfo
+var xxx_messageInfo_Package proto.InternalMessageInfo
 
-func (m *Package1) GetServerID() int32 {
+func (m *Package) GetServerID() int32 {
 	if m != nil {
 		return m.ServerID
 	}
@@ -68,27 +68,27 @@ func (m *Package1) GetServerID() int32 {
 }
 
 func init() {
-	proto.RegisterType((*Package1)(nil), "pb.Package1")
+	proto.RegisterType((*Package)(nil), "pb.Package")
 }
 
 func init() { proto.RegisterFile("pb/tmp/common.proto", fileDescriptor_1d243e29fd957930) }
 
 var fileDescriptor_1d243e29fd957930 = []byte{
-	// 164 bytes of a gzipped FileDescriptorProto
+	// 163 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2e, 0x48, 0xd2, 0x2f,
 	0xc9, 0x2d, 0xd0, 0x4f, 0xce, 0xcf, 0xcd, 0xcd, 0xcf, 0xd3, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17,
 	0x62, 0x2a, 0x48, 0x92, 0x32, 0x29, 0x4b, 0xcd, 0x4b, 0xc9, 0x2f, 0xd2, 0x4f, 0xcf, 0x2c, 0xc9,
 	0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5, 0x4f, 0xcf, 0x4f, 0xcf, 0xd7, 0x07, 0xab, 0x48, 0x2a,
-	0x4d, 0x03, 0xf3, 0xc0, 0x1c, 0x30, 0x0b, 0xa2, 0x53, 0x49, 0x8d, 0x8b, 0x23, 0x20, 0x31, 0x39,
-	0x3b, 0x31, 0x3d, 0xd5, 0x50, 0x48, 0x8a, 0x8b, 0x23, 0x38, 0xb5, 0xa8, 0x2c, 0xb5, 0xc8, 0xd3,
-	0x45, 0x82, 0x51, 0x81, 0x51, 0x83, 0x35, 0x08, 0xce, 0x77, 0x52, 0xb9, 0xf0, 0x50, 0x8e, 0xe1,
-	0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x9c, 0xf0, 0x58, 0x8e,
-	0x61, 0xc6, 0x63, 0x39, 0x86, 0x0b, 0x8f, 0xe5, 0x18, 0x6e, 0x3c, 0x96, 0x63, 0x88, 0x62, 0x2a,
-	0x48, 0x4a, 0x62, 0x03, 0x1b, 0x6a, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x34, 0x47, 0x14, 0x2e,
-	0xa5, 0x00, 0x00, 0x00,
+	0x4d, 0x03, 0xf3, 0xc0, 0x1c, 0x30, 0x0b, 0xa2, 0x53, 0x49, 0x95, 0x8b, 0x3d, 0x20, 0x31, 0x39,
+	0x3b, 0x31, 0x3d, 0x55, 0x48, 0x8a, 0x8b, 0x23, 0x38, 0xb5, 0xa8, 0x2c, 0xb5, 0xc8, 0xd3, 0x45,
+	0x82, 0x51, 0x81, 0x51, 0x83, 0x35, 0x08, 0xce, 0x77, 0x52, 0xb9, 0xf0, 0x50, 0x8e, 0xe1, 0xc4,
+	0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x9c, 0xf0, 0x58, 0x8e, 0x61,
+	0xc6, 0x63, 0x39, 0x86, 0x0b, 0x8f, 0xe5, 0x18, 0x6e, 0x3c, 0x96, 0x63, 0x88, 0x62, 0x2a, 0x48,
+	0x4a, 0x62, 0x03, 0x9b, 0x69, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0xa2, 0x67, 0xe9, 0x7a, 0xa4,
+	0x00, 0x00, 0x00,
 }
 
-func (m *Package1) Marshal() (dAtA []byte, err error) {
+func (m *Package) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -98,12 +98,12 @@ func (m *Package1) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Package1) MarshalTo(dAtA []byte) (int, error) {
+func (m *Package) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Package1) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *Package) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -127,7 +127,7 @@ func encodeVarintCommon(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *Package1) Size() (n int) {
+func (m *Package) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -145,7 +145,7 @@ func sovCommon(x uint64) (n int) {
 func sozCommon(x uint64) (n int) {
 	return sovCommon(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *Package1) Unmarshal(dAtA []byte) error {
+func (m *Package) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -168,10 +168,10 @@ func (m *Package1) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Package1: wiretype end group for non-group")
+			return fmt.Errorf("proto: Package: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Package1: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: Package: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

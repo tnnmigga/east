@@ -1,6 +1,6 @@
 syntax = "proto3";
 package pb;
 
-message Package1 {
+message Package {
     int32 ServerID = 1;
 }
