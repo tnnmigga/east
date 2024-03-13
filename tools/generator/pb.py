@@ -1,6 +1,8 @@
 import os
 import sys
 
+path = ''
+
 insertTxt = '''
 import "vendor/github.com/gogo/protobuf/gogoproto/gogo.proto";
 
@@ -26,8 +28,9 @@ def gogoFile(path):
             index = insertIndex(txt)
             if index == -1:
                 continue
-            txt = txt[:index] + insertTxt + txt[index:]
-        with open(path + '/tmp/'+file.split('/')[1], 'w') as f:
+            if txt.find('gogoproto') == -1:
+                txt = txt[:index] + insertTxt + txt[index:]
+        with open(path + '/tmp/'+file.split('/')[-1], 'w') as f:
             f.write(txt)
     os.system('protoc --proto_path=./ --gofast_out=.  {}/tmp/*.proto'.format(path))
     os.system('mv {}/tmp/*.go {}/'.format(path, path))    
@@ -52,5 +55,7 @@ if __name__ == '__main__':
     for arg in sys.argv[1:]:
         key, value = arg.split("=")
         if key == "path":
-            gogoFile(value)
+            path = value
+    gogoFile(path)
+    print("generated successfully".format(path))
 
