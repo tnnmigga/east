@@ -1,10 +1,10 @@
 import os
 import sys
 
-path = ''
-
+include = ''
+source = ''
 insertTxt = '''
-import "vendor/github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "gogo.proto";
 
 option go_package                           = "pb";
 option (gogoproto.goproto_enum_prefix_all)  = false;
@@ -13,15 +13,15 @@ option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;
 '''
 
-def gogoFile(path):
+def gogoFile():
     proto_files = []
-    for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk(source):
         for file in files:
             if file.endswith('.proto'):
                 proto_files.append(os.path.join(root, file))
-    if os.path.exists(path + '/tmp'):
-        os.system('rm -r {}/tmp'.format(path))
-    os.mkdir(path + '/tmp')
+    if os.path.exists(source + '/tmp'):
+        os.system('rm -r {}/tmp'.format(source))
+    os.mkdir(source + '/tmp')
     for file in proto_files:
         with open(file, 'r+') as f:
             txt = f.read()
@@ -30,11 +30,11 @@ def gogoFile(path):
                 continue
             if txt.find('gogoproto') == -1:
                 txt = txt[:index] + insertTxt + txt[index:]
-        with open(path + '/tmp/'+file.split('/')[-1], 'w') as f:
+        with open(source + '/tmp/'+file.split('/')[-1], 'w') as f:
             f.write(txt)
-    os.system('protoc --proto_path=./ --gofast_out=.  {}/tmp/*.proto'.format(path))
-    os.system('mv {}/tmp/*.go {}/'.format(path, path))    
-    os.system('rm -r {}/tmp'.format(path))
+    os.system('protoc -I={} --proto_path=./ --gofast_out=. {}/tmp/*.proto'.format(include, source))
+    os.system('mv {}/tmp/*.go {}/'.format(source, source))    
+    os.system('rm -r {}/tmp'.format(source))
 
 def insertIndex(txt):
     i1 = txt.find('message')
@@ -57,8 +57,14 @@ if __name__ == '__main__':
         exit()
     for arg in sys.argv[1:]:
         key, value = arg.split("=")
-        if key == "path":
-            path = value
-    gogoFile(path)
-    print("generated successfully".format(path))
-
+        if key == "source":
+            source = value
+        if key == "include":
+            include = value
+    if source == '':
+        print("path is empty")
+        exit()
+    if include == '':    
+        include = source
+    gogoFile()
+    print("generated successfully".format(source))
