@@ -4,7 +4,7 @@ import sys
 include = ''
 source = ''
 insertTxt = '''
-import "gogo.proto";
+import "gogoproto/gogo.proto";
 
 option go_package                           = "pb";
 option (gogoproto.goproto_enum_prefix_all)  = false;

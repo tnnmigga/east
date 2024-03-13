@@ -1,5 +1,5 @@
 pbc:
-	python tools/generator/pbc.py source=$(source) include=vendor/github.com/gogo/protobuf/gogoproto
+	python tools/generator/pbc.py source=$(source) include=vendor/github.com/gogo/protobuf
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
