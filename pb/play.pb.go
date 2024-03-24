@@ -302,7 +302,10 @@ func (m *SayHelloReq) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthPlay
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthPlay
 			}
 			if (iNdEx + skippy) > l {
@@ -384,7 +387,10 @@ func (m *SayHelloResp) Unmarshal(dAtA []byte) error {
 			if err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			if skippy < 0 {
+				return ErrInvalidLengthPlay
+			}
+			if (iNdEx + skippy) < 0 {
 				return ErrInvalidLengthPlay
 			}
 			if (iNdEx + skippy) > l {

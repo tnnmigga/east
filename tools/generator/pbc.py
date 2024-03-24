@@ -36,7 +36,7 @@ def gogoFile():
     os.system('mv {}/tmp/*.go {}/'.format(source, source))    
     os.system('rm -r {}/tmp'.format(source))
 
-def insertIndex(txt):
+def insertIndex(txt:str):
     i1 = txt.find('message')
     i2 = txt.find('enum')
     index = 1E10

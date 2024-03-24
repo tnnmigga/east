@@ -31,8 +31,7 @@ func (idgen *UUIDGenerater) NewID() uint64 {
 	}
 	serverID := uint64(conf.ServerID())
 	if serverID >= 0xFFF {
-		log.Errorf("server-id must be smaller than 4096")
-		return 0
+		panic("UUIDGenerater.NewID server-id must be smaller than 4096")
 	}
 	return idgen.timestamp<<40 | idgen.index | idgen.index<<10 | serverID
 }
@@ -43,5 +42,5 @@ func newMs() uint64 {
 }
 
 func NewUUID() uint64 {
-	return uuidgen.index
+	return uuidgen.NewID()
 }

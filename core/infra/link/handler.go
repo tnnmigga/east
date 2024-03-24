@@ -66,12 +66,12 @@ func (m *module) onRPCPackage(req *idef.RPCPackage) {
 			resp.Err = err
 			return
 		}
-		rpcResp0, err := codec.Decode(msg.Data)
+		data, err := codec.Decode(msg.Data)
 		if err != nil {
 			resp.Err = fmt.Errorf("RPCPkg decode error: %v", err)
 			return
 		}
-		rpcResp := rpcResp0.(*RPCResponse)
+		rpcResp := data.(*RPCResponse)
 		if len(rpcResp.Err) != 0 {
 			resp.Err = errors.New(rpcResp.Err)
 			return

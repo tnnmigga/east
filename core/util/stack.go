@@ -19,7 +19,7 @@ func ExecAndRecover(fn func()) {
 	fn()
 }
 
-// Caller 获取调用者
+// 获取调用者
 func Caller(skip ...int) string {
 	n := 1
 	if len(skip) > 0 {
@@ -32,7 +32,7 @@ func Caller(skip ...int) string {
 	return runtime.FuncForPC(pc).Name()
 }
 
-// PkgName 获取包名
+// 获取包名
 func PkgName() string {
 	pc, _, _, ok := runtime.Caller(1)
 	if !ok {
@@ -42,7 +42,7 @@ func PkgName() string {
 	return strings.Split(name, ".")[0]
 }
 
-// StructName 获取结构体名称
+// 获取结构体名称
 func StructName(v any) string {
 	mType := reflect.TypeOf(v)
 	for mType.Kind() == reflect.Ptr {
@@ -51,7 +51,7 @@ func StructName(v any) string {
 	return mType.Name()
 }
 
-// FuncName 获取函数名称
+// 获取函数名称
 func FuncName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
