@@ -14,8 +14,8 @@ func RegisterHandler[T any](m idef.IModule, fn func(T)) {
 	codec.Register(mValue)
 	registerRecver(mType, m)
 	m.RegisterHandler(mType, &idef.Handler{
-		Cb: func(msg0 any) {
-			msg := msg0.(T)
+		Cb: func(data any) {
+			msg := data.(T)
 			fn(msg)
 		},
 	})
@@ -27,8 +27,8 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 	codec.Register(mValue)
 	registerRecver(mType, m)
 	m.RegisterHandler(mType, &idef.Handler{
-		RPC: func(msg0 any, res func(any), rej func(error)) {
-			msg := msg0.(T)
+		RPC: func(data any, res func(any), rej func(error)) {
+			msg := data.(T)
 			fn(msg, res, rej)
 		},
 	})

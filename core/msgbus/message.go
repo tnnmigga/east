@@ -131,7 +131,7 @@ func warpCb[T any](cb func(T, error)) func(any, error) {
 		}
 		resp, ok := pkg.(T)
 		if !ok {
-			log.Panicf("async call resp type error, need %s, cur %s", util.StructName(new(T)), util.StructName(pkg))
+			log.Panicf("rpc resp type error, need %s, cur %s", util.StructName(new(T)), util.StructName(pkg))
 		}
 		cb(resp, err)
 	}

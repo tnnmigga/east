@@ -1,4 +1,4 @@
-package tcpagent
+package agent
 
 import (
 	"context"

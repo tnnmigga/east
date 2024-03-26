@@ -1,4 +1,4 @@
-package tcpagent
+package agent
 
 import (
 	"context"
@@ -23,6 +23,8 @@ type userAgent struct {
 	mq       chan []byte
 	Destory  func()
 }
+
+type IAgent
 
 func (agent *userAgent) run() {
 	log.Infof("new agent") // 临时
