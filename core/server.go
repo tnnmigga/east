@@ -1,11 +1,11 @@
 package core
 
 import (
+	"east/core/basic"
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra/link"
 	"east/core/log"
-	"east/core/sys"
 	"east/core/util"
 	"fmt"
 	"os"
@@ -52,7 +52,7 @@ func (s *Server) stop() {
 	s.before(idef.ServerStateStop, s.noabort)
 	log.Info("server try to stop")
 	s.waitMsgHandling(time.Minute)
-	sys.WaitGoDone(time.Minute)
+	basic.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		util.ExecAndRecover(m.Stop)

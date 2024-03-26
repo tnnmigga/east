@@ -24,7 +24,18 @@ type userAgent struct {
 	Destory  func()
 }
 
-type IAgent
+type IAgent interface {
+	OnMessage([]byte)
+	OnClose()
+	OnReconnect()
+	OnReadError(error)
+	OnWriteError(error)
+}
+
+type Conn interface {
+	Run(context.Context)
+	Write() error
+}
 
 func (agent *userAgent) run() {
 	log.Infof("new agent") // 临时

@@ -3,9 +3,9 @@ package timer
 import (
 	"context"
 	"east/core/algorithm"
+	"east/core/basic"
 	"east/core/idef"
 	"east/core/msgbus"
-	"east/core/sys"
 	"east/core/util"
 	"east/core/util/idgen"
 	"fmt"
@@ -44,7 +44,7 @@ func NewTimerHeap(m idef.IModule) *TimerHeap {
 		module: m,
 	}
 	msgbus.RegisterHandler(m, h.onTimerTrigger)
-	sys.Go(h.tryNextTrigger)
+	basic.Go(h.tryNextTrigger)
 	return h
 }
 
@@ -87,7 +87,7 @@ func (h *TimerHeap) tryNextTrigger() {
 		return
 	}
 	h.timer = time.NewTimer(time.Duration(top.Time - util.NowNs()))
-	sys.Go(func(ctx context.Context) {
+	basic.Go(func(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return

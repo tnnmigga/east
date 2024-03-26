@@ -1,12 +1,12 @@
 package link
 
 import (
+	"east/core/basic"
 	"east/core/codec"
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
-	"east/core/sys"
 	"errors"
 	fmt "fmt"
 )
@@ -53,7 +53,7 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 
 func (m *module) onRPCPackage(req *idef.RPCPackage) {
 	b := codec.Encode(req.Req)
-	sys.Go(func() {
+	basic.Go(func() {
 		resp := &idef.RPCResponse{
 			Module: req.Module,
 			Req:    req.Req,

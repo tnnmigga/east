@@ -1,10 +1,10 @@
 package msgbus
 
 import (
+	"east/core/basic"
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/log"
-	"east/core/sys"
 	"east/core/util"
 	"errors"
 	"time"
@@ -23,7 +23,7 @@ func init() {
 }
 
 var (
-	recvers        map[reflect.Type][]IRecver
+	recvers map[reflect.Type][]IRecver
 	// rpcMaxWaitTime time.Duration
 )
 
@@ -98,7 +98,7 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 		log.Errorf("recvs not fuound %v", util.StructName(req))
 		return
 	}
-	sys.Go(func() {
+	basic.Go(func() {
 		callReq := &idef.RPCRequest{
 			Req:  req,
 			Resp: make(chan any, 1),

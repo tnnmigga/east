@@ -2,9 +2,9 @@ package mongo
 
 import (
 	"context"
+	"east/core/basic"
 	"east/core/log"
 	"east/core/msgbus"
-	"east/core/sys"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,7 +27,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	sys.GoWithGroup(req.Key(), func() {
+	basic.GoWithGroup(req.Key(), func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		_, err := m.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
 		cancel()
@@ -38,7 +38,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 }
 
 func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
-	sys.GoWithGroup(req.Key(), func() {
+	basic.GoWithGroup(req.Key(), func() {
 		cur, _ := m.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		err := cur.All(ctx, &req.Data)
