@@ -12,17 +12,14 @@ func (m *module) initHandler() {
 }
 
 func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
-	m.RLock()
-	defer m.RUnlock()
-	agent, ok := m.conns[pkg.UserID]
-	if !ok {
+	agent := m.manager.GetAgent(pkg.UserID)
+	if agent == nil {
 		return
 	}
 	select {
-	case agent.mq <- pkg.Body:
+	case agent.sendMQ <- pkg.Body:
 	default:
-		log.Errorf("userAgent mq full!")
-		agent.close()
+		log.Errorf("agent send mq full! %d", pkg.UserID)
 	}
 }
 

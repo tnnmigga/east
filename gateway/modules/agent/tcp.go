@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"east/core/basic"
+	"east/core/log"
 	"east/core/util"
 	"encoding/binary"
 	"io"
@@ -14,6 +15,52 @@ const (
 	MaxTcpWaitTime = 5 * time.Second
 	MaxTcpPkgSize  = 1024
 )
+
+func NewTCPListener(manager *AgentManager, addr string) *TCPListener {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("tcpagent listen error %v", err)
+	}
+	return &TCPListener{
+		manager:  manager,
+		listener: listener,
+	}
+}
+
+type TCPListener struct {
+	manager  *AgentManager
+	listener net.Listener
+}
+
+func (tl *TCPListener) Run() {
+	basic.Go(tl.accept)
+}
+
+func (tl *TCPListener) Close() {
+	tl.listener.Close()
+	for _, agent := range tl.manager.agents {
+		agent.conn.Close()
+	}
+}
+
+func (tl *TCPListener) accept() {
+	defer util.RecoverPanic()
+	for {
+		conn, err := tl.listener.Accept()
+		log.Debug("new conn: ", conn.RemoteAddr())
+		if err == net.ErrClosed {
+			return
+		}
+		if err != nil {
+			log.Errorf("tcpagent accept error %v", err)
+			continue
+		}
+		tcpConn := &TCPConn{
+			conn: conn,
+		}
+		tl.manager.OnConnect(tcpConn)
+	}
+}
 
 type TCPConn struct {
 	agent IAgent
@@ -66,4 +113,12 @@ func (c *TCPConn) Read(buf []byte, n int) error {
 		return err
 	}
 	return nil
+}
+
+func (c *TCPConn) Close() {
+	c.conn.Close()
+}
+
+func (c *TCPConn) BindAgent(agent IAgent) {
+	c.agent = agent
 }
