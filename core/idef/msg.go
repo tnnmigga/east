@@ -40,7 +40,7 @@ type RPCResponse struct {
 }
 
 type RPCPackage struct {
-	Module   IModule
+	Caller   IModule
 	ServerID uint32
 	Req      any
 	Resp     any

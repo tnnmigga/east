@@ -55,12 +55,12 @@ func (m *module) onRPCPackage(req *idef.RPCPackage) {
 	b := codec.Encode(req.Req)
 	basic.Go(func() {
 		resp := &idef.RPCResponse{
-			Module: req.Module,
+			Module: req.Caller,
 			Req:    req.Req,
 			Cb:     req.Cb,
 			Resp:   req.Resp,
 		}
-		defer req.Module.Assign(resp)
+		defer req.Caller.Assign(resp)
 		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, conf.MaxRPCWaitTime)
 		if err != nil {
 			resp.Err = err

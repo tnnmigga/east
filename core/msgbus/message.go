@@ -83,7 +83,7 @@ func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err er
 		return
 	}
 	rpcReq := &idef.RPCPackage{
-		Module:   m,
+		Caller:   m,
 		ServerID: serverID,
 		Req:      req,
 		Resp:     util.New[T](),

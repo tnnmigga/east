@@ -11,5 +11,7 @@ type IModule interface {
 	Run()
 	Stop()
 	RegisterHandler(mType reflect.Type, handler *Handler)
+	Before(state ServerState, hook func() error)
+	After(state ServerState, hook func() error)
 	Hook(state ServerState, stage int) []func() error
 }
