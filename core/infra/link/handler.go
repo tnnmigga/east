@@ -16,7 +16,7 @@ func (m *module) initHandler() {
 	msgbus.RegisterHandler(m, m.onStreamCastPackage)
 	msgbus.RegisterHandler(m, m.onBroadcastPackage)
 	msgbus.RegisterHandler(m, m.onRandomCastPackage)
-	msgbus.RegisterHandler(m, m.onRPCPackage)
+	msgbus.RegisterHandler(m, m.onRPContext)
 }
 
 func (m *module) onCastPackage(pkg *idef.CastPackage) {
@@ -51,17 +51,17 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	}
 }
 
-func (m *module) onRPCPackage(req *idef.RPCPackage) {
-	b := codec.Encode(req.Req)
+func (m *module) onRPContext(ctx *idef.RPCContext) {
+	b := codec.Encode(ctx.Req)
 	basic.Go(func() {
 		resp := &idef.RPCResponse{
-			Module: req.Caller,
-			Req:    req.Req,
-			Cb:     req.Cb,
-			Resp:   req.Resp,
+			Module: ctx.Caller,
+			Req:    ctx.Req,
+			Cb:     ctx.Cb,
+			Resp:   ctx.Resp,
 		}
-		defer req.Caller.Assign(resp)
-		msg, err := m.conn.Request(rpcSubject(req.ServerID), b, conf.MaxRPCWaitTime)
+		defer ctx.Caller.Assign(resp)
+		msg, err := m.conn.Request(rpcSubject(ctx.ServerID), b, conf.MaxRPCWaitTime)
 		if err != nil {
 			resp.Err = err
 			return

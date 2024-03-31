@@ -39,7 +39,7 @@ type RPCResponse struct {
 	Cb     func(resp any, err error)
 }
 
-type RPCPackage struct {
+type RPCContext struct {
 	Caller   IModule
 	ServerID uint32
 	Req      any

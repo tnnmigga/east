@@ -82,14 +82,14 @@ func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err er
 		localCall(m, req, warpCb(cb))
 		return
 	}
-	rpcReq := &idef.RPCPackage{
+	rpcCtx := &idef.RPCContext{
 		Caller:   m,
 		ServerID: serverID,
 		Req:      req,
 		Resp:     util.New[T](),
 		Cb:       warpCb(cb),
 	}
-	CastLocal(rpcReq)
+	CastLocal(rpcCtx)
 }
 
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
