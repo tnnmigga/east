@@ -14,6 +14,7 @@ func (m *module) initHandler() {
 func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
 	agent := m.manager.GetAgent(pkg.UserID)
 	if agent == nil {
+		log.Warnf("agent not found %d", pkg.UserID)
 		return
 	}
 	select {

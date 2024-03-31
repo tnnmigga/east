@@ -1,0 +1,16 @@
+{
+    "server": {
+        "id": 4242,
+        "type": "login"
+    },
+    "nats": {
+        "url": "nats://127.0.0.1:4222"
+    },
+    "log": {
+        "stdout": "log.txt",
+        "stderr": "log.txt"
+    },
+    "account": {
+        "port": "127.0.0.1:"
+    }
+}

@@ -8,23 +8,38 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"sync/atomic"
 	"time"
 )
 
 const (
 	MaxTcpWaitTime = 5 * time.Second
 	MaxTcpPkgSize  = 1024
+	PkgSizeByteLen = 4
 )
 
-func NewTCPListener(manager *AgentManager, addr string) *TCPListener {
+func NewTCPListener(manager *AgentManager, addr string) IListener {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("tcpagent listen error %v", err)
 	}
-	return &TCPListener{
+	tl := &TCPListener{
 		manager:  manager,
 		listener: listener,
 	}
+	basic.Go(func(ctx context.Context) {
+		timer := time.NewTicker(MaxTcpWaitTime)
+		for {
+			select {
+			case <-timer.C:
+				tl.killDeadAgent()
+			case <-ctx.Done():
+				return
+			}
+		}
+	})
+	log.Infof("tcp listen %s", addr)
+	return tl
 }
 
 type TCPListener struct {
@@ -43,18 +58,38 @@ func (tl *TCPListener) Close() {
 	}
 }
 
+func (tl *TCPListener) killDeadAgent() {
+	tl.manager.rw.RLock()
+	nowNs := util.NowNs()
+	for uid, agent := range tl.manager.agents {
+		state := atomic.LoadInt32(&agent.state)
+		if state == AgentStateDead {
+			delete(tl.manager.agents, uid)
+			continue
+		}
+		if state != AgentStateWait {
+			continue
+		}
+		if agent.waitNs+MaxTcpWaitTime > nowNs {
+			continue
+		}
+		if !atomic.CompareAndSwapInt32(&agent.state, AgentStateWait, AgentStateDead) {
+			continue
+		}
+		delete(tl.manager.agents, uid)
+	}
+	tl.manager.rw.RUnlock()
+}
+
 func (tl *TCPListener) accept() {
 	defer util.RecoverPanic()
 	for {
 		conn, err := tl.listener.Accept()
-		log.Debug("new conn: ", conn.RemoteAddr())
-		if err == net.ErrClosed {
+		if err != nil {
+			log.Warnf("tcp accept error %v", err)
 			return
 		}
-		if err != nil {
-			log.Errorf("tcpagent accept error %v", err)
-			continue
-		}
+		log.Debug("new conn: ", conn.RemoteAddr())
 		tcpConn := &TCPConn{
 			conn: conn,
 		}
@@ -74,26 +109,22 @@ func (c *TCPConn) Write(data []byte) error {
 }
 
 func (c *TCPConn) Run(ctx context.Context) {
-	basic.Go(func() {
-		c.readLoop(ctx)
-	})
-	basic.Go(func() {
-
-	})
+	basic.Go(c.readLoop)
 }
 
-func (c *TCPConn) readLoop(ctx context.Context) {
+func (c *TCPConn) readLoop() {
 	buffer := make([]byte, MaxTcpPkgSize)
 	for {
-		if util.ContextDone(ctx) {
-			return
-		}
-		err := c.Read(buffer, 2)
+		err := c.Read(buffer, PkgSizeByteLen)
 		if err != nil {
 			c.agent.OnReadError(err)
 			continue
 		}
-		pkgSize := int(binary.LittleEndian.Uint16(buffer))
+		pkgSize := int(binary.LittleEndian.Uint32(buffer))
+		if pkgSize == 0 {
+			log.Debugf("receive ping")
+			continue // 心跳包
+		}
 		readbuf := buffer
 		if pkgSize > MaxTcpPkgSize {
 			readbuf = make([]byte, pkgSize)

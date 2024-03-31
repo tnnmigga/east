@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func RandomInterval[T constraints.Signed](low, high T) T {
+func RandomInterval[T constraints.Integer](low, high T) T {
 	a, b := int64(low), int64(high)
 	return T(rand.Int63n(b-a+1) + a)
 }

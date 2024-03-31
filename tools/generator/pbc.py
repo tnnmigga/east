@@ -14,14 +14,17 @@ option (gogoproto.goproto_sizecache_all)    = false;
 '''
 
 def gogoFile():
+    if os.path.exists(source + '/tmp'):
+        os.system('rm -r {}/tmp'.format(source))
     proto_files = []
     for root, dirs, files in os.walk(source):
+        if root.find('gogoproto') != -1:
+            continue
         for file in files:
             if file.endswith('.proto'):
                 proto_files.append(os.path.join(root, file))
-    if os.path.exists(source + '/tmp'):
-        os.system('rm -r {}/tmp'.format(source))
     os.mkdir(source + '/tmp')
+    os.system("cp -r vendor/github.com/gogo/protobuf/gogoproto pb/tmp")
     for file in proto_files:
         with open(file, 'r+') as f:
             txt = f.read()
@@ -32,7 +35,7 @@ def gogoFile():
                 txt = txt[:index] + insertTxt + txt[index:]
         with open(source + '/tmp/'+file.split('/')[-1], 'w') as f:
             f.write(txt)
-    os.system('protoc -I={} --proto_path=./ --gofast_out=. {}/tmp/*.proto'.format(include, source))
+    os.system('protoc -I={}/tmp --proto_path=./{} --gofast_out=./{}/tmp {}/tmp/*.proto'.format(source, source, source, source))
     os.system('mv {}/tmp/*.go {}/'.format(source, source))    
     os.system('rm -r {}/tmp'.format(source))
 

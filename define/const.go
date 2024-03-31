@@ -6,6 +6,6 @@ const (
 )
 
 const (
-	ModTypPlay     = "play"
-	ModTypTCPAgent = "tcp-agent"
+	ModTypPlay    = "play"
+	ModTypAccount = "account"
 )

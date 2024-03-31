@@ -3,10 +3,15 @@ package agent
 import (
 	"context"
 	"east/core/basic"
+	"east/core/idef"
 	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
 	"east/pb"
+	"errors"
+	"fmt"
+	"io"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -20,17 +25,19 @@ const (
 	AgentStateNone = iota
 	AgentStateRun
 	AgentStateWait
-	AgentStateClose
+	AgentStateDead
 )
 
 type AgentManager struct {
+	idef.IModule
 	agents map[uint64]*Agent
 	rw     sync.RWMutex
 }
 
-func NewAgentManager() *AgentManager {
+func NewAgentManager(m idef.IModule) *AgentManager {
 	return &AgentManager{
-		agents: map[uint64]*Agent{},
+		IModule: m,
+		agents:  map[uint64]*Agent{},
 	}
 }
 
@@ -58,10 +65,21 @@ func (am *AgentManager) GetAgent(uid uint64) *Agent {
 }
 
 func (am *AgentManager) OnConnect(conn Conn) {
-	agent := NewAgent()
-	agent.conn = conn
-	conn.BindAgent(agent)
-	agent.Run()
+	msgbus.RPC(am, 4242, &pb.TokenAuthReq{}, func(resp *pb.TokenAuthResp, err error) {
+		fmt.Println(resp, err)
+		if err != nil {
+			conn.Close()
+			return
+		}
+		agent := NewAgent()
+		agent.conn = conn
+		agent.servID = 1999
+		agent.userID = 1
+		conn.BindAgent(agent)
+		am.AddAgent(agent)
+		agent.Run()
+	})
+
 }
 
 func (am *AgentManager) OnError(err error) {
@@ -84,7 +102,7 @@ type Agent struct {
 	closeFn func()
 	state   int32
 	failMsg []byte
-	waitMs  time.Duration
+	waitNs  time.Duration
 }
 
 func NewAgent() *Agent {
@@ -107,19 +125,24 @@ func (a *Agent) OnClose() {
 }
 
 func (a *Agent) OnReadError(err error) {
+	if errors.Is(err, io.EOF) {
+		atomic.StoreInt32(&a.state, AgentStateDead)
+	}
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
-		a.waitMs = util.NowNs()
+		a.waitNs = util.NowNs()
 		log.Debugf("agent read error %v", err)
 		a.conn.Close()
 	}
+	runtime.Goexit()
 }
 
 func (a *Agent) OnWriteError(data []byte, err error) {
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
-		a.waitMs = util.NowNs()
+		a.waitNs = util.NowNs()
 		a.conn.Close()
 	}
 	a.failMsg = data
+	runtime.Goexit()
 }
 
 func (a *Agent) OnReconnect() {
@@ -136,6 +159,8 @@ func (a *Agent) OnReconnect() {
 }
 
 func (a *Agent) Run() {
+	a.state = AgentStateRun
+	// 启动agent读写goroutine
 	basic.Go(a.writeLoop)
 	basic.Go(func() {
 		a.conn.Run(a.ctx)
@@ -148,13 +173,9 @@ func (a *Agent) writeLoop() {
 			a.failMsg = data
 			return
 		}
-		if util.ContextDone(a.ctx) {
-			return
-		}
 		err := a.conn.Write(data)
 		if err != nil {
 			a.OnWriteError(data, err)
-			return
 		}
 	}
 }

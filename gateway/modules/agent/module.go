@@ -36,12 +36,12 @@ func New(agentType AgentType) idef.IModule {
 	m := &module{
 		Module:    basic.New(infra.ModNameAgent, basic.DefaultMQLen),
 		agentType: agentType,
-		manager:   NewAgentManager(),
 	}
+	m.manager = NewAgentManager(m)
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)
-	m.After(idef.ServerStateStop, m.afterStop)
+	m.Before(idef.ServerStateStop, m.beforeStop)
 	return m
 }
 
@@ -60,7 +60,7 @@ func (m *module) afterRun() error {
 	return nil
 }
 
-func (m *module) afterStop() error {
+func (m *module) beforeStop() error {
 	m.listener.Close()
 	return nil
 }

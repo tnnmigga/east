@@ -11,8 +11,13 @@ message S2CPackage {
     bytes body    = 2;
 }
 
-message UserLoginReq { uint64 userID = 1; }
+message UserLoginReq {
+    uint64 userID = 1;
+}
 
-message TestRPC {}
+message TestRPC {
+}
 
-message TestRPCRes { int32 v = 1; }
+message TestRPCRes {
+    int32 v = 1;
+}

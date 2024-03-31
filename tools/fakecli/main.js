@@ -8,11 +8,18 @@ const msgBuilders = {}
 const msgidToName = {}
 var socket = new Socket()
 
+var ping = Buffer.alloc(4)
+ping.writeUint32LE(0)
+
 function connect() {
     socket = new Socket()
-    socket.connect('9527', '127.0.0.1', function () {
+    socket.connect('10078', '127.0.0.1', function () {
         print("connect success")
         send("SayHelloReq", { text: "hello, server!" })
+        setInterval(function () {
+            print("ping")
+            socket.write(ping)
+        }, 3000)
     })
     socket.on("data", function (data) {
         try {

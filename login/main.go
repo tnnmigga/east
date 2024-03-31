@@ -3,12 +3,12 @@ package main
 import (
 	"east/core"
 	"east/core/sys"
-	"east/gateway/modules/agent"
+	"east/login/modules/account"
 )
 
 func main() {
 	server := core.NewServer(
-		agent.New(agent.AgentTypeTCP),
+		account.New(),
 	)
 	defer server.Exit()
 	sys.WaitExitSignal()

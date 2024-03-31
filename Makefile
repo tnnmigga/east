@@ -8,6 +8,7 @@ corepb:
 ba:
 	cd game && go build -o ../bin/game main.go 
 	cd gateway && go build -o ../bin/gateway main.go 
+	cd login && go build -o ../bin/login main.go
 
 run:
 	tools/shell/run.sh
@@ -21,3 +22,6 @@ client:
 br: ba run
 
 rerun: stop br
+
+worker:
+	@python tools/generator/worker.py name=$(name)
