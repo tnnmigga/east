@@ -3,7 +3,7 @@ package main
 import (
 	"east/core"
 	"east/core/sys"
-	"east/login/modules/account"
+	"east/door/modules/account"
 )
 
 func main() {

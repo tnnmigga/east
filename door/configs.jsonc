@@ -1,7 +1,7 @@
 {
     "server": {
         "id": 4242,
-        "type": "login"
+        "type": "door"
     },
     "nats": {
         "url": "nats://127.0.0.1:4222"

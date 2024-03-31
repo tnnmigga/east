@@ -9,7 +9,6 @@ import (
 	"east/core/util"
 	"east/pb"
 	"errors"
-	"fmt"
 	"io"
 	"runtime"
 	"sync"
@@ -66,15 +65,14 @@ func (am *AgentManager) GetAgent(uid uint64) *Agent {
 
 func (am *AgentManager) OnConnect(conn Conn) {
 	msgbus.RPC(am, 4242, &pb.TokenAuthReq{}, func(resp *pb.TokenAuthResp, err error) {
-		fmt.Println(resp, err)
 		if err != nil {
 			conn.Close()
 			return
 		}
 		agent := NewAgent()
 		agent.conn = conn
-		agent.servID = 1999
-		agent.userID = 1
+		agent.servID = resp.SeverID
+		agent.userID = resp.UserID
 		conn.BindAgent(agent)
 		am.AddAgent(agent)
 		agent.Run()

@@ -8,7 +8,7 @@ corepb:
 ba:
 	cd game && go build -o ../bin/game main.go 
 	cd gateway && go build -o ../bin/gateway main.go 
-	cd login && go build -o ../bin/login main.go
+	cd door && go build -o ../bin/door main.go
 
 run:
 	tools/shell/run.sh
