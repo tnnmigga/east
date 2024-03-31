@@ -27,17 +27,6 @@ func NewTCPListener(manager *AgentManager, addr string) IListener {
 		manager:  manager,
 		listener: listener,
 	}
-	basic.Go(func(ctx context.Context) {
-		timer := time.NewTicker(MaxTcpWaitTime)
-		for {
-			select {
-			case <-timer.C:
-				tl.killDeadAgent()
-			case <-ctx.Done():
-				return
-			}
-		}
-	})
 	log.Infof("tcp listen %s", addr)
 	return tl
 }
@@ -49,6 +38,17 @@ type TCPListener struct {
 
 func (tl *TCPListener) Run() {
 	basic.Go(tl.accept)
+	basic.Go(func(ctx context.Context) {
+		timer := time.NewTicker(MaxTcpWaitTime)
+		for {
+			select {
+			case <-timer.C:
+				tl.killDeadAgent()
+			case <-ctx.Done():
+				return
+			}
+		}
+	})
 }
 
 func (tl *TCPListener) Close() {

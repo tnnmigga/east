@@ -7,12 +7,13 @@ import (
 )
 
 type timerSayHello struct {
-	Text string
+	UserID uint64
+	Text   string
 }
 
 func (c *useCase) onTimerSayHello(ctx *timerSayHello) {
 	msgbus.Cast(&pb.S2CPackage{
-		UserID: 1,
+		UserID: ctx.UserID,
 		Body: codec.Encode(&pb.SayHelloResp{
 			Text: ctx.Text,
 		}),

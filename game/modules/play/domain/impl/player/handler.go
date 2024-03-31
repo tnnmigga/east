@@ -17,7 +17,8 @@ func (c *useCase) onSayHelloReq(msg *pb.SayHelloReq) {
 		Value:   1,
 	})
 	c.TimerCase().New(time.Second*2, &timerSayHello{
-		Text: "hello client!",
+		UserID: 1,
+		Text:   "hello client!",
 	})
 }
 

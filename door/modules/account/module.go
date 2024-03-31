@@ -24,6 +24,8 @@ func New() idef.IModule {
 
 func (m *module) afterInit() error {
 	m.initHandler()
-	m.web.Run()
+	basic.Go(func() {
+		m.web.Run()
+	})
 	return nil
 }
