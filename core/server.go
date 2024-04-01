@@ -82,7 +82,8 @@ func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
 }
 
 func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
-	maxCheckCount := maxWaitTime / time.Second * 10
+	// 每100ms检查一次模块消息是否处理完
+	maxCheckCount := maxWaitTime / time.Millisecond / 100
 	for ; maxCheckCount > 0; maxCheckCount-- {
 		time.Sleep(100 * time.Millisecond)
 		isEmpty := true
