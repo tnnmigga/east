@@ -45,3 +45,13 @@ func RandomIntervalN[T constraints.Signed](low, high T, num T) algorithm.Set[T] 
 	}
 	return set
 }
+
+// 生成生成指定长度的只包含字母和数字的随机字符串
+func GenerateToken(charLen int) string {
+	charset := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	token := make([]byte, charLen)
+	for i := 0; i < charLen; i++ {
+		token[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(token)
+}
