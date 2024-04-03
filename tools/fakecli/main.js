@@ -17,7 +17,7 @@ function connect() {
         print("connect success")
         send("SayHelloReq", { text: "hello, server!" })
         setInterval(function () {
-            print("ping")
+            // print("ping")
             socket.write(ping)
         }, 3000)
     })

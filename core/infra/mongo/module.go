@@ -6,6 +6,7 @@ import (
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -28,11 +29,13 @@ func New() idef.IModule {
 }
 
 func (m *module) beforeRun() (err error) {
-	m.mongocli, err = mongo.Connect(context.Background(), options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	m.mongocli, err = mongo.Connect(ctx, options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
 	if err != nil {
 		return err
 	}
-	if err := m.mongocli.Ping(context.Background(), readpref.Primary()); err != nil {
+	if err := m.mongocli.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
 	return nil

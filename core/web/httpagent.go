@@ -18,6 +18,7 @@ type HttpAgent struct {
 }
 
 func NewHttpAgent() *HttpAgent {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	agent := &HttpAgent{
 		Engine: r,

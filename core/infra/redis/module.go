@@ -24,11 +24,13 @@ func New() idef.IModule {
 }
 
 func (m *module) afterInit() error {
+	m.initHandler()
 	m.cli = redis.NewClient(&redis.Options{
-		Addr: conf.String("redis.addr", "localhost:6379"),
+		Addr:     conf.String("redis.address", "localhost:6379"),
+		Password: conf.String("redis.password", ""),
 	})
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	_, err := m.cli.Ping(ctx).Result()
-	cancel()
 	return err
 }

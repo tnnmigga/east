@@ -1,48 +1,21 @@
 package redis
 
-type Pipeline struct {
+import "time"
 
+// redis执行单条命令
+// 通过msgbus.RPC调用
+// 返回为具体的结果只可能为string或int64
+type Exec struct {
+	Cmd     []any
+	Key     string        // 默认为Cmd[1]
+	Timeout time.Duration // 默认为3s
 }
 
-type op interface {
-	key() string
-	value() any
-}
-
-type OpGet struct {
-	Key string
-	Value any
-}
-
-func (op *OpGet) key() string {
-	return op.Key
-}
-
-func (op *OpGet) value() any {
-	return op.Value
-}
-
-type OpSet struct {
-	Key   string
-	Value any
-}
-
-func (op *OpSet) key() string {
-	return op.Key
-}
-
-func (op *OpSet) value() any {
-	return op.Value
-}
-
-type Del struct {
-	Key string
-}
-
-func (op *Del) key() string {
-	return op.Key
-}
-
-func (op *Del) value() any {
-	return nil
+// redis执行多条命令批处理
+// 通过msgbus.RPC调用
+// 返回为具体的结果为[]any
+type ExecMulti struct {
+	Cmds    [][]any
+	Key     string        // 默认为Cmds[0][1]
+	Timeout time.Duration // 默认为3s
 }

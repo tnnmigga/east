@@ -3,6 +3,7 @@ package msgbus
 import (
 	"east/core/codec"
 	"east/core/idef"
+	"east/core/util"
 	"fmt"
 	"log"
 	"reflect"
@@ -22,7 +23,7 @@ func RegisterHandler[T any](m idef.IModule, fn func(T)) {
 }
 
 func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject func(error))) {
-	mValue := *new(T)
+	mValue := util.New[T]()
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)
 	registerRecver(mType, m)

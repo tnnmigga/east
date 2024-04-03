@@ -1,6 +1,10 @@
 package account
 
 import (
+	"east/core/conf"
+	"east/core/infra/redis"
+	"east/core/log"
+	"east/core/msgbus"
 	"east/core/util"
 	"east/core/web"
 	"east/pb"
@@ -42,4 +46,14 @@ func (m *module) onPostLogin(ctx *gin.Context) {
 
 func (m *module) onGetTest(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "success")
+	msgbus.RPC(m, conf.ServerID(), &redis.Exec{
+		Cmd: []any{"set", "test", "test"},
+	}, func(res any, err error) {
+		log.Infof("set res:%v, err:%v", res, err)
+		msgbus.RPC(m, conf.ServerID(), &redis.ExecMulti{
+			Cmds: [][]any{{"get", "test"}, {"set", "test1", "test1"}, {"get", "test1"}},
+		}, func(res any, err error) {
+			log.Infof("get res:%v, err:%v", res, err)
+		})
+	})
 }
