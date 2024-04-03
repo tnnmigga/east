@@ -34,7 +34,6 @@ func NewHttpAgent() *HttpAgent {
 		}()
 		ctx.Next()
 	})
-	agent.Use(func(ctx *gin.Context) {})
 	return agent
 }
 
