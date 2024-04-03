@@ -3,5 +3,5 @@ package conf
 import "time"
 
 const (
-	MaxRPCWaitTime = 10*time.Second
+	MaxRPCWaitTime = 10 * time.Second
 )

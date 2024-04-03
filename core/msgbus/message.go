@@ -7,6 +7,7 @@ import (
 	"east/core/log"
 	"east/core/util"
 	"errors"
+	"fmt"
 	"time"
 
 	"reflect"
@@ -37,11 +38,11 @@ type IRecver interface {
 }
 
 func Cast(msg any, opts ...castOpt) {
-	serverID, find := findCastOpt[uint32](opts, keyServerID)
-	if !find || serverID == conf.ServerID() {
+	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, 0)
+	if serverID == conf.ServerID() {
 		CastLocal(msg, opts...)
 	}
-	if nonuse, find := findCastOpt[bool](opts, keyNonuseStream); nonuse && find { // 不使用流
+	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse { // 不使用流
 		CastLocal(&idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
@@ -51,6 +52,7 @@ func Cast(msg any, opts ...castOpt) {
 	CastLocal(&idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
+		Header:   castHeader(opts),
 	}, opts...)
 }
 
@@ -60,9 +62,9 @@ func CastLocal(msg any, opts ...castOpt) {
 		log.Errorf("message cast recv not fuound %v", util.StructName(msg))
 		return
 	}
-	modName, oneOfMod := findCastOpt[string](opts, keyOneOfMods)
+	modName := findCastOpt[string](opts, idef.ConstKeyOneOfMods, "")
 	for _, recv := range recvs {
-		if oneOfMod && modName != recv.Name() {
+		if modName != "" && modName != recv.Name() {
 			continue
 		}
 		recv.Assign(msg)
@@ -135,4 +137,15 @@ func warpCb[T any](cb func(T, error)) func(any, error) {
 		}
 		cb(resp, err)
 	}
+}
+
+func castHeader(opts []castOpt) map[string]string {
+	handler := map[string]string{}
+	for _, opt := range opts {
+		switch opt.key {
+		case idef.ConstKeyExpires:
+			handler[opt.key] = fmt.Sprint(opt.value)
+		}
+	}
+	return handler
 }

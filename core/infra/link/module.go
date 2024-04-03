@@ -11,6 +11,7 @@ import (
 	"east/core/msgbus"
 	"east/core/util"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -141,6 +142,17 @@ func (m *module) afterStop() error {
 func (m *module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
+	log.Debug(msg.Headers())
+	if expires := msg.Headers().Get(idef.ConstKeyExpires); expires != "" {
+		// 检测部分不重要但有一定时效性的消息是否超时
+		// 比如往客户端推送的实时消息
+		// 超时后直接丢弃
+		n, err := strconv.Atoi(expires)
+		if err == nil && util.NowNs() > time.Duration(n) {
+			log.Debugf("message expired")
+			return
+		}
+	}
 	pkg, err := codec.Decode(msg.Data())
 	if err != nil {
 		log.Errorf("nats streamRecv decode msg error: %v", err)

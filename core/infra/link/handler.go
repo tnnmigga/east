@@ -9,6 +9,8 @@ import (
 	"east/core/msgbus"
 	"errors"
 	fmt "fmt"
+
+	"github.com/nats-io/nats.go"
 )
 
 func (m *module) initHandler() {
@@ -29,7 +31,18 @@ func (m *module) onCastPackage(pkg *idef.CastPackage) {
 
 func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	b := codec.Encode(pkg.Body)
-	_, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
+	// _, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
+	msg := &nats.Msg{
+		Subject: streamCastSubject(pkg.ServerID),
+		Data:    b,
+	}
+	if len(pkg.Header) > 0 {
+		msg.Header = nats.Header{}
+		for key, value := range pkg.Header {
+			msg.Header.Set(key, value)
+		}
+	}
+	_, err := m.js.PublishMsgAsync(msg)
 	if err != nil {
 		log.Errorf("onStreamCastPackage error %v", err)
 	}

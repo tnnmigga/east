@@ -13,6 +13,7 @@ type CastPackage struct {
 type StreamCastPackage struct {
 	ServerID uint32
 	Body     any
+	Header   map[string]string
 }
 
 type BroadcastPackage struct {
