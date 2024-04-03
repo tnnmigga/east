@@ -2,6 +2,6 @@ syntax = "proto3";
 package pb;
 
 enum Code {
-    SUCC        = 0;
+    SUCCESS        = 0;
     PARAM_ERROR = 1;
 }

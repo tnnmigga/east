@@ -11,7 +11,7 @@ func (m *module) initHandler() {
 
 func (m *module) onTokenAuthReq(req *pb.TokenAuthReq, resolve func(any), reject func(error)) {
 	resolve(&pb.TokenAuthResp{
-		Code:    pb.SUCC,
+		Code:    pb.SUCCESS,
 		UserID:  1, // util.RandomInterval[uint64](1, 1000),
 		SeverID: 1999,
 	})

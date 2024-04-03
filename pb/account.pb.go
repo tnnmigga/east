@@ -110,7 +110,7 @@ func (m *TokenAuthResp) GetCode() Code {
 	if m != nil {
 		return m.Code
 	}
-	return SUCC
+	return SUCCESS
 }
 
 func (m *TokenAuthResp) GetUserID() uint64 {

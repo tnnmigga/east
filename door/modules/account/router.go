@@ -28,7 +28,7 @@ func (m *module) onPostRegister(ctx *gin.Context) {
 		ctx.String(http.StatusForbidden, "parse data error:%v", err)
 	}
 	ctx.JSON(http.StatusOK, &WebResponse{
-		Code: int(pb.SUCC),
+		Code: int(pb.SUCCESS),
 	})
 }
 
@@ -39,7 +39,7 @@ func (m *module) onPostLogin(ctx *gin.Context) {
 		ctx.String(http.StatusForbidden, "parse data error:%v", err)
 	}
 	ctx.JSON(http.StatusOK, &WebResponse{
-		Code: int(pb.SUCC),
+		Code: int(pb.SUCCESS),
 		Data: util.GenerateToken(32),
 	})
 }
