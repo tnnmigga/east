@@ -109,7 +109,7 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 		callResp := &idef.RPCResponse{
 			Module: m,
 			Req:    req,
-			Cb:     warpCb(cb),
+			Cb:     cb,
 		}
 		recvs[0].Assign(callReq)
 		timer := time.NewTimer(conf.MaxRPCWaitTime)
