@@ -1,5 +1,5 @@
 pbc:
-	@python tools/generator/pbc.py source=$(source) include=vendor/github.com/gogo/protobuf
+	@python nett/scripts/generator/pbc.py source=$(source)
 
 corepb:
 	protoc --proto_path=./ --gofast_out=source_relative:.  core/eventbus/*.proto
@@ -17,7 +17,7 @@ stop:
 	tools/shell/stop.sh
 
 client:
-	node tools/fakecli/main.js
+	node nett/scripts/fakecli/main.js
 
 br: ba run
 
@@ -25,3 +25,7 @@ rerun: stop br
 
 worker:
 	@python tools/generator/worker.py name=$(name)
+
+init:
+	git clone git@github.com:tnnmigga/nett.git
+	cd nett/scripts/fakecli/ && npm install
