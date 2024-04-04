@@ -29,3 +29,4 @@ worker:
 init:
 	git clone git@github.com:tnnmigga/nett.git
 	cd nett/scripts/fakecli/ && npm install
+	go mod vendor
