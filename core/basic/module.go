@@ -14,11 +14,6 @@ const (
 	DefaultMQLen = 100000
 )
 
-var (
-	rpcReqType  = reflect.TypeOf((*idef.RPCRequest)(nil))
-	rpcRespType = reflect.TypeOf((*idef.RPCResponse)(nil))
-)
-
 type Module struct {
 	name      string
 	mq        chan any

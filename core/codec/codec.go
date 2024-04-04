@@ -2,7 +2,6 @@ package codec
 
 import (
 	"east/core/util"
-	"east/core/util/idgen"
 	"east/core/zlog"
 	"encoding/binary"
 	"errors"
@@ -39,7 +38,7 @@ func (d *MessageDescriptor) New() any {
 
 func Register(v any) {
 	name := util.TypeName(v)
-	id := msgID(v)
+	id := util.TypeID(v)
 	if desc, has := msgIDToDesc[id]; has {
 		if desc.MessageName != name {
 			zlog.Fatalf("msgid duplicat %v %d", name, id)
@@ -57,7 +56,7 @@ func Register(v any) {
 }
 
 func Encode(v any) []byte {
-	msgID := msgID(v)
+	msgID := util.TypeID(v)
 	bytes := Marshal(v)
 	body := make([]byte, 4, len(bytes)+4)
 	binary.LittleEndian.PutUint32(body, msgID)
@@ -103,11 +102,6 @@ func Unmarshal(b []byte, addr any) error {
 	default:
 		return errors.New("invalid marshal type")
 	}
-}
-
-func msgID(v any) uint32 {
-	name := util.TypeName(v)
-	return idgen.HashToID(name)
 }
 
 func marshalType(v any) int {
