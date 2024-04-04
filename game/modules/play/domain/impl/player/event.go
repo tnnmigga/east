@@ -4,16 +4,16 @@ import (
 	"east/core/conf"
 	"east/core/eventbus"
 	"east/core/infra/mongo"
-	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"east/core/zlog"
 	"east/pb"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (c *useCase) onEventUserMsg(event *eventbus.Event) {
-	log.Infof("user event %v", util.String(event))
+	zlog.Infof("user event %v", util.String(event))
 	msgbus.CastLocal(&mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
@@ -34,12 +34,12 @@ func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 		Filter:   bson.M{},
 		Data:     []bson.M{},
 	}, func(res any, err error) {
-		log.Info("db load", res, err)
+		zlog.Info("db load", res, err)
 	})
 	msgbus.RPC(c, 1888, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
-		log.Info("remote call", resp, err)
+		zlog.Info("remote call", resp, err)
 	})
 	msgbus.RPC(c, conf.ServerID(), &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
-		log.Info("local call", resp, err)
+		zlog.Info("local call", resp, err)
 	})
 }

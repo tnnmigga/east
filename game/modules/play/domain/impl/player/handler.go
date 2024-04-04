@@ -2,15 +2,15 @@ package player
 
 import (
 	"east/core/eventbus"
-	"east/core/log"
 	"east/core/msgbus"
+	"east/core/zlog"
 	"east/define"
 	"east/pb"
 	"time"
 )
 
 func (c *useCase) onSayHelloReq(msg *pb.SayHelloReq) {
-	log.Infof("client say hello %v", msg.Text)
+	zlog.Infof("client say hello %v", msg.Text)
 	msgbus.CastLocal(&eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,

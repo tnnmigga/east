@@ -1,7 +1,8 @@
 package util
 
 import (
-	"east/core/log"
+	"east/core/util/idgen"
+	"east/core/zlog"
 	"reflect"
 	"runtime"
 	"runtime/debug"
@@ -10,7 +11,7 @@ import (
 
 func RecoverPanic() {
 	if r := recover(); r != nil {
-		log.Errorf("%v: %s", r, debug.Stack())
+		zlog.Errorf("%v: %s", r, debug.Stack())
 	}
 }
 
@@ -43,12 +44,17 @@ func PkgName() string {
 }
 
 // 获取结构体名称
-func StructName(v any) string {
+func TypeName(v any) string {
 	mType := reflect.TypeOf(v)
 	for mType.Kind() == reflect.Ptr {
 		mType = mType.Elem()
 	}
 	return mType.Name()
+}
+
+func TypeID(v any) uint32 {
+	name := TypeName(v)
+	return idgen.HashToID(name)
 }
 
 // 获取函数名称

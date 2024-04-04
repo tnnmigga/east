@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"east/core/log"
 	"east/core/msgbus"
+	"east/core/zlog"
 	"east/pb"
 )
 
@@ -14,13 +14,13 @@ func (m *module) initHandler() {
 func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
 	agent := m.manager.GetAgent(pkg.UserID)
 	if agent == nil {
-		log.Warnf("agent not found %d", pkg.UserID)
+		zlog.Warnf("agent not found %d", pkg.UserID)
 		return
 	}
 	select {
 	case agent.sendMQ <- pkg.Body:
 	default:
-		log.Errorf("agent send mq full! %d", pkg.UserID)
+		zlog.Errorf("agent send mq full! %d", pkg.UserID)
 	}
 }
 

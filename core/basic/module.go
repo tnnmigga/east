@@ -2,8 +2,9 @@ package basic
 
 import (
 	"east/core/idef"
-	"east/core/log"
+	"east/core/msgbus"
 	"east/core/util"
+	"east/core/zlog"
 	"fmt"
 	"reflect"
 	"runtime/debug"
@@ -27,12 +28,15 @@ type Module struct {
 }
 
 func New(name string, mqLen int32) *Module {
-	return &Module{
+	m := &Module{
 		name:      name,
 		mq:        make(chan any, mqLen),
 		handlers:  map[reflect.Type]*idef.Handler{},
 		closeSign: make(chan struct{}, 1),
 	}
+	msgbus.RegisterHandler(m, m.onRPCRequest)
+	msgbus.RegisterHandler(m, m.onRPCResponse)
+	return m
 }
 
 func (m *Module) Name() string {
@@ -47,7 +51,7 @@ func (m *Module) Assign(msg any) {
 	select {
 	case m.mq <- msg:
 	default:
-		log.Errorf("modele %s mq full, lose %s", m.name, util.String(msg))
+		zlog.Errorf("modele %s mq full, lose %s", m.name, util.String(msg))
 	}
 }
 
@@ -55,7 +59,7 @@ func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
 	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
-		log.Fatal(fmt.Errorf("RegisterHandler multiple registration %v", mType))
+		zlog.Fatal(fmt.Errorf("RegisterHandler multiple registration %v", mType))
 	}
 	m.handlers[mType] = handler
 }
@@ -66,38 +70,30 @@ func (m *Module) Hook(state idef.ServerState, stage int) []func() error {
 
 func (m *Module) Before(state idef.ServerState, hook func() error) {
 	if state <= idef.ServerStateInit {
-		panic("module after close hook not support")
+		zlog.Fatal("module after close hook not support")
 	}
 	m.hooks[state][0] = append(m.hooks[state][0], hook)
 }
 
 func (m *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateExit {
-		panic("module after close hook not support")
+		zlog.Fatal("module after close hook not support")
 	}
 	m.hooks[state][1] = append(m.hooks[state][1], hook)
 }
 
 func (m *Module) Run() {
 	defer func() {
-		log.Infof("%v has stoped", m.Name())
+		zlog.Infof("%v has stoped", m.Name())
 		m.closeSign <- struct{}{}
 	}()
 	for msg := range m.mq {
-		msgType := reflect.TypeOf(msg)
-		switch msgType {
-		case rpcReqType: // 被发起rpc
-			m.rpc(msg.(*idef.RPCRequest))
-		case rpcRespType: // rpc请求完成
-			m.rpcResp(msg.(*idef.RPCResponse))
-		default:
-			m.cb(msg)
-		}
+		m.cb(msg)
 	}
 }
 
 func (m *Module) Stop() {
-	log.Infof("try stop %s", m.name)
+	zlog.Infof("try stop %s", m.name)
 	close(m.mq)
 	<-m.closeSign
 }
@@ -107,13 +103,13 @@ func (m *Module) cb(msg any) {
 	msgType := reflect.TypeOf(msg)
 	h, ok := m.handlers[msgType]
 	if !ok {
-		log.Errorf("handler not exist %v", msgType)
+		zlog.Errorf("handler not exist %v", msgType)
 		return
 	}
 	h.Cb(msg)
 }
 
-func (m *Module) rpc(msg *idef.RPCRequest) {
+func (m *Module) onRPCRequest(msg *idef.RPCRequest) {
 	defer func() {
 		if r := recover(); r != nil {
 			msg.Err <- fmt.Errorf("%v: %s", r, debug.Stack())
@@ -132,7 +128,7 @@ func (m *Module) rpc(msg *idef.RPCRequest) {
 	})
 }
 
-func (m *Module) rpcResp(req *idef.RPCResponse) {
+func (m *Module) onRPCResponse(req *idef.RPCResponse) {
 	defer util.RecoverPanic()
 	req.Cb(req.Resp, req.Err)
 }

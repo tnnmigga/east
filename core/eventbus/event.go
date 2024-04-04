@@ -2,9 +2,9 @@ package eventbus
 
 import (
 	"east/core/idef"
-	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"east/core/zlog"
 	"strconv"
 )
 
@@ -20,7 +20,7 @@ type EventBus struct {
 
 func (bus *EventBus) RegisterSubscriber(sub ISubscriber) {
 	if bus.find(sub) {
-		log.Errorf("%s has registered", sub.Name())
+		zlog.Errorf("%s has registered", sub.Name())
 		return
 	}
 	for _, topic := range sub.Topics() {
@@ -116,7 +116,7 @@ func (e Event) Int64Arg(name string) (arg int64) {
 			}
 		}
 	}
-	log.Errorf("event get param %s from %s faild", name, e.String())
+	zlog.Errorf("event get param %s from %s faild", name, e.String())
 	return arg
 }
 
@@ -130,6 +130,6 @@ func (e Event) StringArg(name string) (arg string) {
 			return v
 		}
 	}
-	log.Errorf("event get param %s from %s faild", name, e.String())
+	zlog.Errorf("event get param %s from %s faild", name, e.String())
 	return arg
 }

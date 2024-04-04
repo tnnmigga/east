@@ -1,9 +1,8 @@
-package log
+package zlog
 
 import (
 	"east/core/conf"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -13,19 +12,25 @@ import (
 
 var logger *zap.SugaredLogger
 
+func init() {
+	// 先按默认值临时创建一个logger
+	// 用于配置初始化前的日志输出
+	Init()
+}
+
 func Init() {
 	var logLevel zap.AtomicLevel
-	err := logLevel.UnmarshalText([]byte(conf.String("log.level", "debug")))
+	err := logLevel.UnmarshalText([]byte(conf.String("zlog.level", "debug")))
 	if err != nil {
-		log.Fatal(fmt.Errorf("log Init level error: %v", err))
+		Fatal(fmt.Errorf("log Init level error: %v", err))
 	}
 	conf := zap.Config{
 		Level:             logLevel,
 		Development:       false,
 		Encoding:          conf.String("log.encoding", "console"),
 		EncoderConfig:     zap.NewProductionEncoderConfig(),
-		OutputPaths:       []string{conf.String("log.stdout", "stdout")},
-		ErrorOutputPaths:  []string{conf.String("log.stderr", "stderr")},
+		OutputPaths:       []string{conf.String("zlog.stdout", "stdout")},
+		ErrorOutputPaths:  []string{conf.String("zlog.stderr", "stderr")},
 		DisableCaller:     false,
 		DisableStacktrace: true,
 	}
@@ -38,7 +43,7 @@ func Init() {
 	}
 	l, err := conf.Build(zap.AddCallerSkip(1))
 	if err != nil {
-		log.Fatal(fmt.Errorf("log Init conf build error: %v", err))
+		Fatal(fmt.Errorf("zlog Init conf build error: %v", err))
 	}
 	logger = l.Sugar()
 }

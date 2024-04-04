@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	"east/core/basic"
+	"east/core/core"
 	"east/core/msgbus"
 	"east/core/util"
 	"errors"
@@ -27,7 +27,7 @@ func (m *module) onExec(req *Exec, resolve func(any), reject func(error)) {
 	if key == "" {
 		key = req.Cmd[1].(string)
 	}
-	basic.GoWithGroup(key, func() {
+	core.GoWithGroup(key, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), util.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		cmd := m.cli.Do(ctx, req.Cmd...)
@@ -45,7 +45,7 @@ func (m *module) onExecMulti(req *ExecMulti, resolve func(any), reject func(erro
 		reject(ErrInvalidCmd)
 		return
 	}
-	basic.GoWithGroup(req.Key, func() {
+	core.GoWithGroup(req.Key, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), util.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		pipe := m.cli.TxPipeline()

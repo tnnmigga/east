@@ -10,7 +10,7 @@
         "url": "nats://127.0.0.1:4222",
         "mq-len": 100000
     },
-    "log": {
+    "zlog": {
         "stdout": "log.txt",
         "stderr": "log.txt"
     }

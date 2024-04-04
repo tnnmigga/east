@@ -1,11 +1,11 @@
 package msgbus
 
 import (
-	"east/core/basic"
 	"east/core/conf"
+	"east/core/core"
 	"east/core/idef"
-	"east/core/log"
 	"east/core/util"
+	"east/core/zlog"
 	"errors"
 	"fmt"
 	"time"
@@ -59,7 +59,7 @@ func Cast(msg any, opts ...castOpt) {
 func CastLocal(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	if !ok {
-		log.Errorf("message cast recv not fuound %v", util.StructName(msg))
+		zlog.Errorf("message cast recv not fuound %v", util.TypeName(msg))
 		return
 	}
 	modName := findCastOpt[string](opts, idef.ConstKeyOneOfMods, "")
@@ -97,10 +97,10 @@ func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err er
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 	recvs, ok := recvers[reflect.TypeOf(req)]
 	if !ok {
-		log.Errorf("recvs not fuound %v", util.StructName(req))
+		zlog.Errorf("recvs not fuound %v", util.TypeName(req))
 		return
 	}
-	basic.Go(func() {
+	core.Go(func() {
 		callReq := &idef.RPCRequest{
 			Req:  req,
 			Resp: make(chan any, 1),
@@ -133,7 +133,7 @@ func warpCb[T any](cb func(T, error)) func(any, error) {
 		}
 		resp, ok := pkg.(T)
 		if !ok {
-			log.Panicf("rpc resp type error, need %s, cur %s", util.StructName(new(T)), util.StructName(pkg))
+			zlog.Panicf("rpc resp type error, need %s, cur %s", util.TypeName(new(T)), util.TypeName(pkg))
 		}
 		cb(resp, err)
 	}

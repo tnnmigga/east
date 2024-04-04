@@ -2,9 +2,9 @@ package mongo
 
 import (
 	"context"
-	"east/core/basic"
-	"east/core/log"
+	"east/core/core"
 	"east/core/msgbus"
+	"east/core/zlog"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,24 +21,24 @@ func (m *module) onMongoSave(req *MongoSave) {
 	for _, op := range req.Ops {
 		b, err := bson.Marshal(op.Value)
 		if err != nil {
-			log.Errorf("save %#v bson error %v", op.Value, err)
+			zlog.Errorf("save %#v bson error %v", op.Value, err)
 			continue
 		}
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	basic.GoWithGroup(req.Key(), func() {
+	core.GoWithGroup(req.Key(), func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		_, err := m.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
 		cancel()
 		if err != nil {
-			log.Errorf("mongo save error %v", err)
+			zlog.Errorf("mongo save error %v", err)
 		}
 	})
 }
 
 func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
-	basic.GoWithGroup(req.Key(), func() {
+	core.GoWithGroup(req.Key(), func() {
 		cur, _ := m.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		err := cur.All(ctx, &req.Data)

@@ -9,7 +9,7 @@ option (gogoproto.goproto_unrecognized_all) = false;
 option (gogoproto.goproto_unkeyed_all)      = false;
 option (gogoproto.goproto_sizecache_all)    = false;
 
-message RPCResponse {
+message RPCResult {
     bytes Data = 1;
     string Err = 2;
 }

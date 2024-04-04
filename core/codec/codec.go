@@ -3,6 +3,7 @@ package codec
 import (
 	"east/core/util"
 	"east/core/util/idgen"
+	"east/core/zlog"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -37,10 +38,12 @@ func (d *MessageDescriptor) New() any {
 }
 
 func Register(v any) {
-	name := util.StructName(v)
+	name := util.TypeName(v)
 	id := msgID(v)
-	if _, has := msgIDToDesc[id]; has {
-		log.Fatalf("msgid duplicat %v %d", name, id)
+	if desc, has := msgIDToDesc[id]; has {
+		if desc.MessageName != name {
+			zlog.Fatalf("msgid duplicat %v %d", name, id)
+		}
 	}
 	mType := reflect.TypeOf(v)
 	if mType.Kind() == reflect.Ptr {
@@ -103,7 +106,7 @@ func Unmarshal(b []byte, addr any) error {
 }
 
 func msgID(v any) uint32 {
-	name := util.StructName(v)
+	name := util.TypeName(v)
 	return idgen.HashToID(name)
 }
 

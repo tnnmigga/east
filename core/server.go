@@ -1,12 +1,12 @@
 package core
 
 import (
-	"east/core/basic"
 	"east/core/conf"
+	"east/core/core"
 	"east/core/idef"
 	"east/core/infra/link"
-	"east/core/log"
 	"east/core/util"
+	"east/core/zlog"
 	"fmt"
 	"os"
 	"runtime/debug"
@@ -33,32 +33,32 @@ func NewServer(modules ...idef.IModule) *Server {
 
 func (s *Server) init() {
 	conf.LoadFromJSON(util.ReadFile("configs.jsonc"))
-	log.Init()
-	log.Info("server initialization")
+	zlog.Init()
+	zlog.Info("server initialization")
 	s.after(idef.ServerStateInit, s.abort)
 }
 
 func (s *Server) run() {
 	s.before(idef.ServerStateRun, s.abort)
-	log.Info("server try to run")
+	zlog.Info("server try to run")
 	for _, m := range s.modules {
 		s.runModule(s.wg, m)
 	}
-	log.Info("server running successfully")
+	zlog.Info("server running successfully")
 	s.after(idef.ServerStateRun, s.abort)
 }
 
 func (s *Server) stop() {
 	s.before(idef.ServerStateStop, s.noabort)
-	log.Info("server try to stop")
+	zlog.Info("server try to stop")
 	s.waitMsgHandling(time.Minute)
-	basic.WaitGoDone(time.Minute)
+	core.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		util.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
-	log.Info("server stoped successfully")
+	zlog.Info("server stoped successfully")
 	s.exit()
 }
 
@@ -68,7 +68,7 @@ func (s *Server) Exit() {
 
 func (s *Server) exit() {
 	s.before(idef.ServerStateExit, s.noabort)
-	log.Info("server close")
+	zlog.Info("server close")
 	os.Exit(0)
 }
 
@@ -97,15 +97,15 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 			return
 		}
 	}
-	log.Errorf("wait msg handing timeout")
+	zlog.Errorf("wait msg handing timeout")
 }
 
 func (s *Server) abort(m idef.IModule, err error) {
-	log.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+	zlog.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
 func (s *Server) noabort(m idef.IModule, err error) {
-	log.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+	zlog.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
 }
 
 func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, error)) {
@@ -113,7 +113,7 @@ func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, er
 		hook := m.Hook(state, 0)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
+				zlog.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
 					f(m, err)
 				}
@@ -127,7 +127,7 @@ func (s *Server) after(state idef.ServerState, onError ...func(idef.IModule, err
 		hook := m.Hook(state, 1)
 		for _, h := range hook {
 			if err := wrapHook(h)(); err != nil {
-				log.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
+				zlog.Errorf("server before %#v error, module %s, error %v", state, m.Name(), err)
 				for _, f := range onError {
 					f(m, err)
 				}

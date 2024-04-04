@@ -3,7 +3,6 @@ package conf
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"regexp"
 	"strings"
 
@@ -22,7 +21,7 @@ func LoadFromJSON(b []byte) {
 	tmp := map[string]any{}
 	err := json.Unmarshal(b, &tmp)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	transform(tmp, confs, nil)
 	afterLoad()

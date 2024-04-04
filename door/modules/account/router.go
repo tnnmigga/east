@@ -3,10 +3,10 @@ package account
 import (
 	"east/core/conf"
 	"east/core/infra/redis"
-	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
 	"east/core/web"
+	"east/core/zlog"
 	"east/pb"
 	"net/http"
 
@@ -49,11 +49,11 @@ func (m *module) onGetTest(ctx *gin.Context) {
 	msgbus.RPC(m, conf.ServerID(), &redis.Exec{
 		Cmd: []any{"set", "test", "test"},
 	}, func(res any, err error) {
-		log.Infof("set res:%v, err:%v", res, err)
+		zlog.Infof("set res:%v, err:%v", res, err)
 		msgbus.RPC(m, conf.ServerID(), &redis.ExecMulti{
 			Cmds: [][]any{{"get", "test"}, {"set", "test1", "test1"}, {"get", "test1"}},
 		}, func(res any, err error) {
-			log.Infof("get res:%v, err:%v", res, err)
+			zlog.Infof("get res:%v, err:%v", res, err)
 		})
 	})
 }

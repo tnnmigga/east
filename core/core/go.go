@@ -1,9 +1,9 @@
-package basic
+package core
 
 import (
 	"context"
-	"east/core/log"
 	"east/core/util"
+	"east/core/zlog"
 	"sync"
 	"time"
 )
@@ -119,6 +119,6 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	case <-c:
 		return
 	case <-timer:
-		log.Errorf("wait goroutine exit timeout")
+		zlog.Errorf("wait goroutine exit timeout")
 	}
 }

@@ -2,9 +2,9 @@ package agent
 
 import (
 	"context"
-	"east/core/basic"
-	"east/core/log"
+	"east/core/core"
 	"east/core/util"
+	"east/core/zlog"
 	"encoding/binary"
 	"io"
 	"net"
@@ -21,14 +21,14 @@ const (
 func NewTCPListener(manager *AgentManager, addr string) IListener {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatalf("tcpagent listen error %v", err)
+		zlog.Fatalf("tcpagent listen error %v", err)
 	}
-	tl := &TCPListener{
+	tcp := &TCPListener{
 		manager:  manager,
 		listener: listener,
 	}
-	log.Infof("tcp listen %s", addr)
-	return tl
+	zlog.Infof("tcp listen %s", addr)
+	return tcp
 }
 
 type TCPListener struct {
@@ -36,14 +36,14 @@ type TCPListener struct {
 	listener net.Listener
 }
 
-func (tl *TCPListener) Run() {
-	basic.Go(tl.accept)
-	basic.Go(func(ctx context.Context) {
+func (tcp *TCPListener) Run() {
+	core.Go(tcp.accept)
+	core.Go(func(ctx context.Context) {
 		timer := time.NewTicker(MaxTcpWaitTime)
 		for {
 			select {
 			case <-timer.C:
-				tl.killDeadAgent()
+				tcp.killDeadAgent()
 			case <-ctx.Done():
 				return
 			}
@@ -51,20 +51,20 @@ func (tl *TCPListener) Run() {
 	})
 }
 
-func (tl *TCPListener) Close() {
-	tl.listener.Close()
-	for _, agent := range tl.manager.agents {
+func (tcp *TCPListener) Close() {
+	tcp.listener.Close()
+	for _, agent := range tcp.manager.agents {
 		agent.conn.Close()
 	}
 }
 
-func (tl *TCPListener) killDeadAgent() {
-	tl.manager.rw.RLock()
+func (tcp *TCPListener) killDeadAgent() {
+	tcp.manager.rw.RLock()
 	nowNs := util.NowNs()
-	for uid, agent := range tl.manager.agents {
+	for uid, agent := range tcp.manager.agents {
 		state := atomic.LoadInt32(&agent.state)
 		if state == AgentStateDead {
-			delete(tl.manager.agents, uid)
+			delete(tcp.manager.agents, uid)
 			continue
 		}
 		if state != AgentStateWait {
@@ -76,24 +76,24 @@ func (tl *TCPListener) killDeadAgent() {
 		if !atomic.CompareAndSwapInt32(&agent.state, AgentStateWait, AgentStateDead) {
 			continue
 		}
-		delete(tl.manager.agents, uid)
+		delete(tcp.manager.agents, uid)
 	}
-	tl.manager.rw.RUnlock()
+	tcp.manager.rw.RUnlock()
 }
 
-func (tl *TCPListener) accept() {
+func (tcp *TCPListener) accept() {
 	defer util.RecoverPanic()
 	for {
-		conn, err := tl.listener.Accept()
+		conn, err := tcp.listener.Accept()
 		if err != nil {
-			log.Warnf("tcp accept error %v", err)
+			zlog.Warnf("tcp accept error %v", err)
 			return
 		}
-		log.Debug("new conn: ", conn.RemoteAddr())
+		zlog.Debug("new conn: ", conn.RemoteAddr())
 		tcpConn := &TCPConn{
 			conn: conn,
 		}
-		tl.manager.OnConnect(tcpConn)
+		tcp.manager.OnConnect(tcpConn)
 	}
 }
 
@@ -109,7 +109,7 @@ func (c *TCPConn) Write(data []byte) error {
 }
 
 func (c *TCPConn) Run(ctx context.Context) {
-	basic.Go(c.readLoop)
+	core.Go(c.readLoop)
 }
 
 func (c *TCPConn) readLoop() {
@@ -122,7 +122,7 @@ func (c *TCPConn) readLoop() {
 		}
 		pkgSize := int(binary.LittleEndian.Uint32(buffer))
 		if pkgSize == 0 {
-			log.Debugf("receive ping")
+			zlog.Debugf("receive ping")
 			continue // 心跳包
 		}
 		readbuf := buffer

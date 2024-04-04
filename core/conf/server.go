@@ -1,7 +1,5 @@
 package conf
 
-import "log"
-
 var (
 	serverID   uint32
 	serverType string
@@ -19,6 +17,6 @@ func initServerConf() {
 	serverID = UInt32("server.id")
 	serverType = String("server.type")
 	if len(serverType) == 0 {
-		log.Fatal("server.type is empty")
+		panic("server.type is empty")
 	}
 }

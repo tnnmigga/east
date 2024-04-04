@@ -4,16 +4,16 @@ import (
 	"east/core/codec"
 	"east/core/idef"
 	"east/core/util"
+	"east/core/zlog"
 	"fmt"
-	"log"
 	"reflect"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(T)) {
-	mValue := *new(T)
+	mValue := util.New[T]()
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)
-	registerRecver(mType, m)
+	RegisterRecver(mType, m)
 	m.RegisterHandler(mType, &idef.Handler{
 		Cb: func(data any) {
 			msg := data.(T)
@@ -26,7 +26,7 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 	mValue := util.New[T]()
 	mType := reflect.TypeOf(mValue)
 	codec.Register(mValue)
-	registerRecver(mType, m)
+	RegisterRecver(mType, m)
 	m.RegisterHandler(mType, &idef.Handler{
 		RPC: func(data any, res func(any), rej func(error)) {
 			msg := data.(T)
@@ -36,9 +36,13 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 }
 
 // 注册消息接收者
-func registerRecver(mType reflect.Type, recver IRecver) {
-	if _, has := recvers[mType]; has {
-		log.Fatal(fmt.Errorf("message has registered %v", mType.Elem().Name()))
+func RegisterRecver(mType reflect.Type, recver IRecver) {
+	if ms, has := recvers[mType]; has {
+		for _, m := range ms {
+			if m.Name() == recver.Name() {
+				zlog.Fatal(fmt.Errorf("message duplicate registration %v %v", recver.Name(), mType.Elem().Name()))
+			}
+		}
 	}
 	recvers[mType] = append(recvers[mType], recver)
 }

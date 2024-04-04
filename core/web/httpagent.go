@@ -2,8 +2,8 @@ package web
 
 import (
 	"context"
-	"east/core/basic"
-	"east/core/log"
+	"east/core/core"
+	"east/core/zlog"
 	"errors"
 	"net/http"
 	"runtime/debug"
@@ -29,7 +29,7 @@ func NewHttpAgent() *HttpAgent {
 	agent.Use(func(ctx *gin.Context) {
 		defer func() {
 			if r := recover(); r != nil {
-				log.Errorf("%v: %s", r, debug.Stack())
+				zlog.Errorf("%v: %s", r, debug.Stack())
 				ctx.String(http.StatusInternalServerError, "server panic")
 			}
 		}()
@@ -41,16 +41,16 @@ func NewHttpAgent() *HttpAgent {
 func (agent *HttpAgent) Run(addr string) error {
 	agent.svr.Addr = addr
 	errChan := make(chan error, 1)
-	basic.Go(func() {
+	core.Go(func() {
 		err := agent.svr.ListenAndServe()
 		if errors.Is(err, http.ErrServerClosed) {
 			return
 		}
-		log.Errorf("http agent ListenAndServe return error %v", err)
+		zlog.Errorf("http agent ListenAndServe return error %v", err)
 		errChan <- err
 	})
 	time.Sleep(time.Second) // 等待1秒检测端口监听
-	log.Infof("http listen and serve %s", addr)
+	zlog.Infof("http listen and serve %s", addr)
 	select {
 	case err := <-errChan:
 		return err

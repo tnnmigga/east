@@ -1,12 +1,12 @@
 package link
 
 import (
-	"east/core/basic"
 	"east/core/codec"
 	"east/core/conf"
+	"east/core/core"
 	"east/core/idef"
-	"east/core/log"
 	"east/core/msgbus"
+	"east/core/zlog"
 	"errors"
 	fmt "fmt"
 
@@ -25,7 +25,7 @@ func (m *module) onCastPackage(pkg *idef.CastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(castSubject(pkg.ServerID), b)
 	if err != nil {
-		log.Errorf("onCastPackage error %v", err)
+		zlog.Errorf("onCastPackage error %v", err)
 	}
 }
 
@@ -44,7 +44,7 @@ func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	}
 	_, err := m.js.PublishMsgAsync(msg)
 	if err != nil {
-		log.Errorf("onStreamCastPackage error %v", err)
+		zlog.Errorf("onStreamCastPackage error %v", err)
 	}
 }
 
@@ -52,7 +52,7 @@ func (m *module) onBroadcastPackage(pkg *idef.BroadcastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(broadcastSubject(pkg.ServerType), b)
 	if err != nil {
-		log.Errorf("onBroadcastPackage error %v", err)
+		zlog.Errorf("onBroadcastPackage error %v", err)
 	}
 }
 
@@ -60,13 +60,13 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 	b := codec.Encode(pkg.Body)
 	err := m.conn.Publish(randomCastSubject(pkg.ServerType), b)
 	if err != nil {
-		log.Errorf("onRandomCastPackage error %v", err)
+		zlog.Errorf("onRandomCastPackage error %v", err)
 	}
 }
 
 func (m *module) onRPContext(ctx *idef.RPCContext) {
 	b := codec.Encode(ctx.Req)
-	basic.Go(func() {
+	core.Go(func() {
 		resp := &idef.RPCResponse{
 			Module: ctx.Caller,
 			Req:    ctx.Req,
@@ -84,7 +84,7 @@ func (m *module) onRPContext(ctx *idef.RPCContext) {
 			resp.Err = fmt.Errorf("RPCPkg decode error: %v", err)
 			return
 		}
-		rpcResp := data.(*RPCResponse)
+		rpcResp := data.(*RPCResult)
 		if len(rpcResp.Err) != 0 {
 			resp.Err = errors.New(rpcResp.Err)
 			return

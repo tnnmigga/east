@@ -7,9 +7,9 @@ import (
 	"east/core/conf"
 	"east/core/idef"
 	"east/core/infra"
-	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"east/core/zlog"
 	"fmt"
 	"strconv"
 	"time"
@@ -39,7 +39,7 @@ func New() idef.IModule {
 	m := &module{
 		Module: basic.New(infra.ModNameLink, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
 	}
-	codec.Register((*RPCResponse)(nil))
+	codec.Register((*RPCResult)(nil))
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)
@@ -55,7 +55,7 @@ func (m *module) afterInit() error {
 		nats.MaxReconnects(10),
 		nats.ReconnectWait(time.Second),
 		nats.ReconnectHandler(func(_ *nats.Conn) {
-			log.Errorf("nats retry connect")
+			zlog.Errorf("nats retry connect")
 		}),
 	)
 	if err != nil {
@@ -142,20 +142,20 @@ func (m *module) afterStop() error {
 func (m *module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
-	log.Debug(msg.Headers())
+	zlog.Debug(msg.Headers())
 	if expires := msg.Headers().Get(idef.ConstKeyExpires); expires != "" {
 		// 检测部分不重要但有一定时效性的消息是否超时
 		// 比如往客户端推送的实时消息
 		// 超时后直接丢弃
 		n, err := strconv.Atoi(expires)
 		if err == nil && util.NowNs() > time.Duration(n) {
-			log.Debugf("message expired")
+			zlog.Debugf("message expired")
 			return
 		}
 	}
 	pkg, err := codec.Decode(msg.Data())
 	if err != nil {
-		log.Errorf("nats streamRecv decode msg error: %v", err)
+		zlog.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
 	msgbus.CastLocal(pkg)
@@ -165,7 +165,7 @@ func (m *module) recv(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
-		log.Errorf("nats recv decode msg error: %v", err)
+		zlog.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
 	msgbus.CastLocal(pkg)
@@ -174,7 +174,7 @@ func (m *module) recv(msg *nats.Msg) {
 func (m *module) rpc(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	req, err := codec.Decode(msg.Data)
-	rpcResp := &RPCResponse{}
+	rpcResp := &RPCResult{}
 	if err != nil {
 		rpcResp.Err = fmt.Sprintf("req decode msg error: %v", err)
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))

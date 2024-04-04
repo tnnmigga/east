@@ -2,16 +2,17 @@ package agent
 
 import (
 	"context"
-	"east/core/basic"
+	"east/core/core"
 	"east/core/idef"
-	"east/core/log"
 	"east/core/msgbus"
 	"east/core/util"
+	"east/core/zlog"
 	"east/pb"
 	"errors"
 	"io"
 	"runtime"
 	"sync"
+
 	"sync/atomic"
 	"time"
 )
@@ -42,7 +43,7 @@ func NewAgentManager(m idef.IModule) *AgentManager {
 
 func (am *AgentManager) AddAgent(agent *Agent) {
 	if agent.userID == 0 {
-		log.Errorf("agent uid is 0")
+		zlog.Errorf("agent uid is 0")
 		return
 	}
 	am.rw.Lock()
@@ -81,7 +82,7 @@ func (am *AgentManager) OnConnect(conn Conn) {
 }
 
 func (am *AgentManager) OnError(err error) {
-	log.Errorf("agent manager error %v", err)
+	zlog.Errorf("agent manager error %v", err)
 }
 
 type IAgent interface {
@@ -128,7 +129,7 @@ func (a *Agent) OnReadError(err error) {
 	}
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
 		a.waitNs = util.NowNs()
-		log.Debugf("agent read error %v", err)
+		zlog.Debugf("agent read error %v", err)
 		a.conn.Close()
 	}
 	runtime.Goexit()
@@ -145,7 +146,7 @@ func (a *Agent) OnWriteError(data []byte, err error) {
 
 func (a *Agent) OnReconnect() {
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateWait, AgentStateRun) {
-		log.Debugf("agent reconnect")
+		zlog.Debugf("agent reconnect")
 	}
 	if a.failMsg != nil {
 		if err := a.conn.Write(a.failMsg); err != nil {
@@ -159,8 +160,8 @@ func (a *Agent) OnReconnect() {
 func (a *Agent) Run() {
 	a.state = AgentStateRun
 	// 启动agent读写goroutine
-	basic.Go(a.writeLoop)
-	basic.Go(func() {
+	core.Go(a.writeLoop)
+	core.Go(func() {
 		a.conn.Run(a.ctx)
 	})
 }

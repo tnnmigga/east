@@ -22,12 +22,12 @@ func New[T any]() any {
 func String(v any) string {
 	type IString interface{ String() string }
 	if v0, ok := v.(IString); ok {
-		return fmt.Sprintf("[ %s: %s ]", StructName(v0), v0.String())
+		return fmt.Sprintf("[ %s: %s ]", TypeName(v0), v0.String())
 	}
 	if b, err := json.Marshal(v); err == nil {
-		return fmt.Sprintf("[ %s: %s ]", StructName(v), string(b))
+		return fmt.Sprintf("[ %s: %s ]", TypeName(v), string(b))
 	}
-	return fmt.Sprintf("[ %s: %v ]", StructName(v), v)
+	return fmt.Sprintf("[ %s: %v ]", TypeName(v), v)
 }
 
 func Integer[T constraints.Integer](value any) T {
