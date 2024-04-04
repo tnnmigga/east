@@ -1,14 +1,15 @@
 package main
 
 import (
-	"east/core"
-	"east/core/infra/mongo"
-	"east/core/sys"
 	"east/game/modules/play"
+
+	"github.com/tnnmigga/nett"
+	"github.com/tnnmigga/nett/infra/mongo"
+	"github.com/tnnmigga/nett/sys"
 )
 
 func main() {
-	server := core.NewServer(
+	server := nett.NewServer(
 		play.New(),
 		mongo.New(),
 	)

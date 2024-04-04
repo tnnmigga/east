@@ -1,10 +1,11 @@
 package msg
 
 import (
-	"east/core/idef"
-	"east/core/msgbus"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
+
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/msgbus"
 )
 
 type useCase struct {

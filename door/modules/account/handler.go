@@ -1,8 +1,9 @@
 package account
 
 import (
-	"east/core/msgbus"
 	"east/pb"
+
+	"github.com/tnnmigga/nett/msgbus"
 )
 
 func (m *module) initHandler() {

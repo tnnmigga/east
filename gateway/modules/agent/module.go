@@ -1,11 +1,12 @@
 package agent
 
 import (
-	"east/core/basic"
-	"east/core/conf"
-	"east/core/idef"
-	"east/core/infra"
 	"fmt"
+
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra"
 )
 
 type AgentType string

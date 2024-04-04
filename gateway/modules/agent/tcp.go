@@ -2,14 +2,15 @@ package agent
 
 import (
 	"context"
-	"east/core/core"
-	"east/core/util"
-	"east/core/zlog"
 	"encoding/binary"
 	"io"
 	"net"
 	"sync/atomic"
 	"time"
+
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 const (

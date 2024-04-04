@@ -1,13 +1,14 @@
 package player
 
 import (
-	"east/core/conf"
-	"east/core/eventbus"
-	"east/core/infra/mongo"
-	"east/core/msgbus"
-	"east/core/util"
-	"east/core/zlog"
 	"east/pb"
+
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/eventbus"
+	"github.com/tnnmigga/nett/infra/mongo"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

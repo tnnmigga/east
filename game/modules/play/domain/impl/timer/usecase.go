@@ -1,10 +1,11 @@
 package timer
 
 import (
-	"east/core/idef"
-	"east/core/timer"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
+
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/timer"
 )
 
 type useCase struct {

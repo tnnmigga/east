@@ -1,11 +1,12 @@
 package account
 
 import (
-	"east/core/basic"
-	"east/core/conf"
-	"east/core/idef"
-	"east/core/web"
 	"east/define"
+
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/web"
 )
 
 type module struct {

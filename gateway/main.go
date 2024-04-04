@@ -1,13 +1,14 @@
 package main
 
 import (
-	"east/core"
-	"east/core/sys"
 	"east/gateway/modules/agent"
+
+	"github.com/tnnmigga/nett"
+	"github.com/tnnmigga/nett/sys"
 )
 
 func main() {
-	server := core.NewServer(
+	server := nett.NewServer(
 		agent.New(agent.AgentTypeTCP),
 	)
 	defer server.Exit()

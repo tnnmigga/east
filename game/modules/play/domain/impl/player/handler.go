@@ -1,12 +1,13 @@
 package player
 
 import (
-	"east/core/eventbus"
-	"east/core/msgbus"
-	"east/core/zlog"
 	"east/define"
 	"east/pb"
 	"time"
+
+	"github.com/tnnmigga/nett/eventbus"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func (c *useCase) onSayHelloReq(msg *pb.SayHelloReq) {

@@ -2,16 +2,17 @@ package agent
 
 import (
 	"context"
-	"east/core/core"
-	"east/core/idef"
-	"east/core/msgbus"
-	"east/core/util"
-	"east/core/zlog"
 	"east/pb"
 	"errors"
 	"io"
 	"runtime"
 	"sync"
+
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 
 	"sync/atomic"
 	"time"

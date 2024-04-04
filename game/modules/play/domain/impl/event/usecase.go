@@ -1,9 +1,10 @@
 package event
 
 import (
-	"east/core/eventbus"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/api"
+
+	"github.com/tnnmigga/nett/eventbus"
 )
 
 type useCase struct {

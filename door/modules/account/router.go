@@ -1,14 +1,15 @@
 package account
 
 import (
-	"east/core/conf"
-	"east/core/infra/redis"
-	"east/core/msgbus"
-	"east/core/util"
-	"east/core/web"
-	"east/core/zlog"
 	"east/pb"
 	"net/http"
+
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/infra/redis"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/web"
+	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,14 +1,15 @@
 package main
 
 import (
-	"east/core"
-	"east/core/infra/redis"
-	"east/core/sys"
 	"east/door/modules/account"
+
+	"github.com/tnnmigga/nett"
+	"github.com/tnnmigga/nett/infra/redis"
+	"github.com/tnnmigga/nett/sys"
 )
 
 func main() {
-	server := core.NewServer(
+	server := nett.NewServer(
 		account.New(),
 		redis.New(),
 	)

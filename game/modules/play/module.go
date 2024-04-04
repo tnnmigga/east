@@ -1,11 +1,12 @@
 package play
 
 import (
-	"east/core/basic"
-	"east/core/idef"
 	"east/define"
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/impl"
+
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/idef"
 )
 
 type module struct {

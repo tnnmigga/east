@@ -1,11 +1,12 @@
 package msg
 
 import (
-	"east/core/codec"
-	"east/core/msgbus"
-	"east/core/util"
-	"east/core/zlog"
 	"east/pb"
+
+	"github.com/tnnmigga/nett/codec"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func (c *useCase) onC2SPackage(msg *pb.C2SPackage) {
