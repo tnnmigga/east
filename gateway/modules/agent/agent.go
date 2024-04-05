@@ -20,6 +20,7 @@ import (
 
 const (
 	MaxSendMQLen = 64
+	MaxAliveTime = 10 * time.Second
 )
 
 const (
@@ -36,10 +37,12 @@ type AgentManager struct {
 }
 
 func NewAgentManager(m idef.IModule) *AgentManager {
-	return &AgentManager{
+	am := &AgentManager{
 		IModule: m,
 		agents:  map[uint64]*Agent{},
 	}
+	core.Go(am.clean)
+	return am
 }
 
 func (am *AgentManager) AddAgent(agent *Agent) {
@@ -84,6 +87,41 @@ func (am *AgentManager) OnConnect(conn Conn) {
 
 func (am *AgentManager) OnError(err error) {
 	zlog.Errorf("agent manager error %v", err)
+}
+
+func (am *AgentManager) clean(ctx context.Context) {
+	ticker := time.NewTicker(MaxAliveTime)
+	for {
+		select {
+		case <-ticker.C:
+			am.cleanDeadAgent()
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (am *AgentManager) cleanDeadAgent() {
+	am.rw.RLock()
+	defer am.rw.RUnlock()
+	nowNs := util.NowNs()
+	for uid, agent := range am.agents {
+		state := atomic.LoadInt32(&agent.state)
+		if state == AgentStateDead {
+			delete(am.agents, uid)
+			continue
+		}
+		if state != AgentStateWait {
+			continue
+		}
+		if agent.waitNs+MaxAliveTime > nowNs {
+			continue
+		}
+		if !atomic.CompareAndSwapInt32(&agent.state, AgentStateWait, AgentStateDead) {
+			continue
+		}
+		delete(am.agents, uid)
+	}
 }
 
 type IAgent interface {

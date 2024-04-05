@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/tnnmigga/nett/basic"
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra"
 )
@@ -15,11 +14,6 @@ const (
 	AgentTypeTCP       AgentType = "tcp"
 	AgentTypeWebSocket AgentType = "websocket"
 )
-
-func GetTCPBindAddress() string {
-	defaultAddr := fmt.Sprintf(":%d", conf.ServerID()+0x1FFE)
-	return conf.String("agent.tcp.addr", defaultAddr)
-}
 
 type module struct {
 	*basic.Module
@@ -49,7 +43,9 @@ func New(agentType AgentType) idef.IModule {
 func (m *module) afterInit() (err error) {
 	switch m.agentType {
 	case AgentTypeTCP:
-		m.listener = NewTCPListener(m.manager, GetTCPBindAddress())
+		m.listener = NewTCPListener(m.manager)
+	case AgentTypeWebSocket:
+		m.listener = NewWebSocketListener(m.manager)
 	default:
 		return fmt.Errorf("unknown agent type: %s", m.agentType)
 	}

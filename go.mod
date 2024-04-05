@@ -57,6 +57,7 @@ require (
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
+	github.com/gorilla/websocket v1.5.1
 	github.com/tnnmigga/nett v0.0.3
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect

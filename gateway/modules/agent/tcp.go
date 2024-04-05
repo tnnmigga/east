@@ -3,23 +3,28 @@ package agent
 import (
 	"context"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
-	"sync/atomic"
 	"time"
 
+	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"
 )
 
 const (
-	MaxTcpWaitTime = 5 * time.Second
-	MaxTcpPkgSize  = 1024
 	PkgSizeByteLen = 4
 )
 
-func NewTCPListener(manager *AgentManager, addr string) IListener {
+func GetTCPBindAddress() string {
+	defaultAddr := fmt.Sprintf(":%d", conf.ServerID()+0x1FFE)
+	return conf.String("agent.tcp.addr", defaultAddr)
+}
+
+func NewTCPListener(manager *AgentManager) IListener {
+	addr := GetTCPBindAddress()
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		zlog.Fatalf("tcpagent listen error %v", err)
@@ -38,18 +43,7 @@ type TCPListener struct {
 }
 
 func (tcp *TCPListener) Run() {
-	core.Go(tcp.accept)
-	core.Go(func(ctx context.Context) {
-		timer := time.NewTicker(MaxTcpWaitTime)
-		for {
-			select {
-			case <-timer.C:
-				tcp.killDeadAgent()
-			case <-ctx.Done():
-				return
-			}
-		}
-	})
+	core.Go(tcp.start)
 }
 
 func (tcp *TCPListener) Close() {
@@ -59,30 +53,7 @@ func (tcp *TCPListener) Close() {
 	}
 }
 
-func (tcp *TCPListener) killDeadAgent() {
-	tcp.manager.rw.RLock()
-	nowNs := util.NowNs()
-	for uid, agent := range tcp.manager.agents {
-		state := atomic.LoadInt32(&agent.state)
-		if state == AgentStateDead {
-			delete(tcp.manager.agents, uid)
-			continue
-		}
-		if state != AgentStateWait {
-			continue
-		}
-		if agent.waitNs+MaxTcpWaitTime > nowNs {
-			continue
-		}
-		if !atomic.CompareAndSwapInt32(&agent.state, AgentStateWait, AgentStateDead) {
-			continue
-		}
-		delete(tcp.manager.agents, uid)
-	}
-	tcp.manager.rw.RUnlock()
-}
-
-func (tcp *TCPListener) accept() {
+func (tcp *TCPListener) start() {
 	defer util.RecoverPanic()
 	for {
 		conn, err := tcp.listener.Accept()
@@ -104,7 +75,7 @@ type TCPConn struct {
 }
 
 func (c *TCPConn) Write(data []byte) error {
-	c.conn.SetDeadline(time.Now().Add(5 * time.Second))
+	c.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	_, err := c.conn.Write(data)
 	return err
 }
@@ -114,33 +85,32 @@ func (c *TCPConn) Run(ctx context.Context) {
 }
 
 func (c *TCPConn) readLoop() {
-	buffer := make([]byte, MaxTcpPkgSize)
+	sizeBuffer := make([]byte, PkgSizeByteLen)
 	for {
-		err := c.Read(buffer, PkgSizeByteLen)
+		err := c.Read(sizeBuffer, PkgSizeByteLen)
 		if err != nil {
 			c.agent.OnReadError(err)
 			continue
 		}
-		pkgSize := int(binary.LittleEndian.Uint32(buffer))
+		pkgSize := int(binary.LittleEndian.Uint32(sizeBuffer))
 		if pkgSize == 0 {
 			zlog.Debugf("receive ping")
 			continue // 心跳包
 		}
-		readbuf := buffer
-		if pkgSize > MaxTcpPkgSize {
-			readbuf = make([]byte, pkgSize)
-		}
-		err = c.Read(readbuf, pkgSize)
+		// 每次创建一个新缓冲区
+		// 防止在传递过程中可能出现的slice并发读写
+		buffer := make([]byte, pkgSize)
+		err = c.Read(buffer, pkgSize)
 		if err != nil {
 			c.agent.OnReadError(err)
 			continue
 		}
-		c.agent.OnMessage(readbuf[:pkgSize])
+		c.agent.OnMessage(buffer)
 	}
 }
 
 func (c *TCPConn) Read(buf []byte, n int) error {
-	c.conn.SetReadDeadline(time.Now().Add(MaxTcpWaitTime))
+	c.conn.SetReadDeadline(time.Now().Add(MaxAliveTime))
 	if _, err := io.ReadFull(c.conn, buf[:n]); err != nil {
 		return err
 	}
