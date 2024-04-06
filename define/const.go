@@ -8,4 +8,7 @@ const (
 const (
 	ModTypPlay    = "play"
 	ModTypAccount = "account"
+	ModTypMongo   = "mongo"
+	ModTypRedis   = "redis"
+	ModTypMysql   = "mysql"
 )
