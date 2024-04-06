@@ -16,7 +16,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: basic.New(define.ModTypAccount, basic.DefaultMQLen),
+		Module: basic.New(define.ModAccount, basic.DefaultMQLen),
 	}
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)

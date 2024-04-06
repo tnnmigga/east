@@ -1,11 +1,11 @@
 package agent
 
 import (
+	"east/define"
 	"fmt"
 
 	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra"
 )
 
 type AgentType string
@@ -29,7 +29,7 @@ type IListener interface {
 
 func New(agentType AgentType) idef.IModule {
 	m := &module{
-		Module:    basic.New(infra.ModNameAgent, basic.DefaultMQLen),
+		Module:    basic.New(define.ModAgent, basic.DefaultMQLen),
 		agentType: agentType,
 	}
 	m.manager = NewAgentManager(m)
