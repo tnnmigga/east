@@ -12,7 +12,7 @@ import (
 
 func (c *useCase) onSayHelloReq(msg *pb.SayHelloReq) {
 	zlog.Infof("client say hello %v", msg.Text)
-	msgbus.CastLocal(&eventbus.Event{
+	msgbus.Cast(&eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,
 		Value:   1,

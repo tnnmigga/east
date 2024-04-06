@@ -15,7 +15,7 @@ import (
 
 func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 	zlog.Infof("user event %v", util.String(event))
-	msgbus.CastLocal(&mongo.MongoSave{
+	msgbus.Cast(&mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
 		Ops: []*mongo.MongoSaveOp{
@@ -29,7 +29,7 @@ func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 			},
 		},
 	})
-	msgbus.RPC(c, conf.ServerID(), &mongo.MongoLoad{
+	msgbus.RPC(c, conf.ServerID, &mongo.MongoLoad{
 		DBName:   "test",
 		CollName: "test",
 		Filter:   bson.M{},
@@ -40,7 +40,7 @@ func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 	msgbus.RPC(c, 1888, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
 		zlog.Info("remote call", resp, err)
 	})
-	msgbus.RPC(c, conf.ServerID(), &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
+	msgbus.RPC(c, conf.ServerID, &pb.TestRPC{}, func(resp *pb.TestRPCRes, err error) {
 		zlog.Info("local call", resp, err)
 	})
 }

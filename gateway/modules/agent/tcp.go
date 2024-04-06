@@ -19,8 +19,8 @@ const (
 )
 
 func GetTCPBindAddress() string {
-	defaultAddr := fmt.Sprintf(":%d", conf.ServerID()+0x1FFE)
-	return conf.String("agent.tcp.addr", defaultAddr)
+	defaultAddr := fmt.Sprintf(":%d", conf.ServerID+0x1FFE)
+	return conf.String("agent.tcp.address", defaultAddr)
 }
 
 func NewTCPListener(manager *AgentManager) IListener {

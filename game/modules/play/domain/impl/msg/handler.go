@@ -16,5 +16,5 @@ func (c *useCase) onC2SPackage(msg *pb.C2SPackage) {
 		return
 	}
 	zlog.Errorf("recv user %d msg %s", msg.UserID, util.String(pkg))
-	msgbus.CastLocal(pkg)
+	msgbus.Cast(pkg)
 }

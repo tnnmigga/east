@@ -22,8 +22,8 @@ type WebSocketListener struct {
 }
 
 func GetWebSocketBindAddress() string {
-	defaultAddr := fmt.Sprintf(":%d/", conf.ServerID()+0x1FEE)
-	return conf.String("agent.tcp.addr", defaultAddr)
+	defaultAddr := fmt.Sprintf(":%d/", conf.ServerID+0x1FEE)
+	return conf.String("agent.websocket.address", defaultAddr)
 }
 
 func NewWebSocketListener(am *AgentManager) IListener {
