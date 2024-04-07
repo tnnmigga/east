@@ -12,5 +12,8 @@
     },
     "account": {
         "addr": "127.0.0.1:8080"
+    },
+    "mysql": {
+        "dsn": "root:intmain1024@tcp(101.43.112.200:3306)/test"
     }
 }

@@ -6,7 +6,7 @@ services:
     container_name: mongo1
     restart: always
     ports:
-      - "27018:27017"
+      - "27017:27017"
     volumes:
       - mongodb_data:/data/db/mongo1
 
@@ -19,7 +19,7 @@ services:
       MYSQL_ROOT_PASSWORD: 123456
 
     ports:
-      - "3307:3306"
+      - "3306:3306"
 
 volumes:
   mongodb_data:
