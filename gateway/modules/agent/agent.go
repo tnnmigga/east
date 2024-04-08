@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"east/define"
 	"east/pb"
 	"errors"
 	"io"
@@ -69,7 +70,7 @@ func (am *AgentManager) GetAgent(uid uint64) *Agent {
 }
 
 func (am *AgentManager) OnConnect(conn Conn) {
-	msgbus.RPC(am, 4242, &pb.TokenAuthReq{}, func(resp *pb.TokenAuthResp, err error) {
+	msgbus.RPC(am, msgbus.ServerType(define.ServDoor), &pb.TokenAuthReq{}, func(resp *pb.TokenAuthResp, err error) {
 		if err != nil {
 			conn.Close()
 			return

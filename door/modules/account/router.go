@@ -4,7 +4,6 @@ import (
 	"east/pb"
 	"net/http"
 
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/infra/mysql"
 	"github.com/tnnmigga/nett/infra/redis"
 	"github.com/tnnmigga/nett/msgbus"
@@ -49,22 +48,22 @@ func (m *module) onPostLogin(ctx *gin.Context) {
 
 func (m *module) onGetTest(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "success")
-	msgbus.RPC(m, conf.ServerID, &redis.Exec{
+	msgbus.RPC(m, msgbus.Local(), &redis.Exec{
 		Cmd: []any{"set", "test", "test"},
 	}, func(res any, err error) {
 		zlog.Infof("set res:%v, err:%v", res, err)
-		msgbus.RPC(m, conf.ServerID, &redis.ExecMulti{
+		msgbus.RPC(m, msgbus.Local(), &redis.ExecMulti{
 			Cmds: [][]any{{"get", "test"}, {"set", "test1", "test1"}, {"get", "test1"}},
 		}, func(res any, err error) {
 			zlog.Infof("get res:%v, err:%v", res, err)
 		})
 	})
-	msgbus.RPC(m, conf.ServerID, &mysql.ExecSQL{
+	msgbus.RPC(m, msgbus.Local(), &mysql.ExecSQL{
 		SQL: "select * from kv",
 	}, func(res any, err error) {
 		zlog.Infof("mysql find res:%v, err:%v", res, err)
 	})
-	msgbus.RPC(m, conf.ServerID, &mysql.ExecGORM{
+	msgbus.RPC(m, msgbus.Local(), &mysql.ExecGORM{
 		GORM: func(d *gorm.DB) (any, error) {
 			err := d.Table("kv").Where("k = ?", "1").Update("v", "test").Error
 			return "success", err

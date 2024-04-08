@@ -3,8 +3,9 @@ package define
 import "github.com/tnnmigga/nett/idef"
 
 const (
-	ServTypGame    = "game"
-	ServTypGateway = "gateway"
+	ServGame    = "game"
+	ServGateway = "gateway"
+	ServDoor    = "door"
 )
 
 const (
