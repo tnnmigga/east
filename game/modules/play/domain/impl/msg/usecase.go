@@ -36,6 +36,6 @@ type PlayerMessage interface {
 	PlayerID() uint64
 }
 
-func RegPlayerMsgHandler[T PlayerMessage](fn func(p any, msg T)) { //
+func RegPlayerMsgHandler[T PlayerMessage](fn func(p any, req T)) { //
 
 }

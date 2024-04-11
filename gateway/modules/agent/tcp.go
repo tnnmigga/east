@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	PkgSizeByteLen = 4
+	PkgSizeByteLen   = 4
+	DefaultBufferLen = 1024
 )
 
 func GetTCPBindAddress() string {
@@ -62,9 +63,7 @@ func (tcp *TCPListener) start() {
 			return
 		}
 		zlog.Debug("new conn: ", conn.RemoteAddr())
-		tcpConn := &TCPConn{
-			conn: conn,
-		}
+		tcpConn := NewTCPConn(conn)
 		tcp.manager.OnConnect(tcpConn)
 	}
 }
@@ -72,11 +71,26 @@ func (tcp *TCPListener) start() {
 type TCPConn struct {
 	agent IAgent
 	conn  net.Conn
+	wBuf  []byte
+}
+
+func NewTCPConn(conn net.Conn) *TCPConn {
+	return &TCPConn{
+		conn: conn,
+		wBuf: make([]byte, DefaultBufferLen),
+	}
 }
 
 func (c *TCPConn) Write(data []byte) error {
 	c.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
-	_, err := c.conn.Write(data)
+	buf := c.wBuf
+	pkgSize := len(data) + PkgSizeByteLen
+	if pkgSize < DefaultBufferLen {
+		buf = make([]byte, pkgSize)
+	}
+	binary.LittleEndian.PutUint32(buf, uint32(len(data)))
+	copy(buf[PkgSizeByteLen:], data)
+	_, err := c.conn.Write(buf[:pkgSize])
 	return err
 }
 

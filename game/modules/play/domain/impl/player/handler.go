@@ -12,8 +12,8 @@ import (
 	"github.com/tnnmigga/nett/zlog"
 )
 
-func (c *useCase) onSayHelloReq(msg *pb.SayHelloReq) {
-	zlog.Infof("client say hello %v", msg.Text)
+func (c *useCase) onSayHelloReq(req *pb.SayHelloReq) {
+	zlog.Infof("client say hello %v", req.Text)
 	msgbus.Cast(&eventbus.Event{
 		OwnerID: 1,
 		Topic:   define.EventUserSayHello,
