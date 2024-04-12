@@ -8,26 +8,24 @@ import (
 	"github.com/tnnmigga/nett/idef"
 )
 
-type AgentType string
-
 const (
-	AgentTypeTCP       AgentType = "tcp"
-	AgentTypeWebSocket AgentType = "websocket"
+	AgentTypeTCP       = "tcp"
+	AgentTypeWebSocket = "websocket"
 )
 
 type module struct {
 	*basic.Module
-	agentType AgentType
+	agentType string
 	listener  IListener
 	manager   *AgentManager
 }
 
 type IListener interface {
-	Run()
+	Run() error
 	Close()
 }
 
-func New(agentType AgentType) idef.IModule {
+func New(agentType string) idef.IModule {
 	m := &module{
 		Module:    basic.New(define.ModAgent, basic.DefaultMQLen),
 		agentType: agentType,
@@ -37,6 +35,7 @@ func New(agentType AgentType) idef.IModule {
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)
 	m.Before(idef.ServerStateStop, m.beforeStop)
+	m.After(idef.ServerStateStop, m.afterStop)
 	return m
 }
 
@@ -53,11 +52,20 @@ func (m *module) afterInit() (err error) {
 }
 
 func (m *module) afterRun() error {
-	m.listener.Run()
-	return nil
+	return m.listener.Run()
 }
 
 func (m *module) beforeStop() error {
 	m.listener.Close()
+	for _, agent := range m.manager.agents {
+		agent.beforeStop()
+	}
+	return nil
+}
+
+func (m *module) afterStop() error {
+	for _, agent := range m.manager.agents {
+		agent.afterStop()
+	}
 	return nil
 }

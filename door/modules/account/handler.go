@@ -4,6 +4,7 @@ import (
 	"east/pb"
 
 	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func (m *module) initHandler() {
@@ -11,6 +12,7 @@ func (m *module) initHandler() {
 }
 
 func (m *module) onTokenAuthReq(req *pb.TokenAuthReq, resolve func(any), reject func(error)) {
+	zlog.Debugf("onTokenAuthReq: %v", req)
 	resolve(&pb.TokenAuthResp{
 		Code:    pb.SUCCESS,
 		UserID:  1, // util.RandomInterval[uint64](1, 1000),

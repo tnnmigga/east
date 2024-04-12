@@ -6,17 +6,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/web"
+	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"
 )
 
 type WebSocketListener struct {
-	addr     string
-	ha       *web.HttpAgent
+	server   *http.Server
 	upgrader websocket.Upgrader
 	manager  *AgentManager
 }
@@ -27,43 +25,55 @@ func GetWebSocketBindAddress() string {
 }
 
 func NewWebSocketListener(am *AgentManager) IListener {
-	addr := GetWebSocketBindAddress()
 	ws := &WebSocketListener{
-		ha:      web.NewHttpAgent(),
 		manager: am,
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
 		},
-		addr: addr,
+	}
+	ws.server = &http.Server{
+		Handler: ws,
 	}
 	return ws
 }
 
-func (ws *WebSocketListener) Run() {
-	ws.ha.GET(ws.addr, ws.handle)
-	ws.ha.Run(ws.addr)
+func (ws *WebSocketListener) Run() error {
+	ws.server.Addr = GetWebSocketBindAddress()
+	errChan := make(chan error, 1)
+	core.Go(func() {
+		err := ws.server.ListenAndServe()
+		errChan <- err
+	})
+	time.Sleep(time.Second) // 等待1秒检测端口监听
+	zlog.Infof("http listen and serve %s", ws.server.Addr)
+	select {
+	case err := <-errChan:
+		return err
+	default:
+		return nil
+	}
 }
 
-func (ws *WebSocketListener) handle(ctx *gin.Context) {
-	conn, err := ws.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+func (ws *WebSocketListener) Close() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	ws.server.Shutdown(ctx)
+}
+
+func (ws *WebSocketListener) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	conn, err := ws.upgrader.Upgrade(resp, req, nil)
 	if err != nil {
 		zlog.Warnf("websocket upgrade error %v", err)
-		ctx.String(http.StatusInternalServerError, "websocket upgrade faild")
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.Write([]byte("websocket upgrade faild"))
 		return
 	}
 	wsconn := &WebSocketConn{
 		conn: conn,
 	}
 	ws.manager.OnConnect(wsconn)
-}
-
-func (ws *WebSocketListener) Close() {
-	ws.ha.Stop()
-	for _, agent := range ws.manager.agents {
-		agent.conn.Close()
-	}
 }
 
 type WebSocketConn struct {
@@ -77,27 +87,24 @@ func (c *WebSocketConn) Write(data []byte) error {
 	return err
 }
 
-func (c *WebSocketConn) Run(ctx context.Context) {
-	core.Go(c.readLoop)
-}
-
-func (c *WebSocketConn) readLoop() {
-	for {
-		c.conn.SetReadDeadline(time.Now().Add(MaxAliveTime))
-		mType, data, err := c.conn.ReadMessage()
-		if err != nil {
-			c.agent.OnReadError(err)
-		}
-		if mType == websocket.PingMessage {
-			c.conn.WriteMessage(websocket.PongMessage, nil)
-			continue
-		}
-		if mType == websocket.BinaryMessage {
+func (c *WebSocketConn) ReadLoop(ctx context.Context) {
+	core.Go(func() {
+		for {
+			c.conn.SetReadDeadline(time.Now().Add(MaxAliveTime))
+			_, data, err := c.conn.ReadMessage()
+			if util.ContextDone(ctx) {
+				return
+			}
+			if err != nil {
+				c.agent.OnReadError(err)
+				continue
+			}
+			if len(data) == 0 {
+				continue
+			}
 			c.agent.OnMessage(data)
-			continue
 		}
-		zlog.Warnf("invalid msg type %v", mType)
-	}
+	})
 }
 
 func (c *WebSocketConn) Close() {

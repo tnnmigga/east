@@ -72,6 +72,7 @@ func (am *AgentManager) GetAgent(uid uint64) *Agent {
 func (am *AgentManager) OnConnect(conn Conn) {
 	msgbus.RPC(am, msgbus.ServerType(define.ServDoor), &pb.TokenAuthReq{}, func(resp *pb.TokenAuthResp, err error) {
 		if err != nil {
+			zlog.Errorf("TokenAuthReq return error %v", err)
 			conn.Close()
 			return
 		}
@@ -127,7 +128,6 @@ func (am *AgentManager) cleanDeadAgent() {
 
 type IAgent interface {
 	OnMessage([]byte)
-	OnClose()
 	OnReconnect()
 	OnReadError(error)
 }
@@ -135,20 +135,18 @@ type IAgent interface {
 type Agent struct {
 	userID  uint64
 	servID  uint32
-	ctx     context.Context
 	conn    Conn
 	sendMQ  chan []byte
-	closeFn func()
 	state   int32
 	failMsg []byte
 	waitNs  time.Duration
+	cancel  func()
 }
 
 func NewAgent() *Agent {
 	agent := &Agent{
 		sendMQ: make(chan []byte, MaxSendMQLen),
 	}
-	agent.ctx, agent.closeFn = context.WithCancel(context.Background())
 	return agent
 }
 
@@ -159,13 +157,10 @@ func (a *Agent) OnMessage(data []byte) {
 	}, msgbus.ServerID(a.servID))
 }
 
-func (a *Agent) OnClose() {
-	a.closeFn()
-}
-
 func (a *Agent) OnReadError(err error) {
 	if errors.Is(err, io.EOF) {
 		atomic.StoreInt32(&a.state, AgentStateDead)
+		a.conn.Close()
 	}
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
 		a.waitNs = util.NowNs()
@@ -181,7 +176,6 @@ func (a *Agent) OnWriteError(data []byte, err error) {
 		a.conn.Close()
 	}
 	a.failMsg = data
-	runtime.Goexit()
 }
 
 func (a *Agent) OnReconnect() {
@@ -200,27 +194,47 @@ func (a *Agent) OnReconnect() {
 func (a *Agent) Run() {
 	a.state = AgentStateRun
 	// 启动agent读写goroutine
-	core.Go(a.writeLoop)
+	ctx, cancel := context.WithCancel(context.Background())
+	if a.cancel != nil {
+		zlog.Warnf("cancel is exist")
+	}
+	a.cancel = cancel
+	a.conn.ReadLoop(ctx)
+	a.writeLoop(ctx)
+}
+
+func (a *Agent) writeLoop(ctx context.Context) {
 	core.Go(func() {
-		a.conn.Run(a.ctx)
+		for {
+			select {
+			case data := <-a.sendMQ:
+				if atomic.LoadInt32(&a.state) != AgentStateRun {
+					a.failMsg = data
+					return
+				}
+				err := a.conn.Write(data)
+				if err == nil {
+					continue
+				}
+				a.OnWriteError(data, err)
+				return
+			case <-ctx.Done():
+				return
+			}
+		}
 	})
 }
 
-func (a *Agent) writeLoop() {
-	for data := range a.sendMQ {
-		if atomic.LoadInt32(&a.state) != AgentStateRun {
-			a.failMsg = data
-			return
-		}
-		err := a.conn.Write(data)
-		if err != nil {
-			a.OnWriteError(data, err)
-		}
-	}
+func (a *Agent) beforeStop() {
+	a.cancel()
+}
+
+func (a *Agent) afterStop() {
+	a.conn.Close()
 }
 
 type Conn interface {
-	Run(context.Context)
+	ReadLoop(ctx context.Context)
 	Write([]byte) error
 	Close()
 	BindAgent(IAgent)
