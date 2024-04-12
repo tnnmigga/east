@@ -15,6 +15,9 @@ import (
 
 func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 	zlog.Infof("user event %v", util.String(event))
+	b, _ := bson.Marshal(bson.M{
+		"test": 11,
+	})
 	msgbus.Cast(&mongo.MongoSave{
 		DBName:   "test",
 		CollName: "test",
@@ -23,9 +26,7 @@ func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 				Filter: bson.M{
 					"_id": 1,
 				},
-				Value: bson.M{
-					"test": 1,
-				},
+				Value: b,
 			},
 		},
 	})
