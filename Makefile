@@ -17,10 +17,10 @@ stop:
 	tools/shell/stop.sh
 
 wscli:
-	@node nett/scripts/fakecli/wscli.js
+	@node tools/fakecli/wscli.js
 
 tcpcli:
-	@node nett/scripts/fakecli/tcpcli.js
+	@node tools/fakecli/tcpcli.js
 
 br: ba run
 

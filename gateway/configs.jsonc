@@ -17,7 +17,7 @@
         "mq-len": 100000
     },
     "zlog": {
-        "stdout": "log.txt",
-        "stderr": "log.txt"
+        "stdout": "gateway.log",
+        "stderr": "gateway.log"
     }
 }

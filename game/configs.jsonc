@@ -7,7 +7,7 @@
         "url": "nats://127.0.0.1:4222"
     },
     "zlog": {
-        "stdout": "log.txt",
-        "stderr": "log.txt"
+        "stdout": "game.log",
+        "stderr": "game.log"
     }
 }
