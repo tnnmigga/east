@@ -5,7 +5,7 @@ import (
 	"east/pb"
 
 	"github.com/tnnmigga/nett/eventbus"
-	"github.com/tnnmigga/nett/infra/mongo"
+	"github.com/tnnmigga/nett/modules/mongo"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"

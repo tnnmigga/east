@@ -4,8 +4,8 @@ import (
 	"east/pb"
 	"net/http"
 
-	"github.com/tnnmigga/nett/infra/mysql"
-	"github.com/tnnmigga/nett/infra/redis"
+	"github.com/tnnmigga/nett/modules/mysql"
+	"github.com/tnnmigga/nett/modules/redis"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/web"

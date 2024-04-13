@@ -7,8 +7,8 @@ import (
 	"github.com/tnnmigga/nett"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/mysql"
-	"github.com/tnnmigga/nett/infra/redis"
+	"github.com/tnnmigga/nett/modules/mysql"
+	"github.com/tnnmigga/nett/modules/redis"
 	"github.com/tnnmigga/nett/sys"
 )
 

@@ -3,8 +3,8 @@ package domain
 import (
 	"east/game/modules/play/domain/api"
 
-	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/domain"
+	"github.com/tnnmigga/nett/modules/basic"
 )
 
 type Domain struct {

@@ -5,8 +5,8 @@ import (
 	"east/game/modules/play/domain"
 	"east/game/modules/play/domain/impl"
 
-	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/modules/basic"
 )
 
 type module struct {

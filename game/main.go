@@ -7,7 +7,7 @@ import (
 	"github.com/tnnmigga/nett"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/mongo"
+	"github.com/tnnmigga/nett/modules/mongo"
 	"github.com/tnnmigga/nett/sys"
 )
 
