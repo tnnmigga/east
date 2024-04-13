@@ -19,6 +19,6 @@ func main() {
 		conf.String("mongo.uri", "mongodb://localhost:27017"),
 	))
 	server := nett.NewServer(modules...)
-	defer server.Exit()
+	defer server.Shutdown()
 	sys.WaitExitSignal()
 }

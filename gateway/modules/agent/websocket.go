@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"
 )
 
@@ -77,8 +76,7 @@ func (ws *WebSocketListener) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 }
 
 type WebSocketConn struct {
-	agent IAgent
-	conn  *websocket.Conn
+	conn *websocket.Conn
 }
 
 func (c *WebSocketConn) Write(data []byte) error {
@@ -87,30 +85,15 @@ func (c *WebSocketConn) Write(data []byte) error {
 	return err
 }
 
-func (c *WebSocketConn) ReadLoop(ctx context.Context) {
-	core.Go(func() {
-		for {
-			c.conn.SetReadDeadline(time.Now().Add(MaxAliveTime))
-			_, data, err := c.conn.ReadMessage()
-			if util.ContextDone(ctx) {
-				return
-			}
-			if err != nil {
-				c.agent.OnReadError(err)
-				continue
-			}
-			if len(data) == 0 {
-				continue
-			}
-			c.agent.OnMessage(data)
-		}
-	})
+func (c *WebSocketConn) Read(timeout time.Duration) ([]byte, error) {
+	c.conn.SetReadDeadline(time.Now().Add(timeout))
+	_, data, err := c.conn.ReadMessage()
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (c *WebSocketConn) Close() {
 	c.conn.Close()
-}
-
-func (c *WebSocketConn) BindAgent(agent IAgent) {
-	c.agent = agent
 }

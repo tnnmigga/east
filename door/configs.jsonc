@@ -6,7 +6,7 @@
     "nats": {
         "url": "nats://127.0.0.1:4222"
     },
-    "log": {
+    "zlog": {
         "stdout": "door.log",
         "stderr": "door.log"
     },

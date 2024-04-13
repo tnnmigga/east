@@ -26,6 +26,6 @@ func main() {
 		conf.String("mysql.dsn", ""),
 	))
 	server := nett.NewServer(modules...)
-	defer server.Exit()
+	defer server.Shutdown()
 	sys.WaitExitSignal()
 }

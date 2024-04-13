@@ -80,7 +80,6 @@ func (am *AgentManager) OnConnect(conn Conn) {
 		agent.conn = conn
 		agent.servID = resp.SeverID
 		agent.userID = resp.UserID
-		conn.BindAgent(agent)
 		am.AddAgent(agent)
 		agent.Run()
 	})
@@ -138,7 +137,7 @@ type Agent struct {
 	conn    Conn
 	sendMQ  chan []byte
 	state   int32
-	failMsg []byte
+	failMsg []byte // 记录发送失败的消息等待重发
 	waitNs  time.Duration
 	cancel  func()
 }
@@ -157,7 +156,7 @@ func (a *Agent) OnMessage(data []byte) {
 	}, msgbus.ServerID(a.servID))
 }
 
-func (a *Agent) OnReadError(err error) {
+func (a *Agent) OnError(err error) {
 	if errors.Is(err, io.EOF) {
 		atomic.StoreInt32(&a.state, AgentStateDead)
 		a.conn.Close()
@@ -170,21 +169,13 @@ func (a *Agent) OnReadError(err error) {
 	runtime.Goexit()
 }
 
-func (a *Agent) OnWriteError(data []byte, err error) {
-	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
-		a.waitNs = util.NowNs()
-		a.conn.Close()
-	}
-	a.failMsg = data
-}
-
 func (a *Agent) OnReconnect() {
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateWait, AgentStateRun) {
 		zlog.Debugf("agent reconnect")
 	}
 	if a.failMsg != nil {
 		if err := a.conn.Write(a.failMsg); err != nil {
-			a.OnWriteError(a.failMsg, err)
+			a.OnError(err)
 			return
 		}
 	}
@@ -199,14 +190,36 @@ func (a *Agent) Run() {
 		zlog.Warnf("cancel is exist")
 	}
 	a.cancel = cancel
-	a.conn.ReadLoop(ctx)
+	a.readLoop(ctx)
 	a.writeLoop(ctx)
+}
+
+func (a *Agent) readLoop(ctx context.Context) {
+	core.Go(func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				data, err := a.conn.Read(MaxAliveTime)
+				if err == nil {
+					a.OnMessage(data)
+					continue
+				}
+				a.OnError(err)
+				return
+			}
+		}
+	})
+
 }
 
 func (a *Agent) writeLoop(ctx context.Context) {
 	core.Go(func() {
 		for {
 			select {
+			case <-ctx.Done():
+				return
 			case data := <-a.sendMQ:
 				if atomic.LoadInt32(&a.state) != AgentStateRun {
 					a.failMsg = data
@@ -216,9 +229,8 @@ func (a *Agent) writeLoop(ctx context.Context) {
 				if err == nil {
 					continue
 				}
-				a.OnWriteError(data, err)
-				return
-			case <-ctx.Done():
+				a.failMsg = data
+				a.OnError(err)
 				return
 			}
 		}
@@ -234,8 +246,7 @@ func (a *Agent) afterStop() {
 }
 
 type Conn interface {
-	ReadLoop(ctx context.Context)
+	Read(time.Duration) ([]byte, error)
 	Write([]byte) error
 	Close()
-	BindAgent(IAgent)
 }
