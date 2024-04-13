@@ -4,19 +4,19 @@ import (
 	"east/pb"
 	"net/http"
 
+	"github.com/tnnmigga/nett/infra/https"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/mysql"
 	"github.com/tnnmigga/nett/modules/redis"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/web"
-	"github.com/tnnmigga/nett/zlog"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (m *module) initRoute() {
-	agent := web.NewHttpAgent()
+	agent := https.NewHttpAgent()
 	agent.POST("/register", m.onPostRegister)
 	agent.POST("/login", m.onPostLogin)
 	agent.GET("/test", m.onGetTest)

@@ -6,7 +6,7 @@ import (
 	"github.com/tnnmigga/nett"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/sys"
+	"github.com/tnnmigga/nett/infra/sys"
 )
 
 func main() {

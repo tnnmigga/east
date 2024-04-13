@@ -5,7 +5,7 @@ import (
 	"east/game/modules/play/domain/api"
 
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/timer"
+	"github.com/tnnmigga/nett/infra/timer"
 )
 
 type useCase struct {
@@ -18,12 +18,12 @@ func New(d *domain.Domain) api.ITimer {
 		Domain:    d,
 		TimerHeap: timer.NewTimerHeap(d),
 	}
-	s.After(idef.ServerStateInit, s.afterInit)
+	s.Before(idef.ServerStateRun, s.beforeRun)
 	s.Before(idef.ServerStateStop, s.beforeStop)
 	return s
 }
 
-func (c *useCase) afterInit() error {
+func (c *useCase) beforeRun() error {
 	// 加载数据
 	return nil
 }

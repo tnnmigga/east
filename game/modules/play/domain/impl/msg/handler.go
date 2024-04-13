@@ -4,9 +4,9 @@ import (
 	"east/pb"
 
 	"github.com/tnnmigga/nett/codec"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/zlog"
 )
 
 func (c *useCase) onC2SPackage(req *pb.C2SPackage) {

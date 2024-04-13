@@ -5,13 +5,13 @@ import (
 
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/https"
 	"github.com/tnnmigga/nett/modules/basic"
-	"github.com/tnnmigga/nett/web"
 )
 
 type module struct {
 	*basic.Module
-	agent *web.HttpAgent
+	agent *https.HttpAgent
 }
 
 func New() idef.IModule {

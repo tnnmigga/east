@@ -9,7 +9,7 @@ import (
 
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 )
 
 const (

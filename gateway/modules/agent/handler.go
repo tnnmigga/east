@@ -3,8 +3,8 @@ package agent
 import (
 	"east/pb"
 
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/zlog"
 )
 
 func (m *module) initHandler() {

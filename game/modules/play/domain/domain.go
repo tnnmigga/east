@@ -3,7 +3,7 @@ package domain
 import (
 	"east/game/modules/play/domain/api"
 
-	"github.com/tnnmigga/nett/domain"
+	"github.com/tnnmigga/nett/infra/domain"
 	"github.com/tnnmigga/nett/modules/basic"
 )
 

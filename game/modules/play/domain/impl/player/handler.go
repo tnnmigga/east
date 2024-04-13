@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/eventbus"
+	"github.com/tnnmigga/nett/infra/eventbus"
+	"github.com/tnnmigga/nett/infra/https"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/zlog"
 )
 
 func (c *useCase) onSayHelloReq(req *pb.SayHelloReq) {
@@ -26,7 +27,7 @@ func (c *useCase) onSayHelloReq(req *pb.SayHelloReq) {
 	zlog.Infof("http get 1 %f", util.NowSec())
 	core.Async(c, func() ([]byte, error) {
 		zlog.Infof("http get 2 %f", util.NowSec())
-		res, err := util.HttpGet("https://www.baidu.com")
+		res, err := https.HttpGet("https://www.baidu.com")
 		zlog.Infof("http get 3 %f", util.NowSec())
 		return res, err
 	}, func(b []byte, err error) {

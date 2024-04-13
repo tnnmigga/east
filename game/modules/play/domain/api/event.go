@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/tnnmigga/nett/eventbus"
+	"github.com/tnnmigga/nett/infra/eventbus"
 )
 
 type IEvent interface {
