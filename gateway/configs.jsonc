@@ -19,5 +19,10 @@
     "zlog": {
         "stdout": "gateway.log",
         "stderr": "gateway.log"
+    },
+    "etcd": {
+        "endpoints": [
+            "http://localhost:2379"
+        ]
     }
 }
