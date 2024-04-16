@@ -18,11 +18,10 @@ log.txt
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 # go.work
-vendor
 go.work.sum
 test.go
 test
