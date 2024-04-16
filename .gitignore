@@ -22,6 +22,7 @@ log.txt
 
 # Go workspace file
 # go.work
+vendor
 go.work.sum
 test.go
 test
