@@ -23,7 +23,6 @@ log.txt
 # Go workspace file
 # go.work
 go.work.sum
-vendor
 test.go
 test
 node_modules
