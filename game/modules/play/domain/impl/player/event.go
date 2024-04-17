@@ -8,13 +8,13 @@ import (
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/mongo"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (c *useCase) onEventUserMsg(event *eventbus.Event) {
-	zlog.Infof("user event %v", util.String(event))
+	zlog.Infof("user event %v", utils.String(event))
 	b, _ := bson.Marshal(bson.M{
 		"test": 11,
 	})

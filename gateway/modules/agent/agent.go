@@ -13,7 +13,7 @@ import (
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 
 	"sync/atomic"
 	"time"
@@ -105,7 +105,7 @@ func (am *AgentManager) clean(ctx context.Context) {
 func (am *AgentManager) cleanDeadAgent() {
 	am.rw.RLock()
 	defer am.rw.RUnlock()
-	nowNs := util.NowNs()
+	nowNs := utils.NowNs()
 	for uid, agent := range am.agents {
 		state := atomic.LoadInt32(&agent.state)
 		if state == AgentStateDead {
@@ -162,7 +162,7 @@ func (a *Agent) OnError(err error) {
 		a.conn.Close()
 	}
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
-		a.waitNs = util.NowNs()
+		a.waitNs = utils.NowNs()
 		zlog.Debugf("agent read error %v", err)
 		a.conn.Close()
 	}

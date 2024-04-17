@@ -9,7 +9,7 @@ import (
 	"github.com/tnnmigga/nett/modules/mysql"
 	"github.com/tnnmigga/nett/modules/redis"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +42,7 @@ func (m *module) onPostLogin(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, &WebResponse{
 		Code: int(pb.SUCCESS),
-		Data: util.GenerateToken(32),
+		Data: utils.GenerateToken(32),
 	})
 }
 
