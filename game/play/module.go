@@ -2,11 +2,11 @@ package play
 
 import (
 	"east/define"
-	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/impl"
+	"east/game/play/domain"
+	"east/game/play/domain/impl"
 
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/modules/basic"
+	"github.com/tnnmigga/nett/mods/basic"
 )
 
 type module struct {

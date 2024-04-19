@@ -1,8 +1,8 @@
 package msg
 
 import (
-	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/api"
+	"east/game/play/domain"
+	"east/game/play/domain/api"
 
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/msgbus"

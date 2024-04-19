@@ -2,13 +2,13 @@ package main
 
 import (
 	"east/define"
-	"east/game/modules/play"
+	"east/game/play"
 
 	"github.com/tnnmigga/nett"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/process"
-	"github.com/tnnmigga/nett/modules/mongo"
+	"github.com/tnnmigga/nett/mods/mongo"
 )
 
 func main() {

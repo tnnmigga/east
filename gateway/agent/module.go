@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/modules/basic"
+	"github.com/tnnmigga/nett/mods/basic"
 )
 
 const (

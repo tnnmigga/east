@@ -6,8 +6,8 @@ import (
 
 	"github.com/tnnmigga/nett/infra/https"
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/modules/mysql"
-	"github.com/tnnmigga/nett/modules/redis"
+	"github.com/tnnmigga/nett/mods/mysql"
+	"github.com/tnnmigga/nett/mods/redis"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/utils"
 	"gorm.io/gorm"

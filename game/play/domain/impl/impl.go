@@ -1,11 +1,11 @@
 package impl
 
 import (
-	"east/game/modules/play/domain"
-	"east/game/modules/play/domain/impl/event"
-	"east/game/modules/play/domain/impl/msg"
-	"east/game/modules/play/domain/impl/player"
-	"east/game/modules/play/domain/impl/timer"
+	"east/game/play/domain"
+	"east/game/play/domain/impl/event"
+	"east/game/play/domain/impl/msg"
+	"east/game/play/domain/impl/player"
+	"east/game/play/domain/impl/timer"
 )
 
 func Init(d *domain.Domain) {

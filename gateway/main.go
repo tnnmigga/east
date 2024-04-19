@@ -1,7 +1,7 @@
 package main
 
 import (
-	"east/gateway/modules/agent"
+	"east/gateway/agent"
 
 	"github.com/tnnmigga/nett"
 	"github.com/tnnmigga/nett/conf"
