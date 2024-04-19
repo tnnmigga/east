@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
@@ -42,7 +42,7 @@ func NewAgentManager(m idef.IModule) *AgentManager {
 		IModule: m,
 		agents:  map[uint64]*Agent{},
 	}
-	core.Go(am.clean)
+	conc.Go(am.clean)
 	return am
 }
 
@@ -195,7 +195,7 @@ func (a *Agent) Run() {
 }
 
 func (a *Agent) readLoop(ctx context.Context) {
-	core.Go(func() {
+	conc.Go(func() {
 		for {
 			select {
 			case <-ctx.Done():
@@ -215,7 +215,7 @@ func (a *Agent) readLoop(ctx context.Context) {
 }
 
 func (a *Agent) writeLoop(ctx context.Context) {
-	core.Go(func() {
+	conc.Go(func() {
 		for {
 			select {
 			case <-ctx.Done():

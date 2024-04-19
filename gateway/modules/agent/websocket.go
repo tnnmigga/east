@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/zlog"
 )
 
@@ -41,7 +41,7 @@ func NewWebSocketListener(am *AgentManager) IListener {
 func (ws *WebSocketListener) Run() error {
 	ws.server.Addr = GetWebSocketBindAddress()
 	errChan := make(chan error, 1)
-	core.Go(func() {
+	conc.Go(func() {
 		err := ws.server.ListenAndServe()
 		errChan <- err
 	})

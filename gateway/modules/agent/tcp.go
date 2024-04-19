@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/zlog"
 )
 
@@ -42,7 +42,7 @@ func (tcp *TCPListener) Run() error {
 		return err
 	}
 	tcp.listener = listener
-	core.Go(func() {
+	conc.Go(func() {
 		for {
 			conn, err := tcp.listener.Accept()
 			if err != nil {

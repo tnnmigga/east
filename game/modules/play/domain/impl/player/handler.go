@@ -5,7 +5,7 @@ import (
 	"east/pb"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/eventbus"
 	"github.com/tnnmigga/nett/infra/https"
 	"github.com/tnnmigga/nett/infra/zlog"
@@ -25,7 +25,7 @@ func (c *useCase) onSayHelloReq(req *pb.SayHelloReq) {
 		Text:   "hello client!",
 	})
 	zlog.Infof("http get 1 %f", utils.NowSec())
-	core.Async(c, func() ([]byte, error) {
+	conc.Async(c, func() ([]byte, error) {
 		zlog.Infof("http get 2 %f", utils.NowSec())
 		res, err := https.HttpGet("https://www.baidu.com")
 		zlog.Infof("http get 3 %f", utils.NowSec())
