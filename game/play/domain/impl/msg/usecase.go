@@ -5,7 +5,6 @@ import (
 	"east/game/play/domain/api"
 
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/msgbus"
 )
 
 type useCase struct {
@@ -21,7 +20,6 @@ func New(d *domain.Domain) api.IMsg {
 }
 
 func (c *useCase) afterInit() error {
-	msgbus.RegisterHandler(c, c.onC2SPackage)
 	return nil
 }
 

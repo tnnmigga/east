@@ -3,19 +3,19 @@ package domain
 import (
 	"east/game/play/domain/api"
 
+	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/domain"
-	"github.com/tnnmigga/nett/mods/basic"
 )
 
 type Domain struct {
-	*basic.Module
-	*domain.Pool
+	idef.IModule
+	domain.Root
 }
 
-func New(m *basic.Module) *Domain {
+func New(m idef.IModule) *Domain {
 	d := &Domain{
-		Module: m,
-		Pool:   domain.NewPool(MaxCaseIndex),
+		Root:    domain.New(m, MaxCaseIndex),
+		IModule: m,
 	}
 	return d
 }

@@ -2,6 +2,7 @@ package player
 
 import (
 	"east/define"
+	"east/game/play/pm"
 	"east/pb"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"github.com/tnnmigga/nett/utils"
 )
 
-func (c *useCase) onSayHelloReq(req *pb.SayHelloReq) {
+func (c *useCase) onSayHelloReq(p *pm.Player, req *pb.SayHelloReq) {
 	zlog.Infof("client say hello %v", req.Text)
 	msgbus.Cast(&eventbus.Event{
 		OwnerID: 1,

@@ -17,6 +17,7 @@ func main() {
 	modules = append(modules, mongo.New(
 		define.ModMongo,
 		conf.String("mongo.uri", "mongodb://localhost:27017"),
+		conf.String("mongo.db", "game"),
 	))
 	server := nett.NewServer(modules...)
 	defer server.Shutdown()

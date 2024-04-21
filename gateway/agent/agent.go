@@ -202,6 +202,9 @@ func (a *Agent) readLoop(ctx context.Context) {
 				return
 			default:
 				data, err := a.conn.Read(MaxAliveTime)
+				if len(data) == 0 {
+					continue // 心跳
+				}
 				if err == nil {
 					a.OnMessage(data)
 					continue

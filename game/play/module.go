@@ -4,19 +4,23 @@ import (
 	"east/define"
 	"east/game/play/domain"
 	"east/game/play/domain/impl"
+	"east/game/play/pm"
 
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/mods/basic"
 )
 
 type module struct {
+	*basic.Module
 	*domain.Domain
 }
 
 func New() idef.IModule {
 	m := &module{
-		Domain: domain.New(basic.New(define.ModPlay, basic.DefaultMQLen)),
+		Module: basic.New(define.ModPlay, basic.DefaultMQLen),
 	}
+	m.Domain = domain.New(m)
+	pm.Init(m)
 	impl.Init(m.Domain)
 	return m
 }
