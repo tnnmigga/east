@@ -1,6 +1,7 @@
 package pm
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -39,8 +40,15 @@ func LoadAsync(uid uint64, cb func(*Player, error)) {
 			Filter:   bson.M{"_id": uid},
 		}, func(raw bson.Raw, err error) {
 			p := &Player{}
-			bson.Unmarshal(raw, p)
-			manager.cache[uid] = p
+			if err == nil {
+				err = bson.Unmarshal(raw, p)
+				if err == nil {
+					manager.cache[uid] = p
+				}
+			} else if errors.Is(err, mongo.ErrNoDocuments) {
+				p = NewPlayer(uid)
+				err = nil
+			}
 			cbs := manager.waiting[uid]
 			for _, cb := range cbs {
 				func() {
