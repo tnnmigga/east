@@ -26,6 +26,7 @@ func Init(m idef.IModule) {
 		waiting: map[uint64][]func(*Player, error){},
 	}
 	msgbus.RegisterHandler(m, manager.onC2SPackage)
+	msgbus.RegisterRPC(m, manager.onCreatePlayerRPC)
 }
 
 func (m *Manager) onC2SPackage(req *pb.C2SPackage) {

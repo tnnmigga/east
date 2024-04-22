@@ -1,7 +1,6 @@
 package pm
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -35,20 +34,18 @@ func LoadAsync(uid uint64, cb func(*Player, error)) {
 		return lock, nil
 	}, func(l *cluster.Lock, err error) {
 		msgbus.RPC(manager, msgbus.Local(), &mongo.MongoLoadSingle{
-			GroupKey: fmt.Sprintf("mongo.userdata.%d", uid),
+			GroupKey: groupKey(uid),
 			CollName: "player",
 			Filter:   bson.M{"_id": uid},
 		}, func(raw bson.Raw, err error) {
 			p := &Player{}
 			if err == nil {
 				err = bson.Unmarshal(raw, p)
-				if err == nil {
-					manager.cache[uid] = p
-				}
-			} else if errors.Is(err, mongo.ErrNoDocuments) {
-				p = NewPlayer(uid)
-				err = nil
 			}
+			if err == nil {
+				manager.cache[uid] = p
+			}
+			zlog.Debugf("load player %d %v", uid, err)
 			cbs := manager.waiting[uid]
 			for _, cb := range cbs {
 				func() {
@@ -58,5 +55,4 @@ func LoadAsync(uid uint64, cb func(*Player, error)) {
 			}
 		})
 	})
-
 }

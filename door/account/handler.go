@@ -1,6 +1,7 @@
 package account
 
 import (
+	"east/define"
 	"east/pb"
 
 	"github.com/tnnmigga/nett/infra/zlog"
@@ -13,9 +14,17 @@ func (m *module) initHandler() {
 
 func (m *module) onTokenAuthReq(req *pb.TokenAuthReq, resolve func(any), reject func(error)) {
 	zlog.Debugf("onTokenAuthReq: %v", req)
-	resolve(&pb.TokenAuthResp{
-		Code:    pb.SUCCESS,
-		UserID:  1, // util.RandomInterval[uint64](1, 1000),
-		SeverID: 1999,
+	msgbus.RPC(m, msgbus.ServerType(define.ServGame), &pb.CreatePlayerRPC{
+		UserID: 1,
+	}, func(res *pb.CreatePlayerRPCRes, err error) {
+		if err != nil {
+			reject(err)
+			return
+		}
+		resolve(&pb.TokenAuthResp{
+			Code:    pb.SUCCESS,
+			UserID:  1,
+			SeverID: res.ServerID,
+		})
 	})
 }

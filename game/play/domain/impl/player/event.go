@@ -18,7 +18,7 @@ func (c *useCase) onEventUserMsg(event *eventbus.Event) {
 	b, _ := bson.Marshal(bson.M{
 		"test": 11,
 	})
-	msgbus.Cast(&mongo.MongoSave{
+	msgbus.Cast(&mongo.MongoSaveMulti{
 		CollName: "test",
 		Ops: []*mongo.MongoSaveOp{
 			{

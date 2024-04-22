@@ -15,6 +15,14 @@ message UserLoginReq {
     uint64 userID = 1;
 }
 
+message CreatePlayerRPC {
+    uint64 userID = 1;
+}
+
+message CreatePlayerRPCRes {
+    uint32 serverID = 1;
+}
+
 message TestRPC {
 }
 
