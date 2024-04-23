@@ -6,7 +6,6 @@ import (
 	"east/pb"
 	"errors"
 	"io"
-	"runtime"
 	"sync"
 
 	"github.com/tnnmigga/nett/conc"
@@ -166,7 +165,6 @@ func (a *Agent) OnError(err error) {
 		zlog.Debugf("agent read error %v", err)
 		a.conn.Close()
 	}
-	runtime.Goexit()
 }
 
 func (a *Agent) OnReconnect() {
@@ -202,15 +200,15 @@ func (a *Agent) readLoop(ctx context.Context) {
 				return
 			default:
 				data, err := a.conn.Read(MaxAliveTime)
+				if err != nil {
+					a.OnError(err)
+					return
+				}
 				if len(data) == 0 {
 					continue // 心跳
 				}
-				if err == nil {
-					a.OnMessage(data)
-					continue
-				}
-				a.OnError(err)
-				return
+				a.OnMessage(data)
+				continue
 			}
 		}
 	})
