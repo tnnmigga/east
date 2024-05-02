@@ -1,4 +1,3 @@
 # east
 
-编译运行参考docs/qa.txt
-功能尚未全部完成
+拉取代码后make init获取完整代码
