@@ -4,11 +4,11 @@ import (
 	"east/define"
 	"east/pb"
 
-	"github.com/tnnmigga/nett/infra/eventbus"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/mods/mongo"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/infra/eventbus"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/mods/mongo"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

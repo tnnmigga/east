@@ -4,12 +4,12 @@ import (
 	"east/pb"
 	"net/http"
 
-	"github.com/tnnmigga/nett/infra/https"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/mods/mysql"
-	"github.com/tnnmigga/nett/mods/redis"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/infra/https"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/mods/mysql"
+	"github.com/tnnmigga/core/mods/redis"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"

@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
-	github.com/tnnmigga/nett v0.0.4-0.20240419132416-e0874d776163
+	github.com/tnnmigga/core v0.0.4-0.20240505185440-8051a6990be7
 	gorm.io/gorm v1.25.9
 )
 

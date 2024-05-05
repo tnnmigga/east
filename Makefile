@@ -30,8 +30,8 @@ worker:
 	@python tools/generator/worker.py name=$(name)
 
 init:
-	git clone git@github.com:tnnmigga/nett.git
-	cd nett/scripts/fakecli/ && npm install
+	git clone git@github.com:tnnmigga/core.git
+	cd tools/fakecli/ && npm install
 	go mod vendor
 
 .PHONY: pbc corepb ba run stop wscli tcpcli br rerun worker init

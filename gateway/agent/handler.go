@@ -3,8 +3,8 @@ package agent
 import (
 	"east/pb"
 
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
 )
 
 func (m *module) initHandler() {
@@ -13,6 +13,7 @@ func (m *module) initHandler() {
 }
 
 func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
+	zlog.Infof("onS2CPackage %v", pkg)
 	agent := m.manager.GetAgent(pkg.UserID)
 	if agent == nil {
 		zlog.Warnf("agent not found %d", pkg.UserID)

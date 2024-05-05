@@ -3,10 +3,10 @@ package main
 import (
 	"east/gateway/agent"
 
-	"github.com/tnnmigga/nett"
-	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/process"
+	"github.com/tnnmigga/core"
+	"github.com/tnnmigga/core/conf"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/process"
 )
 
 func main() {

@@ -4,12 +4,12 @@ import (
 	"east/pb"
 	"reflect"
 
-	"github.com/tnnmigga/nett/codec"
-	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/mods/mongo"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/codec"
+	"github.com/tnnmigga/core/conf"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/mods/mongo"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

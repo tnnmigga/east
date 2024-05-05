@@ -4,7 +4,7 @@ import (
 	"east/game/play/domain"
 	"east/game/play/domain/api"
 
-	"github.com/tnnmigga/nett/infra/eventbus"
+	"github.com/tnnmigga/core/infra/eventbus"
 )
 
 type useCase struct {

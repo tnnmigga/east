@@ -6,12 +6,12 @@ import (
 	"east/pb"
 	"time"
 
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/infra/eventbus"
-	"github.com/tnnmigga/nett/infra/https"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/infra/eventbus"
+	"github.com/tnnmigga/core/infra/https"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 )
 
 func (c *useCase) onSayHelloReq(p *pm.Player, req *pb.SayHelloReq) {

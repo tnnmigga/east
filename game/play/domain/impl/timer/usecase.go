@@ -4,8 +4,8 @@ import (
 	"east/game/play/domain"
 	"east/game/play/domain/api"
 
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/timer"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/timer"
 )
 
 type useCase struct {

@@ -1,6 +1,6 @@
 package define
 
-import "github.com/tnnmigga/nett/idef"
+import "github.com/tnnmigga/core/idef"
 
 const (
 	ServGame    = "game"

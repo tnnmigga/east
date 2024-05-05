@@ -8,11 +8,11 @@ import (
 	"io"
 	"sync"
 
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 
 	"sync/atomic"
 	"time"

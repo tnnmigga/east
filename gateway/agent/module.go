@@ -4,8 +4,8 @@ import (
 	"east/define"
 	"fmt"
 
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/mods/basic"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/mods/basic"
 )
 
 const (

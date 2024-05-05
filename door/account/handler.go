@@ -4,8 +4,8 @@ import (
 	"east/define"
 	"east/pb"
 
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
 )
 
 func (m *module) initHandler() {

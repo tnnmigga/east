@@ -1,8 +1,8 @@
 package pm
 
 import (
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/msgbus"
 )
 
 var manager *Manager

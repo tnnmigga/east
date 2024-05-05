@@ -3,9 +3,9 @@ package pm
 import (
 	"reflect"
 
-	"github.com/tnnmigga/nett/codec"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/codec"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/utils"
 )
 
 var msgHandler = map[reflect.Type]func(p *Player, msg any){}

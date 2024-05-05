@@ -6,8 +6,8 @@ import (
 	"east/game/play/domain/impl"
 	"east/game/play/pm"
 
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/mods/basic"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/mods/basic"
 )
 
 type module struct {
