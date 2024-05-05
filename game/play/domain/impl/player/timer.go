@@ -20,5 +20,5 @@ func (c *useCase) onTimerSayHello(ctx *timerSayHello) {
 		Body: codec.Encode(&pb.SayHelloResp{
 			Text: ctx.Text,
 		}),
-	}, msgbus.ServerID(1888))
+	}, msgbus.UseStream(), msgbus.ServerID(1888))
 }
