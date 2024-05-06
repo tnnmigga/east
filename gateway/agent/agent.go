@@ -4,8 +4,6 @@ import (
 	"context"
 	"east/define"
 	"east/pb"
-	"errors"
-	"io"
 	"sync"
 
 	"github.com/tnnmigga/core/conc"
@@ -156,14 +154,11 @@ func (a *Agent) OnMessage(data []byte) {
 }
 
 func (a *Agent) OnError(err error) {
-	if errors.Is(err, io.EOF) {
-		atomic.StoreInt32(&a.state, AgentStateDead)
-		a.conn.Close()
-	}
 	if atomic.CompareAndSwapInt32(&a.state, AgentStateRun, AgentStateWait) {
 		a.waitNs = utils.NowNs()
 		zlog.Debugf("agent read error %v", err)
 		a.conn.Close()
+		a.cancel()
 	}
 }
 

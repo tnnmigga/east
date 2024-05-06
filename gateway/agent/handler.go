@@ -13,7 +13,6 @@ func (m *module) initHandler() {
 }
 
 func (m *module) onS2CPackage(pkg *pb.S2CPackage) {
-	zlog.Infof("onS2CPackage %v", pkg)
 	agent := m.manager.GetAgent(pkg.UserID)
 	if agent == nil {
 		zlog.Warnf("agent not found %d", pkg.UserID)
