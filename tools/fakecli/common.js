@@ -58,6 +58,16 @@ function nametoid(msgName) {
     return uint32(v)
 }
 
+
+function uint32(x) {
+    return x % Math.pow(2, 32);
+}
+
+export function print(...any) {
+    log(...any)
+    process.stdout.write('> ') // 模拟prompt
+}
+
 export function runCli(context = {}, name = 'REPL') {
     const r = repl.start({
         // prompt: `${name} > `,
@@ -67,26 +77,16 @@ export function runCli(context = {}, name = 'REPL') {
     Object.setPrototypeOf(r.context, context);
     global.console = r.context.console;
 }
+// function int(x) {
+//     x = Number(x);
+//     return x < 0 ? Math.ceil(x) : Math.floor(x);
+// }
+
+// function mod(a, b) {
+//     return a - Math.floor(a / b) * b;
+// }
+
 
 // var m = encode("SayHelloReq", { text: "hello" })
 // var n = decode(m)
 // log(n)
-
-
-function int(x) {
-    x = Number(x);
-    return x < 0 ? Math.ceil(x) : Math.floor(x);
-}
-
-function mod(a, b) {
-    return a - Math.floor(a / b) * b;
-}
-function uint32(x) {
-    return mod(int(x), Math.pow(2, 32));
-}
-
-export function print(...any) {
-    log(...any)
-    process.stdout.write('> ') // 模拟prompt
-}
-
